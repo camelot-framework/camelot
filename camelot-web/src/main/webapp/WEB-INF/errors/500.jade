@@ -1,0 +1,5 @@
+h1 500 Server error
+b #{error.getMessage()}
+each trace in error.getStackTrace()
+    br
+    = trace

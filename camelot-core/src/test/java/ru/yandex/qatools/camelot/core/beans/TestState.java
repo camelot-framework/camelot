@@ -1,0 +1,21 @@
+package ru.yandex.qatools.camelot.core.beans;
+
+import ru.yandex.qa.beans.TestEvent;
+
+import java.io.Serializable;
+
+/**
+ * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ */
+public abstract class TestState implements Serializable {
+
+    TestEvent event;
+
+    public TestEvent getEvent() {
+        return event;
+    }
+
+    public void setEvent(TestEvent event) {
+        this.event = event;
+    }
+}

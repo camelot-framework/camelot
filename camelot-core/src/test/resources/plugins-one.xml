@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugins-config xmlns="urn:config.camelot.qatools.yandex.ru">
+    <source>
+        <artifact>test</artifact>
+        <plugin id="lifecycle" brokerConfig="?maxConcurrentConsumers=1">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.LifecycleFSM</aggregator>
+            <resource>ru.yandex.qatools.camelot.core.plugins.LifecycleService</resource>
+        </plugin>
+        <plugin id="test-started" brokerConfig="?maxConcurrentConsumers=1">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.TestStartedCounterAggregator</aggregator>
+        </plugin>
+        <plugin id="with-timer" brokerConfig="?maxConcurrentConsumers=1">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.AggregatorWithTimer</aggregator>
+        </plugin>
+        <plugin id="filtered">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.FilteredAggregator</aggregator>
+        </plugin>
+        <plugin id="custom-filtered">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.CustomFilteredAggregator</aggregator>
+        </plugin>
+        <plugin id="initializable">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.InitializableAggregator</aggregator>
+        </plugin>
+        <plugin>
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.WithoutIdAggregator</aggregator>
+        </plugin>
+        <plugin id="with-context">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.AggregatorWithContext</aggregator>
+        </plugin>
+        <plugin id="by-custom-strategy">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.ByCustomStrategyAggregator</aggregator>
+        </plugin>
+    </source>
+</plugins-config>

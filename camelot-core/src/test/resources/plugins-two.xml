@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugins-config xmlns="urn:config.camelot.qatools.yandex.ru">
+    <source>
+        <artifact>test</artifact>
+        <plugin id="by-custom-header">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.ByCustomHeaderAggregator</aggregator>
+        </plugin>
+        <plugin id="by-method" source="lifecycle">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.ByMethodAggregator</aggregator>
+        </plugin>
+        <plugin id="broken-by-label" source="lifecycle">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.ByLabelBrokenAggregator</aggregator>
+        </plugin>
+        <plugin id="all-skipped" source="lifecycle">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.AllSkippedAggregator</aggregator>
+            <resource>ru.yandex.qatools.camelot.core.plugins.AllSkippedService</resource>
+        </plugin>
+        <plugin id="by-hour-of-day" source="lifecycle">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.ByHourOfDayAggregator</aggregator>
+        </plugin>
+        <plugin id="test-event-to-string" source="lifecycle">
+            <processor>ru.yandex.qatools.camelot.core.plugins.TestBrokenToStringProcessor</processor>
+        </plugin>
+        <plugin id="fallen-raised" source="lifecycle">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.FallenRaisedAggregator</aggregator>
+        </plugin>
+        <plugin id="dependent" source="by-custom-header">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.DependentAggregator</aggregator>
+        </plugin>
+    </source>
+</plugins-config>

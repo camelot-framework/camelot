@@ -1,0 +1,13 @@
+<archetype>
+  <id>camelot-plugin</id>
+  <sources>
+    <source>src/main/java/plugin/Aggregator.java</source>
+    <source>src/main/java/plugin/Resource.java</source>
+  </sources>
+  <resources>
+      <resource>src/main/resources/camelot.xml</resource>
+  </resources>
+  <testSources>
+    <source>src/test/java/plugin/AggregatorTest.java</source>
+  </testSources>
+</archetype>

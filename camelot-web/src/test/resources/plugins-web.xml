@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugins-config xmlns="urn:config.camelot.qatools.yandex.ru">
+    <source>
+        <artifact>test</artifact>
+        <plugin id="lifecycle" brokerConfig="?maxConcurrentConsumers=5">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.LifecycleFSM</aggregator>
+            <resource>ru.yandex.qatools.camelot.core.plugins.LifecycleService</resource>
+        </plugin>
+        <plugin id="broken-by-label" source="lifecycle">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.ByLabelBrokenAggregator</aggregator>
+        </plugin>
+        <plugin id="all-skipped" source="lifecycle">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.AllSkippedAggregator</aggregator>
+            <resource>ru.yandex.qatools.camelot.core.plugins.AllSkippedService</resource>
+        </plugin>
+        <plugin id="test-started" brokerConfig="?maxConcurrentConsumers=5">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.TestStartedCounterAggregator</aggregator>
+        </plugin>
+    </source>
+</plugins-config>

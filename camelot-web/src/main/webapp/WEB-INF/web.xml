@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:camelot-web-context.xml</param-value>
+    </context-param>
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <servlet>
+        <servlet-name>Jersey Spring Web Application</servlet-name>
+        <servlet-class>ru.yandex.qatools.camelot.spring.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>ru.yandex.qatools.camelot.Application</param-value>
+        </init-param>
+        <async-supported>true</async-supported>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Jersey Spring Web Application</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Wro4j config -->
+    <filter>
+        <filter-name>WebResourceOptimizer</filter-name>
+        <filter-class>ru.yandex.qatools.camelot.core.web.wro.WroFilter</filter-class>
+        <init-param>
+            <param-name>configuration</param-name>
+            <param-value>DEPLOYMENT</param-value>
+        </init-param>
+        <init-param>
+            <param-name>managerFactoryClassName</param-name>
+            <param-value>ru.yandex.qatools.camelot.core.web.wro.ConfigurableWroManagerFactory</param-value>
+        </init-param>
+        <init-param>
+            <param-name>uriLocators</param-name>
+            <param-value>pluginsResourceLocator,servletContext,classpath,uri</param-value>
+        </init-param>
+        <init-param>
+            <param-name>preProcessors</param-name>
+            <param-value>cssImport,semicolonAppender,lessCss.less,coffeeScript.coffee,pluginsCssUrlRewriting</param-value>
+        </init-param>
+        <init-param>
+            <param-name>postProcessors</param-name>
+            <param-value>cssVariables,cssMinJawr,googleClosureSimple</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>WebResourceOptimizer</filter-name>
+        <url-pattern>/wro/*</url-pattern>
+    </filter-mapping>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/errors/404.jade</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/errors/500.jade</location>
+    </error-page>
+
+</web-app>

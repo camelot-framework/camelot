@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:ns="urn:config.camelot.qatools.yandex.ru"
+            targetNamespace="urn:config.camelot.qatools.yandex.ru"
+            elementFormDefault="qualified">
+
+    <!-- Envelope bean -->
+
+    <xsd:element name="plugins-config" type="ns:PluginsConfig"/>
+
+    <!-- Pluggable config beans -->
+
+    <xsd:complexType name="PluginsConfig">
+        <xsd:sequence>
+            <xsd:element name="source" type="ns:PluginsSource" minOccurs="1" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="PluginsSource">
+        <xsd:sequence>
+            <xsd:element name="artifact" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="broker" type="ns:Broker" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="plugin" type="ns:Plugin" minOccurs="1" maxOccurs="unbounded"/>
+            <xsd:element name="appConfig" type="xsd:anyType" minOccurs="0" maxOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="Plugin">
+        <xsd:sequence>
+            <xsd:choice minOccurs="1" maxOccurs="1">
+                <xsd:element name="aggregator" type="xsd:string" maxOccurs="1" minOccurs="1"/>
+                <xsd:element name="processor" type="xsd:string" maxOccurs="1" minOccurs="1"/>
+            </xsd:choice>
+            <xsd:element name="resource" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="context" type="xsd:anyType" minOccurs="0" maxOccurs="0"/>
+            <xsd:element name="broker" type="ns:Broker" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:string"/>
+        <xsd:attribute name="source" type="xsd:string"/>
+        <xsd:attribute name="brokerConfig" type="xsd:string" default=""/>
+        <xsd:attribute name="baseInputUri" type="xsd:string" default="activemq:queue:plugin.input"/>
+        <xsd:attribute name="baseOutputUri" type="xsd:string" default="activemq:queue:plugin.output"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="Broker">
+        <xsd:sequence>
+            <xsd:element name="param" type="ns:Parameter" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="Parameter">
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="value" type="xsd:string" use="required"/>
+    </xsd:complexType>
+</xsd:schema>

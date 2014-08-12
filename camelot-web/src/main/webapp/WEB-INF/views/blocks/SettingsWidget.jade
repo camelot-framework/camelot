@@ -1,0 +1,5 @@
+div.clickable.text-center(ng-controller="WidgetCtrl", ng-click="openSettings()")
+    span.glyphicon.glyphicon-cog
+    | Manage widgets...
+script(type="text/ng-template", id="modal.tpl")
+    != view.render("blocks/SettingsModal.jade")

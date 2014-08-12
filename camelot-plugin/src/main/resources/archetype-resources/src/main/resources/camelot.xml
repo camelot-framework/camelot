@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugins-config xmlns="urn:config.camelot.qatools.yandex.ru">
+    <source>
+        <artifact>test</artifact>
+        <plugin>
+            <aggregator>${groupId}.plugin.Aggregator</aggregator>
+            <resource>${groupId}.plugin.Resource</resource>
+        </plugin>
+    </source>
+</plugins-config>

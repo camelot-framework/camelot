@@ -1,0 +1,14 @@
+-helper = this.getViewHelper()
+div(ng-app="camelotDashboard")
+    script
+        angular.module('camelotUtil').value('pluginsList', !{helper.printPluginsData()});
+    div.row.widgets(drag-container, ng-controller="AppCtrl")
+        div.widget_col.col-md-6(ng-repeat="col in widgets")
+            div.widget(draggable, ng-repeat="widget in col", widget="widget")
+    each plugin in this.getPlugins().values()
+        - pContext = plugin.getContext()
+        if pContext.getWidgetPath() != null
+            script(type="text/ng-template", id="#{plugin.getId()}")
+                != helper.renderPluginWidgetContent(plugin.getId())
+    script(type="text/ng-template", id="settings")
+        != view.render("blocks/SettingsWidget.jade")

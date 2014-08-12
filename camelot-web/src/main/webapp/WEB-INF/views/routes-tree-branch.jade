@@ -1,0 +1,11 @@
+if children != null
+    for child in children
+        li
+            span.label.label-success
+                if child.getPlugin().getContext().getDashboardPath() != null
+                    a(href="#{context_path}/plugin/#{child.getPlugin().getId()}") #{child.getPlugin().getId()}
+                else
+                    | #{child.getPlugin().getId()}
+            if child.getChildren().size() > 0
+                ul
+                    != view.render("routes-tree-branch.jade", {"children": child.getChildren(), "depth": depth + 1})

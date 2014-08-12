@@ -1,0 +1,37 @@
+!!! 5
+html
+    head
+        title #{title}
+        meta(http-equiv="content-type", content="text/html; charset="UTF-8")
+        link(rel="stylesheet", href="#{context_path}/wro/lib.css")
+        link(rel="stylesheet", href="#{context_path}/wro/app.css")
+        link(rel="stylesheet", href="#{context_path}/wro/plugins.css")
+        script(src="#{context_path}/wro/lib.js")
+        script(type="text/javascript")
+            window.PluginsSystem = {
+                contextPath : '#{context_path}'
+            };
+        script(src="#{context_path}/wro/app.js")
+        script(src="#{context_path}/wro/plugins.js")
+    body
+        .navbar.navbar-inverse.navbar-fixed-top
+            .container
+                .navbar-header
+                    button.navbar-toggle(type="button", data-toggle="collapse", data-target=".navbar-collapse")
+                        span.icon-bar
+                        span.icon-bar
+                        span.icon-bar
+                    a.navbar-brand(href="#{context_path}/") Camelot: pluggable aggregation & processing
+                .collapse.navbar-collapse
+                    = req_path
+                    ul.nav.navbar-nav
+                        - menu = {"Plugins": "/pluginslist", "API": "/api", "Dashboard": "/"}
+                        each title in ["Dashboard", "Plugins", "API"]
+                            - cl = ""
+                            - path = menu[title]
+                            if req_path == path
+                                - cl = "active"
+                            li(class="#{cl}")
+                                a(href="#{context_path}#{path}") #{title}
+        .container
+            != yield
