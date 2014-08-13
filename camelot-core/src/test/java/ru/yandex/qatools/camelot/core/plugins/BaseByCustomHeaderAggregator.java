@@ -1,7 +1,5 @@
 package ru.yandex.qatools.camelot.core.plugins;
 
-import ru.yandex.qa.beans.TestEvent;
-import ru.yandex.qa.beans.TestFailed;
 import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.api.Constants;
 import ru.yandex.qatools.camelot.api.PluginInterop;
@@ -9,6 +7,8 @@ import ru.yandex.qatools.camelot.api.Storage;
 import ru.yandex.qatools.camelot.api.annotations.*;
 import ru.yandex.qatools.camelot.core.beans.CounterState;
 import ru.yandex.qatools.camelot.core.beans.StopByCustomHeader;
+import ru.yandex.qatools.camelot.core.beans.TestEvent;
+import ru.yandex.qatools.camelot.core.beans.TestFailed;
 import ru.yandex.qatools.fsm.annotations.*;
 
 /**

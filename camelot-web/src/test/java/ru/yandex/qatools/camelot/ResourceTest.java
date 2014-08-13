@@ -13,8 +13,8 @@ import ru.yandex.qatools.camelot.core.plugins.AllSkippedService;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
-import static ru.yandex.qatools.beans.test.TestEventGenerator.createTestSkipped;
-import static ru.yandex.qatools.beans.utils.TestEventsUtils.copyOf;
+import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestSkipped;
+import static ru.yandex.qatools.camelot.core.util.TestEventsUtils.copyOf;
 import static ru.yandex.qatools.camelot.util.NameUtil.pluginResourceBeanName;
 
 /**

@@ -1,12 +1,12 @@
 package ru.yandex.qatools.camelot.core.plugins;
 
-import ru.yandex.qa.beans.TestEvent;
-import ru.yandex.qa.beans.TestStarted;
 import ru.yandex.qatools.camelot.api.annotations.Aggregate;
 import ru.yandex.qatools.camelot.api.annotations.AggregationKey;
 import ru.yandex.qatools.camelot.api.annotations.Filter;
 import ru.yandex.qatools.camelot.core.beans.CounterState;
 import ru.yandex.qatools.camelot.core.beans.StopTestStartedCounter;
+import ru.yandex.qatools.camelot.core.beans.TestEvent;
+import ru.yandex.qatools.camelot.core.beans.TestStarted;
 import ru.yandex.qatools.camelot.core.impl.TestEventUtil;
 import ru.yandex.qatools.fsm.annotations.FSM;
 import ru.yandex.qatools.fsm.annotations.OnTransit;

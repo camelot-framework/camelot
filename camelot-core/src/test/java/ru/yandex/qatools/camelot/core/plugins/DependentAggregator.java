@@ -1,6 +1,6 @@
 package ru.yandex.qatools.camelot.core.plugins;
 
-import ru.yandex.qa.beans.TestEvent;
+import ru.yandex.qatools.camelot.core.beans.TestEvent;
 import ru.yandex.qatools.fsm.annotations.BeforeTransit;
 import ru.yandex.qatools.fsm.annotations.FSM;
 import ru.yandex.qatools.fsm.annotations.Transit;

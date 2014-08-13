@@ -1,12 +1,20 @@
 package ru.yandex.qatools.camelot.core.plugins;
 
-import ru.yandex.qa.beans.*;
 import ru.yandex.qatools.camelot.api.annotations.Aggregate;
 import ru.yandex.qatools.camelot.api.annotations.AggregationKey;
 import ru.yandex.qatools.camelot.api.annotations.InjectHeader;
 import ru.yandex.qatools.camelot.core.beans.StopEvent;
+import ru.yandex.qatools.camelot.core.beans.TestDropped;
+import ru.yandex.qatools.camelot.core.beans.TestEvent;
+import ru.yandex.qatools.camelot.core.beans.TestFailure;
+import ru.yandex.qatools.camelot.core.beans.TestPassed;
+import ru.yandex.qatools.camelot.core.beans.TestStarted;
 import ru.yandex.qatools.camelot.core.beans.UndefinedTestEvent;
-import ru.yandex.qatools.fsm.annotations.*;
+import ru.yandex.qatools.fsm.annotations.FSM;
+import ru.yandex.qatools.fsm.annotations.NewState;
+import ru.yandex.qatools.fsm.annotations.OnTransit;
+import ru.yandex.qatools.fsm.annotations.Transit;
+import ru.yandex.qatools.fsm.annotations.Transitions;
 
 import static ru.yandex.qatools.camelot.api.Constants.Headers.UUID;
 

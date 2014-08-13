@@ -1,13 +1,13 @@
 package ru.yandex.qatools.camelot.util;
 
 import org.junit.Test;
-import ru.yandex.qa.beans.TestStarted;
+import ru.yandex.qatools.camelot.core.beans.TestStarted;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static ru.yandex.qatools.beans.test.TestEventGenerator.createTestStarted;
+import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestStarted;
 import static ru.yandex.qatools.camelot.util.SerializeUtil.deserializeFromBytes;
 import static ru.yandex.qatools.camelot.util.SerializeUtil.serializeToBytes;
 

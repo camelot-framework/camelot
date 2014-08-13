@@ -1,11 +1,11 @@
 package ru.yandex.qatools.camelot.core.plugins;
 
-import ru.yandex.qa.beans.TestFailed;
-import ru.yandex.qa.beans.TestPassed;
 import ru.yandex.qatools.camelot.api.annotations.Aggregate;
 import ru.yandex.qatools.camelot.api.annotations.AggregationKey;
 import ru.yandex.qatools.camelot.api.annotations.InjectHeader;
+import ru.yandex.qatools.camelot.core.beans.TestFailed;
 import ru.yandex.qatools.camelot.core.beans.TestFailedState;
+import ru.yandex.qatools.camelot.core.beans.TestPassed;
 import ru.yandex.qatools.camelot.core.beans.TestPassedState;
 import ru.yandex.qatools.camelot.core.beans.UndefinedState;
 import ru.yandex.qatools.fsm.annotations.FSM;

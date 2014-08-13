@@ -1,10 +1,14 @@
 package ru.yandex.qatools.camelot.core.plugins;
 
-import ru.yandex.qa.beans.TestStarted;
 import ru.yandex.qatools.camelot.api.AggregatorRepository;
-import ru.yandex.qatools.camelot.api.annotations.*;
+import ru.yandex.qatools.camelot.api.annotations.Aggregate;
+import ru.yandex.qatools.camelot.api.annotations.AggregationKey;
+import ru.yandex.qatools.camelot.api.annotations.InjectHeader;
+import ru.yandex.qatools.camelot.api.annotations.OnTimer;
+import ru.yandex.qatools.camelot.api.annotations.Repository;
 import ru.yandex.qatools.camelot.core.beans.CounterState;
 import ru.yandex.qatools.camelot.core.beans.StopAggregatorWithTimer;
+import ru.yandex.qatools.camelot.core.beans.TestStarted;
 import ru.yandex.qatools.fsm.annotations.FSM;
 import ru.yandex.qatools.fsm.annotations.OnTransit;
 import ru.yandex.qatools.fsm.annotations.Transit;

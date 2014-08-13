@@ -2,13 +2,13 @@ package ru.yandex.qatools.camelot.core.plugins;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.yandex.qa.beans.TestSkipped;
 import ru.yandex.qatools.camelot.api.EventProducer;
 import ru.yandex.qatools.camelot.api.annotations.Aggregate;
 import ru.yandex.qatools.camelot.api.annotations.AggregationKey;
 import ru.yandex.qatools.camelot.api.annotations.Output;
 import ru.yandex.qatools.camelot.core.beans.CounterState;
 import ru.yandex.qatools.camelot.core.beans.StopAllSkipped;
+import ru.yandex.qatools.camelot.core.beans.TestSkipped;
 import ru.yandex.qatools.fsm.annotations.FSM;
 import ru.yandex.qatools.fsm.annotations.OnTransit;
 import ru.yandex.qatools.fsm.annotations.Transit;

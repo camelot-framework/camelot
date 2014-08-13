@@ -1,14 +1,20 @@
 package ru.yandex.qatools.camelot;
 
 import com.hazelcast.core.HazelcastInstance;
-import org.apache.camel.*;
+import org.apache.camel.CamelContext;
+import org.apache.camel.CamelContextAware;
+import org.apache.camel.EndpointInject;
+import org.apache.camel.Exchange;
+import org.apache.camel.Predicate;
+import org.apache.camel.Produce;
+import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.yandex.qa.beans.TestEvent;
 import ru.yandex.qatools.camelot.core.ProcessingEngine;
 import ru.yandex.qatools.camelot.core.beans.StopEvent;
+import ru.yandex.qatools.camelot.core.beans.TestEvent;
 import ru.yandex.qatools.camelot.util.MapUtil;
 
 import java.util.UUID;

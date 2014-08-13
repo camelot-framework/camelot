@@ -143,20 +143,6 @@
         </dependency>
 
         <!-- Testing -->
-
-        <dependency>
-            <groupId>ru.yandex.qatools</groupId>
-            <artifactId>qa-beans</artifactId>
-            <version>1.0</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ru.yandex.qatools</groupId>
-            <artifactId>qa-beans</artifactId>
-            <scope>test</scope>
-            <version>1.0</version>
-        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>camelot-core</artifactId>

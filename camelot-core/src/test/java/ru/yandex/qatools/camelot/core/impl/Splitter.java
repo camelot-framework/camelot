@@ -3,7 +3,7 @@ package ru.yandex.qatools.camelot.core.impl;
 import org.apache.camel.Body;
 import org.apache.camel.Headers;
 import org.slf4j.Logger;
-import ru.yandex.qa.beans.TestEvent;
+import ru.yandex.qatools.camelot.core.beans.TestEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -2,13 +2,13 @@ package ru.yandex.qatools.camelot.core.plugins;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.yandex.qa.beans.TestDropped;
-import ru.yandex.qa.beans.TestEvent;
-import ru.yandex.qa.beans.TestFailure;
 import ru.yandex.qatools.camelot.api.EventProducer;
 import ru.yandex.qatools.camelot.api.annotations.Aggregate;
 import ru.yandex.qatools.camelot.api.annotations.AggregationKey;
 import ru.yandex.qatools.camelot.api.annotations.Output;
+import ru.yandex.qatools.camelot.core.beans.TestDropped;
+import ru.yandex.qatools.camelot.core.beans.TestEvent;
+import ru.yandex.qatools.camelot.core.beans.TestFailure;
 import ru.yandex.qatools.camelot.core.beans.UndefinedTestEvent;
 import ru.yandex.qatools.camelot.core.impl.TestEventUtil;
 import ru.yandex.qatools.fsm.annotations.FSM;

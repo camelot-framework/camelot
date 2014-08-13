@@ -1,7 +1,5 @@
 package ru.yandex.qatools.camelot.core.beans;
 
-import ru.yandex.qa.beans.TestEvent;
-
 import java.io.Serializable;
 
 /**
