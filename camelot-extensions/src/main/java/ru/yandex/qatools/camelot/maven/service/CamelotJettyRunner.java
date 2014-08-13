@@ -81,7 +81,7 @@ public class CamelotJettyRunner {
         context.setParentLoaderPriority(true);
         context.setClassLoader(createWebAppClassLoader(context));
 
-        server.setHandler(createHandlersForServer(server, context));
+        server.setHandler(createHandlersForServer(context));
         server.start();
 
         if (waitFor) {
@@ -122,15 +122,14 @@ public class CamelotJettyRunner {
     /**
      * Create {@link org.eclipse.jetty.server.handler.HandlerList} for given jetty server and web application context
      *
-     * @param server  specified {@link org.eclipse.jetty.server.Server}
      * @param context specified web application context
      * @return created handlers
      */
-    public static HandlerList createHandlersForServer(Server server, WebAppContext context) {
+    public static HandlerList createHandlersForServer(WebAppContext context) {
         HandlerList handlers = new HandlerList();
-        final ShutdownHandler shutdownHandler = new ShutdownHandler(server, SHUTDOWN_PASSWORD);
+        final ShutdownHandler shutdownHandler = new JettyKillHandler(SHUTDOWN_PASSWORD, true, true);
         shutdownHandler.setExitJvm(true);
-        handlers.setHandlers(new Handler[]{shutdownHandler, context});
+        handlers.setHandlers(new Handler[]{context, shutdownHandler});
         return handlers;
     }
 

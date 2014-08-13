@@ -3,11 +3,6 @@ package ru.yandex.qatools.camelot.maven.utils;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ShutdownHandler;
-import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +11,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.jar.Attributes;
@@ -35,7 +29,7 @@ public final class CamelotRunnerUtils {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(CamelotRunnerUtils.class);
 
-    public static final String WAITFOR_TOKEN = "Started SelectChannelConnector";
+    public static final String WAITFOR_TOKEN = "Started ServerConnector";
 
     public static final String MANIFEST_VERSION = "1.0";
 
