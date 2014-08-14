@@ -7,7 +7,6 @@ import org.apache.camel.Predicate;
 import org.apache.camel.model.RouteDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.yandex.qatools.camelot.beans.AggregationOptions;
 import ru.yandex.qatools.camelot.beans.AggregatorConfig;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
@@ -25,12 +24,10 @@ import static ru.yandex.qatools.camelot.api.Constants.Headers.PLUGIN_ID;
 public class AggregatorPluginRouteBuilder extends GenericPluginRouteBuilder implements AggregatorRoutesBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(AggregatorPluginRouteBuilder.class);
     private AggregationStrategyBuilder strategyBuilder;
-    private final AggregationOptions opts;
 
-    public AggregatorPluginRouteBuilder(CamelContext camelContext, Plugin aggregatorPlugin, AggregationOptions options) throws Exception {
+    public AggregatorPluginRouteBuilder(CamelContext camelContext, Plugin aggregatorPlugin) throws Exception {
         super(aggregatorPlugin, camelContext);
         this.strategyBuilder = newAggregationStrategyBuilder(plugin.getContext());
-        this.opts = options;
     }
 
     @Override

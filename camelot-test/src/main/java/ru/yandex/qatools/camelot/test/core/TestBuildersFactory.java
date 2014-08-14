@@ -3,7 +3,6 @@ package ru.yandex.qatools.camelot.test.core;
 import org.apache.camel.CamelContext;
 import org.quartz.Scheduler;
 import org.springframework.context.ApplicationContext;
-import ru.yandex.qatools.camelot.beans.AggregationOptions;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.core.builders.*;
 
@@ -30,11 +29,11 @@ public class TestBuildersFactory extends BuildersFactoryImpl {
 
     @Override
     public AggregatorRoutesBuilder newAggregatorPluginRouteBuilder(CamelContext camelContext,
-                                                                   Plugin plugin, AggregationOptions options) throws Exception {
+                                                                   Plugin plugin) throws Exception {
         final Class<?> classToMock = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass());
         Object mock = pluginMock(plugin);
         mocksStorage.put(plugin.getId(), mock);
-        AggregatorRoutesBuilder original = originalBuildersFactory.newAggregatorPluginRouteBuilder(camelContext, plugin, options);
+        AggregatorRoutesBuilder original = originalBuildersFactory.newAggregatorPluginRouteBuilder(camelContext, plugin);
         return new TestAggregatorPluginRouteBuilder(classToMock, mock, original);
     }
 

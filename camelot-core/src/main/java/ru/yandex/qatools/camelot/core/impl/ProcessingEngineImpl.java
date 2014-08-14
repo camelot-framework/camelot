@@ -325,7 +325,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
      */
     protected BasicRoutesBuilder newAggregatorRouteBuilder(Plugin plugin) throws Exception {
         return getBuildersFactory().newAggregatorPluginRouteBuilder(
-                camelContext, plugin, getAggregationOptions());
+                camelContext, plugin);
     }
 
 }

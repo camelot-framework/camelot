@@ -2,7 +2,6 @@ package ru.yandex.qatools.camelot.core.builders;
 
 import org.apache.camel.CamelContext;
 import org.quartz.Scheduler;
-import ru.yandex.qatools.camelot.beans.AggregationOptions;
 import ru.yandex.qatools.camelot.config.Plugin;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -14,8 +13,8 @@ public class BuildersFactoryImpl implements BuildersFactory {
     private long waitForLockSec = MINUTES.toSeconds(5);
 
     @Override
-    public AggregatorRoutesBuilder newAggregatorPluginRouteBuilder(CamelContext camelContext, Plugin plugin, AggregationOptions options) throws Exception {
-        return new AggregatorPluginRouteBuilder(camelContext, plugin, options);
+    public AggregatorRoutesBuilder newAggregatorPluginRouteBuilder(CamelContext camelContext, Plugin plugin) throws Exception {
+        return new AggregatorPluginRouteBuilder(camelContext, plugin);
     }
 
     @Override
