@@ -141,7 +141,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
     @Test
     public void testExpressionAggregator() throws InterruptedException {
         endpointByHourOfDayOutput.reset();
-        endpointByHourOfDayOutput.expectedMessageCount(2);
+        endpointByHourOfDayOutput.expectedMinimumMessageCount(2);
 
         final String testName = "test";
 

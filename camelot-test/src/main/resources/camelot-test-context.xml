@@ -3,6 +3,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:hz="http://www.hazelcast.com/schema/spring"
+       xmlns:util="http://www.springframework.org/schema/util"
        xmlns:amq="http://activemq.apache.org/schema/core"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
@@ -10,6 +11,8 @@
             http://www.hazelcast.com/schema/spring/hazelcast-spring-3.0.xsd
             http://camel.apache.org/schema/spring
             http://camel.apache.org/schema/spring/camel-spring.xsd
+            http://www.springframework.org/schema/util
+            http://www.springframework.org/schema/util/spring-util-3.1.xsd
             http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context-3.0.xsd
             http://activemq.apache.org/schema/core
@@ -34,6 +37,12 @@
                 <value>classpath*:camelot.properties</value>
                 <value>classpath:/camelot-test-config.properties</value>
             </list>
+        </property>
+        <property name="properties">
+            <util:properties>
+                <prop key="activemq.embedded.bind">localhost:#{T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort()}</prop>
+                <prop key="hazelcast.port">#{new String(T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort())}</prop>
+            </util:properties>
         </property>
     </bean>
 </beans>

@@ -25,12 +25,10 @@ import static ru.yandex.qatools.camelot.api.Constants.Headers.PLUGIN_ID;
 public class AggregatorPluginRouteBuilder extends GenericPluginRouteBuilder implements AggregatorRoutesBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(AggregatorPluginRouteBuilder.class);
     private AggregationStrategyBuilder strategyBuilder;
-    private final AggregationOptions opts;
 
     public AggregatorPluginRouteBuilder(CamelContext camelContext, Plugin aggregatorPlugin, AggregationOptions options) throws Exception {
         super(aggregatorPlugin, camelContext);
         this.strategyBuilder = newAggregationStrategyBuilder(plugin.getContext());
-        this.opts = options;
     }
 
     @Override

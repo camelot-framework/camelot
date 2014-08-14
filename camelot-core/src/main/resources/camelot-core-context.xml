@@ -130,11 +130,6 @@
                 <constructor-arg name="hazelcastInstance" ref="hazelcastInstance"/>
             </bean>
         </property>
-        <property name="aggregationOptions">
-            <bean class="ru.yandex.qatools.camelot.beans.AggregationOptionsImpl">
-                <constructor-arg name="useOptimisticLocking" value="${camelot.aggregation.optimisticLocking}"/>
-            </bean>
-        </property>
     </bean>
 
     <!-- ThreadPool profiles -->

@@ -2,20 +2,23 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
             http://camel.apache.org/schema/spring
             http://camel.apache.org/schema/spring/camel-spring.xsd
+            http://www.springframework.org/schema/util
+            http://www.springframework.org/schema/util/spring-util-3.1.xsd
             http://activemq.apache.org/schema/core
             http://activemq.apache.org/schema/core/activemq-core.xsd">
 
     <amq:broker useJmx="false" persistent="false" id="test-camelot-broker">
         <amq:transportConnectors>
-            <amq:transportConnector uri="tcp://localhost:61618"/>
+            <amq:transportConnector uri="tcp://${activemq.embedded.bind}"/>
         </amq:transportConnectors>
     </amq:broker>
 
-    <amq:connectionFactory id="jmsFactory" brokerURL="vm://localhost:61618"/>
+    <amq:connectionFactory id="jmsFactory" brokerURL="vm://${activemq.embedded.bind}"/>
 
     <bean id="jmsConfig" class="org.apache.camel.component.jms.JmsConfiguration">
         <property name="connectionFactory" ref="jmsFactory"/>
@@ -33,6 +36,13 @@
                 <value>camelot.properties</value>
                 <value>test-config.properties</value>
             </list>
+        </property>
+        <property name="properties">
+            <util:properties>
+                <prop key="activemq.embedded.bind">localhost:#{T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort()}</prop>
+                <prop key="hazelcast.port">#{new String(T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort())}</prop>
+                <prop key="hazelcast.port.auto.increment">false</prop>
+            </util:properties>
         </property>
     </bean>
 

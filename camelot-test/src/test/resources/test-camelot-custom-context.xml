@@ -16,14 +16,14 @@
             http://activemq.apache.org/schema/core/activemq-core.xsd">
     <amq:broker useJmx="false" persistent="false">
         <amq:transportConnectors>
-            <amq:transportConnector uri="tcp://localhost:62619"/>
+            <amq:transportConnector uri="tcp://${activemq.embedded.bind}"/>
         </amq:transportConnectors>
     </amq:broker>
 
-    <amq:connectionFactory id="jmsFactory" brokerURL="vm://localhost:62619"/>
+    <amq:connectionFactory id="jmsFactory" brokerURL="vm://${activemq.embedded.bind}"/>
 
     <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-        <property name="brokerURL" value="failover:(tcp://localhost:62619)?randomize=false"/>
+        <property name="brokerURL" value="failover:(tcp://${activemq.embedded.bind})?randomize=false"/>
     </bean>
 
     <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory"
@@ -53,7 +53,7 @@
                 <hz:property name="hazelcast.merge.first.run.delay.seconds">5</hz:property>
                 <hz:property name="hazelcast.merge.next.run.delay.seconds">5</hz:property>
             </hz:properties>
-            <hz:network port="5802" port-auto-increment="true">
+            <hz:network port="${hazelcast.port}" port-auto-increment="false">
                 <hz:join>
                     <hz:multicast enabled="false" multicast-group="224.2.2.3" multicast-port="54328"/>
                     <hz:tcp-ip enabled="true">

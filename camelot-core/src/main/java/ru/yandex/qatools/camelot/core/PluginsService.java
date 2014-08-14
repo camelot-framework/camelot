@@ -3,7 +3,6 @@ package ru.yandex.qatools.camelot.core;
 import org.apache.camel.CamelContext;
 import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.api.PluginsInterop;
-import ru.yandex.qatools.camelot.beans.AggregationOptions;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
 import ru.yandex.qatools.camelot.core.builders.BuildersFactory;
@@ -116,15 +115,5 @@ public interface PluginsService {
      * Returns the engineName
      */
     String getEngineName();
-
-    /**
-     * Set the aggregation options
-     */
-    void setAggregationOptions(AggregationOptions aggregationOptions);
-
-    /**
-     * Returns the aggregation options
-     */
-    AggregationOptions getAggregationOptions();
 
 }

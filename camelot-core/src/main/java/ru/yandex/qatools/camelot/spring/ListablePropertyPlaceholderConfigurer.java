@@ -46,20 +46,27 @@ public class ListablePropertyPlaceholderConfigurer extends PropertyPlaceholderCo
 
     @Override
     protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props) throws BeansException {
+        if (localProperties != null) {
+            for (Properties localProps : localProperties) {
+                props.putAll(localProps);
+            }
+        }
         super.processProperties(beanFactory, props);
-        for (Resource resource : locations) {
-            try {
-                final String url = resource.getURL().toString();
-                logger.info(format("Trying to load properties from %s", url));
-                final Properties loader = new Properties();
-                loader.load(readResource(resource.getURL()));
-                getProperties().putAll(loader);
-            } catch (Exception e) {
-                if (!ignoreResourceNotFound) {
-                    logger.error(format("Failed to load properties from location %s current working dir: %s",
-                            resource, getProperty("user.dir")), e);
-                } else {
-                    logger.warn(format("Ignoring not existing resource %s (%s)", resource, e.getMessage()));
+        if (locations != null) {
+            for (Resource resource : locations) {
+                try {
+                    final String url = resource.getURL().toString();
+                    logger.info(format("Trying to load properties from %s", url));
+                    final Properties loader = new Properties();
+                    loader.load(readResource(resource.getURL()));
+                    getProperties().putAll(loader);
+                } catch (Exception e) {
+                    if (!ignoreResourceNotFound) {
+                        logger.error(format("Failed to load properties from location %s current working dir: %s",
+                                resource, getProperty("user.dir")), e);
+                    } else {
+                        logger.warn(format("Ignoring not existing resource %s (%s)", resource, e.getMessage()));
+                    }
                 }
             }
         }

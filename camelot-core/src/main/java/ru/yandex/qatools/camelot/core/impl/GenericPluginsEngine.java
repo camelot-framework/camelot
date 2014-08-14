@@ -10,8 +10,6 @@ import org.springframework.core.io.Resource;
 import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.api.PluginEndpoints;
 import ru.yandex.qatools.camelot.api.PluginsInterop;
-import ru.yandex.qatools.camelot.beans.AggregationOptions;
-import ru.yandex.qatools.camelot.beans.AggregationOptionsImpl;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
 import ru.yandex.qatools.camelot.config.PluginsConfig;
@@ -28,14 +26,12 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.*;
 
 import static jodd.util.StringUtil.isEmpty;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
 import static ru.yandex.qatools.camelot.util.IOUtils.readResource;
 import static ru.yandex.qatools.camelot.util.NameUtil.defaultPluginId;
-import static ru.yandex.qatools.camelot.util.ReflectUtil.resolveResourcesAsStringsFromPattern;
 import static ru.yandex.qatools.camelot.util.ServiceUtil.*;
 
 /**
@@ -47,7 +43,6 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
 
     private PluginContextInjector contextInjector;
     private BuildersFactory buildersFactory;
-    private AggregationOptions aggregationOptions;
 
     protected List<PluginsConfig> pluginsConfigs;
     protected final CamelContext camelContext;
@@ -75,7 +70,6 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
         setBuildersFactory(new BuildersFactoryImpl());
         setContextInjector(new PluginContextInjectorImpl());
         setAppConfig(new AppConfigSystemProperties());
-        setAggregationOptions(new AggregationOptionsImpl(true));
     }
 
 
@@ -313,16 +307,6 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     @Override
     public void setEngineName(String engineName) {
         this.engineName = engineName;
-    }
-
-    @Override
-    public AggregationOptions getAggregationOptions() {
-        return aggregationOptions;
-    }
-
-    @Override
-    public void setAggregationOptions(AggregationOptions aggregationOptions) {
-        this.aggregationOptions = aggregationOptions;
     }
 
     /**
