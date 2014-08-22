@@ -16,6 +16,7 @@ import static ru.yandex.qatools.camelot.util.ReflectUtil.invokeAnyMethod;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 @SuppressWarnings("unchecked")
 public class FSMAggregationStrategy extends ClayProcessor implements AggregationStrategy {

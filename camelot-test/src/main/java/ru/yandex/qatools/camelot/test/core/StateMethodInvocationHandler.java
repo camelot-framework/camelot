@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
 
 /**
- * @author innokenty
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 class StateMethodInvocationHandler implements MethodInterceptor {
 
