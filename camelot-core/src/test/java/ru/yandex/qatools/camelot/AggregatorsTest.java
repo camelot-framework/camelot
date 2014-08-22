@@ -11,38 +11,17 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import ru.yandex.qatools.camelot.api.Storage;
 import ru.yandex.qatools.camelot.core.ProcessingEngine;
-import ru.yandex.qatools.camelot.core.beans.CollectEventsState;
-import ru.yandex.qatools.camelot.core.beans.CounterState;
-import ru.yandex.qatools.camelot.core.beans.DerivedFilteredEvent;
-import ru.yandex.qatools.camelot.core.beans.InitEvent;
-import ru.yandex.qatools.camelot.core.beans.StopAggregatorWithTimer;
-import ru.yandex.qatools.camelot.core.beans.StopAllSkipped;
-import ru.yandex.qatools.camelot.core.beans.StopByCustomHeader;
-import ru.yandex.qatools.camelot.core.beans.StopByHourOfDay;
-import ru.yandex.qatools.camelot.core.beans.StopByLabelBroken;
-import ru.yandex.qatools.camelot.core.beans.StopTestStartedCounter;
-import ru.yandex.qatools.camelot.core.beans.TestBroken;
-import ru.yandex.qatools.camelot.core.beans.TestDropped;
-import ru.yandex.qatools.camelot.core.beans.TestEvent;
-import ru.yandex.qatools.camelot.core.beans.TestFailed;
-import ru.yandex.qatools.camelot.core.beans.TestPassedState;
-import ru.yandex.qatools.camelot.core.beans.TestStarted;
+import ru.yandex.qatools.camelot.core.beans.*;
 import ru.yandex.qatools.camelot.core.plugins.ByCustomHeaderAggregator;
 import ru.yandex.qatools.camelot.core.plugins.WithoutIdAggregator;
 
 import static java.lang.Thread.sleep;
 import static java.util.Calendar.HOUR_OF_DAY;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.CORRELATION_KEY;
-import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestBroken;
-import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestFailed;
-import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestPassed;
-import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestSkipped;
-import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestStarted;
+import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.*;
 import static ru.yandex.qatools.camelot.core.util.TestEventsUtils.copyOf;
 import static ru.yandex.qatools.camelot.util.DateUtil.calThen;
 import static ru.yandex.qatools.camelot.util.DateUtil.hourAgo;
@@ -52,7 +31,10 @@ import static ru.yandex.qatools.camelot.util.SerializeUtil.checkAndGetBytesInput
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 @RunWith(CamelSpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath*:camelot-core-context.xml", "classpath*:test-camelot-core-context.xml"})
+@ContextConfiguration(locations = {
+        "classpath*:camelot-core-context.xml",
+        "classpath*:test-camelot-core-context.xml"
+})
 @DirtiesContext(classMode = AFTER_CLASS)
 @MockEndpoints("*")
 public class AggregatorsTest extends BasicAggregatorsTest {
@@ -68,28 +50,37 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         sendEvent(WithoutIdAggregator.class, new InitEvent("test"));
         endpointWithoutIdOutput.assertIsSatisfied(3000);
 
-        expectExchangeExists(endpointInitializableOutput, "Must receive counter with 1", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                CounterState first = checkAndGetBytesInput(CounterState.class, exchange.getIn().getBody(), classLoader);
-                return first != null && first.count == 1;
-            }
-        });
+        expectExchangeExists(endpointInitializableOutput,
+                "Must receive counter with 1",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = checkAndGetBytesInput(CounterState.class,
+                                exchange.getIn().getBody(), classLoader);
+                        return first != null && first.count == 1;
+                    }
+                });
     }
 
     @Test
     public void testInitializableAggregator() throws Exception {
         endpointInitializableOutput.expectedMessageCount(1);
-
         endpointInitializableOutput.assertIsSatisfied(3000);
 
-        expectExchangeExists(endpointInitializableOutput, "Must receive counter with 1", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                CounterState first = checkAndGetBytesInput(CounterState.class, exchange.getIn().getBody(), classLoader);
-                return first != null && first.count == 1 && first.label.equals("test");
-            }
-        });
+        expectExchangeExists(endpointInitializableOutput,
+                "Must receive counter with 1",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = checkAndGetBytesInput(
+                                CounterState.class,
+                                exchange.getIn().getBody(),
+                                classLoader);
+                        return first != null
+                                && first.count == 1
+                                && first.label.equals("test");
+                    }
+                });
     }
 
     @Test
@@ -97,22 +88,25 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         endpointTestStartedOutput.reset();
         endpointTestStartedOutput.expectedMessageCount(1);
 
-        final String uuid1 = uuid();
-        final String uuid2 = uuid();
-        final TestStarted testStarted = createTestStarted(uuid1);
+        String uuid1 = uuid();
+        String uuid2 = uuid();
+        TestStarted testStarted = createTestStarted(uuid1);
         sendTestEvent("test-started", testStarted, uuid1);
         sendTestEvent("test-started", testStarted, uuid2);
         sendStopEvent("test-started", copyOf(testStarted, StopTestStartedCounter.class));
 
         endpointTestStartedOutput.assertIsSatisfied(2000);
 
-        expectExchangeExists(endpointTestStartedOutput, "Must receive counter with 2", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                Object first = checkAndGetBytesInput(CounterState.class, exchange.getIn().getBody(), classLoader);
-                return first != null && ((CounterState) first).count == 2;
-            }
-        });
+        expectExchangeExists(endpointTestStartedOutput,
+                "Must receive counter with 2",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        Object first = checkAndGetBytesInput(CounterState.class,
+                                exchange.getIn().getBody(), classLoader);
+                        return first != null && ((CounterState) first).count == 2;
+                    }
+                });
     }
 
     @Test
@@ -120,8 +114,8 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         endpointByMethodOutput.reset();
         endpointByMethodOutput.expectedMessageCount(1);
 
-        final String uuid1 = uuid();
-        final String uuid2 = uuid();
+        String uuid1 = uuid();
+        String uuid2 = uuid();
         sendTestEvent("by-method", createTestStarted(uuid1), uuid1);
         sendTestEvent("by-method", createTestFailed(uuid1), uuid1);
         sendTestEvent("by-method", createTestStarted(uuid1), uuid2);
@@ -129,13 +123,16 @@ public class AggregatorsTest extends BasicAggregatorsTest {
 
         endpointByMethodOutput.assertIsSatisfied(2000);
 
-        expectExchangeExists(endpointByMethodOutput, "TestPassedState must exist!", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                TestPassedState first = checkAndGetBytesInput(TestPassedState.class, exchange.getIn().getBody(), classLoader);
-                return first != null;
-            }
-        });
+        expectExchangeExists(endpointByMethodOutput,
+                "TestPassedState must exist!",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        TestPassedState first = checkAndGetBytesInput(TestPassedState.class,
+                                exchange.getIn().getBody(), classLoader);
+                        return first != null;
+                    }
+                });
     }
 
     @Test
@@ -143,16 +140,16 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         endpointByHourOfDayOutput.reset();
         endpointByHourOfDayOutput.expectedMinimumMessageCount(2);
 
-        final String testName = "test";
+        String testName = "test";
 
-        final TestStarted oldTestStarted = createTestStarted(testName);
-        final TestBroken oldTestBroken = createTestBroken(testName);
+        TestStarted oldTestStarted = createTestStarted(testName);
+        TestBroken oldTestBroken = createTestBroken(testName);
         oldTestStarted.setTime(hourAgo().getTime());
         oldTestBroken.setTime(hourAgo().getTime());
-        final TestStarted newTestStarted = createTestStarted(testName);
-        final TestBroken newTestBroken = createTestBroken(testName);
-        final String uuid1 = uuid();
-        final String uuid2 = uuid();
+        TestStarted newTestStarted = createTestStarted(testName);
+        TestBroken newTestBroken = createTestBroken(testName);
+        String uuid1 = uuid();
+        String uuid2 = uuid();
 
         sendTestEvent("lifecycle", oldTestStarted, uuid1);
         sendTestEvent("lifecycle", oldTestBroken, uuid1);
@@ -164,16 +161,21 @@ public class AggregatorsTest extends BasicAggregatorsTest {
 
         endpointByHourOfDayOutput.assertIsSatisfied(2000);
 
-        endpointByHourOfDayOutput.expectedHeaderReceived(CORRELATION_KEY, calThen(oldTestBroken.getTimestamp()).get(HOUR_OF_DAY));
-        endpointByHourOfDayOutput.expectedHeaderReceived(CORRELATION_KEY, calThen(newTestBroken.getTimestamp()).get(HOUR_OF_DAY));
+        endpointByHourOfDayOutput.expectedHeaderReceived(CORRELATION_KEY,
+                calThen(oldTestBroken.getTimestamp()).get(HOUR_OF_DAY));
+        endpointByHourOfDayOutput.expectedHeaderReceived(CORRELATION_KEY,
+                calThen(newTestBroken.getTimestamp()).get(HOUR_OF_DAY));
 
-        expectExchangeExists(endpointByHourOfDayOutput, "Must receive one of the events with count 1!", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                CounterState first = checkAndGetBytesInput(CounterState.class, exchange.getIn().getBody(), classLoader);
-                return first != null && first.count == 1;
-            }
-        });
+        expectExchangeExists(endpointByHourOfDayOutput,
+                "Must receive one of the events with count 1!",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = checkAndGetBytesInput(CounterState.class,
+                                exchange.getIn().getBody(), classLoader);
+                        return first != null && first.count == 1;
+                    }
+                });
     }
 
     @Test
@@ -181,24 +183,27 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         endpointBrokenByLabelOutput.reset();
         endpointBrokenByLabelOutput.expectedMessageCount(2);
 
-        final String[] labels = new String[]{"bylabel-label1", "bylabel-label2"};
-        final String uuid = uuid();
+        String[] labels = new String[]{"bylabel-label1", "bylabel-label2"};
+        String uuid = uuid();
         for (int i = 0; i < 2; ++i) {
             sendTestEvent("broken-by-label", createTestBroken(uuid, labels), uuid());
         }
-        sendStopEvent("broken-by-label", copyOf(createTestStarted(uuid, labels), StopByLabelBroken.class));
+        sendStopEvent("broken-by-label",
+                copyOf(createTestStarted(uuid, labels),
+                        StopByLabelBroken.class));
 
         endpointBrokenByLabelOutput.assertIsSatisfied(4000);
 
         for (final String label : labels) {
-            expectExchangeExists(endpointBrokenByLabelOutput, label + " exchange must exist!", new Predicate() {
-                @Override
-                public boolean matches(Exchange exchange) {
-                    CounterState obj = checkAndGetBytesInput(CounterState.class, exchange.getIn().getBody(), classLoader);
-                    return obj != null && obj.count > 1 && obj.label.equals(label);
-                }
-            });
-
+            expectExchangeExists(endpointBrokenByLabelOutput,
+                    label + " exchange must exist!", new Predicate() {
+                        @Override
+                        public boolean matches(Exchange exchange) {
+                            CounterState obj = checkAndGetBytesInput(CounterState.class,
+                                    exchange.getIn().getBody(), classLoader);
+                            return obj != null && obj.count > 1 && obj.label.equals(label);
+                        }
+                    });
         }
     }
 
@@ -207,22 +212,27 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         endpointAllSkippedOutput.reset();
         endpointAllSkippedOutput.expectedMessageCount(2);
 
-        final String uuid = uuid();
+        String uuid = uuid();
         for (int i = 0; i < 4; ++i) {
             sendTestEvent("all-skipped", createTestSkipped(uuid), uuid + i);
             if (i % 2 == 1) {
-                sendStopEvent("all-skipped", copyOf(createTestStarted(uuid), StopAllSkipped.class));
+                sendStopEvent("all-skipped",
+                        copyOf(createTestStarted(uuid),
+                                StopAllSkipped.class));
             }
         }
 
         endpointAllSkippedOutput.assertIsSatisfied(4000);
-        expectExchangeExists(endpointAllSkippedOutput, "First counter must have 2", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                CounterState first = checkAndGetBytesInput(CounterState.class, exchange.getIn().getBody(), classLoader);
-                return first != null && first.count == 2;
-            }
-        });
+        expectExchangeExists(endpointAllSkippedOutput,
+                "First counter must have 2",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = checkAndGetBytesInput(CounterState.class,
+                                exchange.getIn().getBody(), classLoader);
+                        return first != null && first.count == 2;
+                    }
+                });
     }
 
     @Test
@@ -230,16 +240,20 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         endpointLifecycleOutput.reset();
         endpointLifecycleOutput.expectedMinimumMessageCount(2);
 
-        final String uuid1 = uuid();
-        final String uuid2 = uuid();
+        String uuid1 = uuid();
+        String uuid2 = uuid();
         sendTestEvent("lifecycle", createTestStarted(uuid1), uuid1);
         sendTestEvent("lifecycle", createTestFailed(uuid1), uuid1);
         sendTestEvent("lifecycle", createTestFailed(uuid1), uuid2);
         sendTestEvent("lifecycle", createTestStarted(uuid1), uuid2);
 
         endpointLifecycleOutput.assertIsSatisfied(2000);
-        TestEvent first = checkAndGetBytesInput(TestFailed.class, endpointLifecycleOutput.getExchanges().get(0).getIn().getBody(), classLoader);
-        TestEvent second = checkAndGetBytesInput(TestFailed.class, endpointLifecycleOutput.getExchanges().get(1).getIn().getBody(), classLoader);
+        TestEvent first = checkAndGetBytesInput(TestFailed.class,
+                endpointLifecycleOutput.getExchanges().get(0).getIn().getBody(),
+                classLoader);
+        TestEvent second = checkAndGetBytesInput(TestFailed.class,
+                endpointLifecycleOutput.getExchanges().get(1).getIn().getBody(),
+                classLoader);
 
 
         assertNotNull("Must contain timestamp", first.getTimestamp());
@@ -251,46 +265,59 @@ public class AggregatorsTest extends BasicAggregatorsTest {
     public void testBrokenToStringProcessor() throws Exception {
         endpointEventToStringOutput.reset();
         endpointEventToStringOutput.expectedMessageCount(1);
-        final String uuid = uuid();
+        String uuid = uuid();
         sendTestEvent("lifecycle", createTestStarted(uuid), uuid);
         sendTestEvent("lifecycle", createTestBroken(uuid), uuid);
         endpointEventToStringOutput.assertIsSatisfied(2000);
-        expectExchangeExists(endpointEventToStringOutput, "Output must be string of class name", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                String first = checkAndGetBytesInput(String.class, exchange.getIn().getBody(), classLoader);
-                return first != null && TestBroken.class.getName().equals(first);
-            }
-        });
+        expectExchangeExists(endpointEventToStringOutput,
+                "Output must be string of class name",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        String first = checkAndGetBytesInput(String.class,
+                                exchange.getIn().getBody(), classLoader);
+                        return first != null && TestBroken.class.getName().equals(first);
+                    }
+                });
     }
 
     @Test
     public void testAggregatorWithTimer() throws Exception {
         endpointWithTimer.reset();
         endpointWithTimer.expectedMessageCount(1);
-        final String uuid1 = uuid();
+        String uuid1 = uuid();
         sendTestEvent("with-timer", createTestStarted(), uuid1);
         sendTestEvent("with-timer", createTestStarted(), uuid1);
         sleep(3000); // wait for 3 seconds
         sendTestEvent("with-timer", new StopAggregatorWithTimer(), uuid1);
         endpointWithTimer.assertIsSatisfied(2000);
-        expectExchangeExists(endpointWithTimer, "Output must contain 2 < count1 <= 10 && 1 <= count2 < 5", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                CounterState first = checkAndGetBytesInput(CounterState.class, exchange.getIn().getBody(), classLoader);
-                assertNotNull("First must not be null", first);
-                final boolean res = first.count2 >= 1 && first.count2 <= 10 && first.count >= 1 && first.count <= 5;
-                assertTrue("Expect 1 <= count1(" + first.count2 + ") <= 10, 1 <= count(" + first.count + ") <= 5 ", res);
-                return res;
-            }
-        });
+        expectExchangeExists(endpointWithTimer,
+                "Output must contain 2 < count1 <= 10 && 1 <= count2 < 5",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = checkAndGetBytesInput(CounterState.class,
+                                exchange.getIn().getBody(), classLoader);
+                        assertNotNull("First must not be null", first);
+                        boolean res = first.count2 >= 1
+                                && first.count2 <= 10
+                                && first.count >= 1
+                                && first.count <= 5;
+                        assertTrue(String.format(
+                                "Expect 1 <= count1(%d) <= 10, 1 <= count(%d) <= 5 ",
+                                first.count2, first.count), res);
+                        //noinspection ConstantConditions
+                        return res;
+                    }
+                });
     }
 
     @Test
     public void testByCustomHeaderAggregator() throws Exception {
         endpointByCustomHeader.reset();
         endpointByCustomHeader.expectedMessageCount(2);
-        endpointByCustomHeaderInput.expectedHeaderReceived(BODY_CLASS, TestFailed.class.getName());
+        endpointByCustomHeaderInput.expectedHeaderReceived(BODY_CLASS,
+                TestFailed.class.getName());
         endpointDependent.reset();
         endpointDependent.expectedMinimumMessageCount(4);
 
@@ -300,21 +327,36 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         sendTestEvent("by-custom-header", new StopByCustomHeader(), "customHeader", "2");
         endpointByCustomHeader.assertIsSatisfied(2000);
         endpointDependent.assertIsSatisfied(2000);
-        expectExchangeExists(endpointByCustomHeader, "Output must contain test started", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                CounterState first = checkAndGetBytesInput(CounterState.class, exchange.getIn().getBody(), classLoader);
-                return first != null && first.count == 0 && first.label.equals("1") && first.label2.equals(first.label);
-            }
-        });
-        expectExchangeExists(endpointByCustomHeader, "Output must be test failed", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                CounterState first = checkAndGetBytesInput(CounterState.class, exchange.getIn().getBody(), classLoader);
-                return first != null && first.count == 1 && first.label.equals("2") && first.label2.equals(first.label);
-            }
-        });
-        Storage storage = processingEngine.getPlugin(ByCustomHeaderAggregator.class).getContext().getStorage();
+        expectExchangeExists(endpointByCustomHeader,
+                "Output must contain test started",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = checkAndGetBytesInput(CounterState.class,
+                                exchange.getIn().getBody(), classLoader);
+                        return first != null
+                                && first.count == 0
+                                && first.label.equals("1")
+                                && first.label2.equals(first.label);
+                    }
+                });
+        expectExchangeExists(endpointByCustomHeader,
+                "Output must be test failed",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = checkAndGetBytesInput(CounterState.class,
+                                exchange.getIn().getBody(), classLoader);
+                        return first != null
+                                && first.count == 1
+                                && first.label.equals("2")
+                                && first.label2.equals(first.label);
+                    }
+                });
+
+        Storage storage = processingEngine.getPlugin(ByCustomHeaderAggregator.class)
+                                          .getContext()
+                                          .getStorage();
         assertEquals(1, storage.get("count"));
         assertEquals("test", storage.get("string"));
         assertEquals(1.5, storage.get("double"));
@@ -324,7 +366,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
 
     @Test
     public void testFallenRaisedAggregator() throws Exception {
-        final String uuid = uuid();
+        String uuid = uuid();
         final TestFailed testFailed = createTestFailed(uuid);
         endpointFallenRaisedOutput.reset();
         sendTestEvent("fallen-raised", testFailed, uuid);
@@ -332,22 +374,29 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         endpointFallenRaisedOutput.expectedMinimumMessageCount(3);
         endpointFallenRaisedOutput.assertIsSatisfied(2000);
         Thread.sleep(5000);
-        expectExchangeExists(endpointFallenRaisedOutput, "Output must contain testFailed ", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                TestFailed msg = checkAndGetBytesInput(TestFailed.class, exchange.getIn().getBody(), classLoader);
-                logger.info("Checking if " + msg + " is instance of TestFailed...");
-                return msg != null && msg.getMethodname().equals(testFailed.getMethodname());
-            }
-        });
-        expectExchangeExists(endpointFallenRaisedOutput, "Output must contain string with method name", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                String msg = checkAndGetBytesInput(String.class, exchange.getIn().getBody(), classLoader);
-                logger.info("Checking if " + msg + " is instance of String...");
-                return msg != null && msg.equals(testFailed.getMethodname());
-            }
-        });
+        expectExchangeExists(endpointFallenRaisedOutput,
+                "Output must contain testFailed ",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        TestFailed msg = checkAndGetBytesInput(TestFailed.class,
+                                exchange.getIn().getBody(), classLoader);
+                        logger.info("Checking if " + msg + " is instance of TestFailed...");
+                        return msg != null && msg.getMethodname()
+                                                 .equals(testFailed.getMethodname());
+                    }
+                });
+        expectExchangeExists(endpointFallenRaisedOutput,
+                "Output must contain string with method name",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        String msg = checkAndGetBytesInput(String.class,
+                                exchange.getIn().getBody(), classLoader);
+                        logger.info("Checking if " + msg + " is instance of String...");
+                        return msg != null && msg.equals(testFailed.getMethodname());
+                    }
+                });
     }
 
     @Test
@@ -360,13 +409,16 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         sendTestEvent("custom-filtered", createTestBroken("filtered"));
         sendTestEvent("custom-filtered", new DerivedFilteredEvent());
         endpointCustomFilteredOutput.assertIsSatisfied(2000);
-        expectExchangeExists(endpointCustomFilteredOutput, "Output must contain just filtered event", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                CollectEventsState state = checkAndGetBytesInput(CollectEventsState.class, exchange.getIn().getBody(), classLoader);
-                return state != null && state.collected.size() == 1;
-            }
-        });
+        expectExchangeExists(endpointCustomFilteredOutput,
+                "Output must contain just filtered event",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CollectEventsState state = checkAndGetBytesInput(CollectEventsState.class,
+                                exchange.getIn().getBody(), classLoader);
+                        return state != null && state.collected.size() == 1;
+                    }
+                });
     }
 
     @Test
@@ -379,13 +431,16 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         sendTestEvent("filtered", createTestBroken("filtered"));
         sendTestEvent("filtered", new DerivedFilteredEvent());
         endpointFilteredOutput.assertIsSatisfied(2000);
-        expectExchangeExists(endpointFilteredOutput, "Output must contain just filtered event", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                CollectEventsState state = checkAndGetBytesInput(CollectEventsState.class, exchange.getIn().getBody(), classLoader);
-                return state != null && state.collected.size() == 1;
-            }
-        });
+        expectExchangeExists(endpointFilteredOutput,
+                "Output must contain just filtered event",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CollectEventsState state = checkAndGetBytesInput(CollectEventsState.class,
+                                exchange.getIn().getBody(), classLoader);
+                        return state != null && state.collected.size() == 1;
+                    }
+                });
     }
 
     @Test
@@ -397,12 +452,18 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         sendTestEvent("by-custom-strategy", createTestPassed("filtered"));
         sendTestEvent("by-custom-strategy", createTestBroken("filtered"));
         endpointByCustomStrategyOutput.assertIsSatisfied(2000);
-        expectExchangeExists(endpointByCustomStrategyOutput, "Output must contain just one passed state", new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                TestPassedState state = checkAndGetBytesInput(TestPassedState.class, exchange.getIn().getBody(), classLoader);
-                return state != null && state.getEvent().getClassname().equals(failed.getClassname());
-            }
-        });
+        expectExchangeExists(endpointByCustomStrategyOutput,
+                "Output must contain just one passed state",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        TestPassedState state = checkAndGetBytesInput(TestPassedState.class,
+                                exchange.getIn().getBody(), classLoader);
+                        return state != null
+                                && state.getEvent()
+                                        .getClassname()
+                                        .equals(failed.getClassname());
+                    }
+                });
     }
 }
