@@ -30,5 +30,11 @@
         <plugin id="by-custom-strategy">
             <aggregator>ru.yandex.qatools.camelot.core.plugins.ByCustomStrategyAggregator</aggregator>
         </plugin>
+        <plugin id="send-to-output">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.SendToOutputAggregator</aggregator>
+        </plugin>
+        <plugin id="bind-to-output" source="send-to-output">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.BindToOutputAggregator</aggregator>
+        </plugin>
     </source>
 </plugins-config>

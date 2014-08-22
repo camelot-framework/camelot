@@ -1,13 +1,7 @@
 package ru.yandex.qatools.camelot;
 
 import com.hazelcast.core.HazelcastInstance;
-import org.apache.camel.CamelContext;
-import org.apache.camel.CamelContextAware;
-import org.apache.camel.EndpointInject;
-import org.apache.camel.Exchange;
-import org.apache.camel.Predicate;
-import org.apache.camel.Produce;
-import org.apache.camel.ProducerTemplate;
+import org.apache.camel.*;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +85,12 @@ public class BasicAggregatorsTest implements CamelContextAware {
 
     @EndpointInject(uri = "mock:activemq:queue:plugin.output.dependent")
     protected MockEndpoint endpointDependent;
+
+    @EndpointInject(uri = "mock:activemq:queue:plugin.output.send-to-output")
+    protected MockEndpoint endpointSendToOutput;
+
+    @EndpointInject(uri = "mock:activemq:queue:plugin.output.bind-to-output")
+    protected MockEndpoint endpointBindToOutput;
 
     @Produce(uri = "activemq:queue:events.input")
     protected ProducerTemplate inputQueue;

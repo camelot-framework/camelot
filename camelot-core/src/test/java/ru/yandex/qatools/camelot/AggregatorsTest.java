@@ -466,4 +466,29 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                     }
                 });
     }
+
+    @Test
+    public void testDependentAggregatorIsNotStopped() throws Exception {
+        endpointSendToOutput.reset();
+        endpointBindToOutput.reset();
+
+        endpointSendToOutput.expectedMessageCount(2);
+        endpointBindToOutput.expectedMessageCount(0);
+
+        sendEvent("send-to-output", new StopEvent());
+
+        endpointSendToOutput.assertIsSatisfied(2000);
+        expectExchangeExists(endpointSendToOutput,
+                "upper level aggregator should stop",
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        return checkAndGetBytesInput(StopEvent.class,
+                                exchange.getIn().getBody(), classLoader) != null;
+                    }
+                });
+
+        sleep(2000);
+        endpointBindToOutput.assertIsSatisfied();
+    }
 }
