@@ -4,7 +4,7 @@ import ru.yandex.qatools.camelot.api.AggregatorRepository;
 import ru.yandex.qatools.camelot.config.PluginContext;
 
 /**
- * @author innokenty
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 class StateLoader {
 
