@@ -30,18 +30,6 @@
             <version>3.12.1.GA</version>
         </dependency>
 
-        <!-- Maven Mojo -->
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-plugin-api</artifactId>
-            <version>3.0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.plugin-tools</groupId>
-            <artifactId>maven-plugin-annotations</artifactId>
-            <version>3.2</version>
-        </dependency>
-
         <!-- TESTING -->
         <dependency>
             <groupId>org.apache.camel</groupId>
@@ -52,12 +40,6 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-test-spring</artifactId>
             <version>${camel.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-common</artifactId>
-            <version>${jersey.version}</version>
         </dependency>
 
         <!-- Junit -->
