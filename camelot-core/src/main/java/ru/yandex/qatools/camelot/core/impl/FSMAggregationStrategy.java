@@ -16,6 +16,7 @@ import static ru.yandex.qatools.camelot.util.ReflectUtil.invokeAnyMethod;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 @SuppressWarnings("unchecked")
 public class FSMAggregationStrategy extends ClayProcessor implements AggregationStrategy {
@@ -32,7 +33,8 @@ public class FSMAggregationStrategy extends ClayProcessor implements Aggregation
         this.fsmClass = fsmClass;
     }
 
-    public FSMAggregationStrategy(ClassLoader classLoader, Class fsmClass, Object fsmEngineBuilder) throws NoSuchMethodException {
+    public FSMAggregationStrategy(ClassLoader classLoader, Class fsmClass, Object fsmEngineBuilder)
+            throws NoSuchMethodException {
         super(classLoader);
         initEngineBuilder(fsmEngineBuilder);
         this.fsmClass = fsmClass;
@@ -52,8 +54,10 @@ public class FSMAggregationStrategy extends ClayProcessor implements Aggregation
             injectFields(fsm, message);
 
             String eventBodyClass = (String) message.getIn().getHeader(BODY_CLASS);
-            String stateBodyClass = (state != null) ? (String) state.getIn().getHeader(BODY_CLASS) : null;
-            logger.debug(format("%s's input, stateBodyClass=%s, eventBodyClass=%s", fsmClass, stateBodyClass, eventBodyClass));
+            String stateBodyClass = state != null ? (String) state.getIn().getHeader(BODY_CLASS)
+                                                  : null;
+            logger.debug(format("%s's input, stateBodyClass=%s, eventBodyClass=%s",
+                    fsmClass, stateBodyClass, eventBodyClass));
 
             if (result != null) {
                 result = processAfterIn(result, stateBodyClass);
@@ -63,7 +67,7 @@ public class FSMAggregationStrategy extends ClayProcessor implements Aggregation
             }
 
             if (eventBodyClass == null) {
-                logger.warn(format("%s got message without bodyClass header, skipping aggregation!", fsmClass));
+                logger.warn(fsmClass + " got message without bodyClass header, skipping aggregation!");
             } else {
                 Object event = processAfterIn(message.getIn().getBody(), eventBodyClass);
 
@@ -71,25 +75,25 @@ public class FSMAggregationStrategy extends ClayProcessor implements Aggregation
                     result = invokeAnyMethod(fsmEngine, "fire", new Class[]{Object.class}, event);
                 } catch (InvocationTargetException e) {
                     logger.trace("Sonar trick", e);
-                    logger.error(format("Failed to process message %s with FSM %s! \n %s", event, fsm,
-                            formatStackTrace(e.getTargetException())), e.getTargetException());
+                    logger.error(format("Failed to process message %s with FSM %s! \n %s",
+                            event, fsm, formatStackTrace(e.getTargetException())),
+                            e.getTargetException());
                 } catch (Exception e) {
-                    logger.error(format("Failed to process message %s with FSM %s! \n %s", event, fsm,
-                            formatStackTrace(e)), e);
+                    logger.error(format("Failed to process message %s with FSM %s! \n %s",
+                            event, fsm, formatStackTrace(e)), e);
                 }
                 if (result != null) {
                     final String newBodyClass = result.getClass().getName();
-                    logger.debug(format("%s's output is not null, bodyClass=%s", fsmClass, newBodyClass));
+                    logger.debug(format("%s's output is not null, bodyClass=%s",
+                            fsmClass, newBodyClass));
                     message.getIn().setHeader(BODY_CLASS, newBodyClass);
                 }
                 result = processBeforeOut(result);
-
-                if ((Boolean) invokeAnyMethod(fsmEngine, "isCompleted")) {
-                    message.getIn().setHeader(FINISHED_EXCHANGE, true);
-                }
+                message.getIn().setHeader(FINISHED_EXCHANGE,
+                                          invokeAnyMethod(fsmEngine, "isCompleted"));
             }
         } catch (Exception e) {
-            logger.error(fsmEngineBuilder + ": \n " + formatStackTrace(e), e);
+            logger.error(String.format("%s: \n %s", fsmEngineBuilder, formatStackTrace(e)), e);
         } finally {
             if (!message.getIn().getHeaders().containsKey(FINISHED_EXCHANGE)) {
                 message.getIn().setHeader(FINISHED_EXCHANGE, false);
@@ -113,9 +117,10 @@ public class FSMAggregationStrategy extends ClayProcessor implements Aggregation
     }
 
     @SuppressWarnings("suspicious")
-    public boolean isCompleted(Exchange exchange) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public boolean isCompleted(Exchange exchange)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return exchange == null
                 || exchange.getIn() == null
-                || (boolean) exchange.getIn().getHeader(FINISHED_EXCHANGE);
+                || (boolean) exchange.getIn().removeHeader(FINISHED_EXCHANGE);
     }
 }

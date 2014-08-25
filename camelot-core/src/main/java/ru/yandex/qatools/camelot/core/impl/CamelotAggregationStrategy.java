@@ -18,9 +18,11 @@ import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
  */
 @SuppressWarnings("unchecked")
 public class CamelotAggregationStrategy extends FSMAggregationStrategy implements Processor {
-    final private PluginContext context;
 
-    public CamelotAggregationStrategy(ClassLoader classLoader, Object fsmEngineBuilder, PluginContext context)
+    private final PluginContext context;
+
+    public CamelotAggregationStrategy(
+            ClassLoader classLoader, Object fsmEngineBuilder, PluginContext context)
             throws NoSuchMethodException, ClassNotFoundException {
         super(classLoader, classLoader.loadClass(context.getPluginClass()), fsmEngineBuilder);
         this.context = context;
@@ -30,19 +32,20 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
     @Override
     public void process(Exchange message) {
         if (context.isShuttingDown()) {
-            logger.warn("Message is not going to be aggregated due to context shutting down: " + message.getIn().getBody());
+            logger.warn("Message is not going to be aggregated due to context shutting down: "
+                    + message.getIn().getBody());
             return;
         }
         final String key = (String) message.getIn().getHeader(CORRELATION_KEY);
         if (isEmpty(key)) {
-            logger.warn(format("Empty keys are not allowed! For plugin %s : skipping aggregation!", key));
+            logger.warn(format("Empty keys are not allowed! " +
+                    "For plugin %s : skipping aggregation!", key));
             return;
         }
         final AggregationRepository repo = context.getAggregationRepo();
         final Exchange state = repo.get(camelContext, key);
         try {
             final Exchange result = createCorrelatedCopy(super.aggregate(state, message), false);
-
             if (isCompleted(result)) {
                 message.setIn(result.getIn());
                 repo.remove(camelContext, key, result);
@@ -53,12 +56,12 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
         } catch (InvocationTargetException e) {
             repo.confirm(camelContext, key);
             logger.trace("Sonar trick", e);
-            logger.error(format("Failed to aggregate for  plugin %s with key '%s': %s! \n %s",
+            logger.error(format("Failed to aggregate for plugin %s with key '%s': %s! \n %s",
                     context.getId(), key, e.getMessage(), formatStackTrace(e.getTargetException())),
                     e.getTargetException());
         } catch (Exception e) {
             repo.confirm(camelContext, key);
-            logger.error(format("Failed to aggregate for  plugin %s with key '%s': %s",
+            logger.error(format("Failed to aggregate for plugin %s with key '%s': %s",
                     context.getId(), key, e.getMessage()), e);
         }
     }
