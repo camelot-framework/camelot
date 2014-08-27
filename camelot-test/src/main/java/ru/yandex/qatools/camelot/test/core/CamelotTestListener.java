@@ -28,6 +28,7 @@ import static org.apache.camel.util.CamelContextHelper.getEndpointInjection;
 import static org.apache.camel.util.ObjectHelper.isEmpty;
 import static org.mockito.Mockito.reset;
 import static org.slf4j.LoggerFactory.getLogger;
+import static ru.yandex.qatools.camelot.test.CamelotTestRunner.APP_CONTEXT;
 import static ru.yandex.qatools.camelot.test.CamelotTestRunner.REAL_TEST_CLASS_ATTR;
 import static ru.yandex.qatools.camelot.test.core.TestUtil.preparePluginMock;
 import static ru.yandex.qatools.camelot.util.ContextUtils.autowireFields;
@@ -45,7 +46,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
     @Override
     public void beforeTestMethod(TestContext testContext) throws Exception {
         injectTestContext(testContext);
-        final ProcessingEngine engine = getAppContext(testContext).getBean(ProcessingEngine.class);
+        final ProcessingEngine engine = getAppContext(testContext, true).getBean(ProcessingEngine.class);
         for (Plugin plugin : engine.getPluginsMap().values()) {
             final PluginEndpoints endpoints = plugin.getContext().getEndpoints();
             getPluginMockEndpoint(engine.getCamelContext(), endpoints.getOutputUri()).reset();
@@ -59,7 +60,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
     }
 
     private void clearContext(TestContext testContext) throws Exception {
-        final ApplicationContext applicationContext = getAppContext(testContext);
+        final ApplicationContext applicationContext = getAppContext(testContext, true);
         final ProcessingEngine engine = applicationContext.getBean(ProcessingEngine.class);
         final MockedClientSenderInitializer clientInitializer = applicationContext.getBean(MockedClientSenderInitializer.class);
         final TestBuildersFactory factory = ((TestBuildersFactory) engine.getBuildersFactory());
@@ -87,34 +88,44 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
         }
     }
 
-    private ApplicationContext getAppContext(TestContext testContext) {
+    private synchronized ApplicationContext getAppContext(TestContext testContext, boolean throwOnEmpty) {
         try {
-            return testContext.getApplicationContext();
+            // cache the loaded context within the attribute to reuse
+            if (testContext.getAttribute(APP_CONTEXT) == null) {
+                testContext.setAttribute(APP_CONTEXT, testContext.getApplicationContext());
+            }
+            return (ApplicationContext) testContext.getAttribute(APP_CONTEXT);
         } catch (Exception e) {
-            logger.error("Failed to load Spring context: \n" + formatStackTrace(e) , e);
-            throw new RuntimeException("Failed to load Spring context", e);
+            logger.error("Failed to load Spring context: \n" + formatStackTrace(e), e);
+            if (throwOnEmpty) {
+                throw new RuntimeException("Failed to load Spring context", e);
+            } else {
+                return null;
+            }
         }
     }
 
     @Override
     public void afterTestClass(TestContext testContext) throws Exception {
-        final ApplicationContext applicationContext = getAppContext(testContext);
-        final ProcessingEngine engine = applicationContext.getBean(ProcessingEngine.class);
-        // reset context injector
-        ((TestContextInjector) engine.getContextInjector()).reset();
+        final ApplicationContext applicationContext = getAppContext(testContext, false);
+        if (applicationContext != null) {
+            final ProcessingEngine engine = applicationContext.getBean(ProcessingEngine.class);
+            // reset context injector
+            ((TestContextInjector) engine.getContextInjector()).reset();
 
-        // return the original app config to each plugin
-        for (Plugin plugin : engine.getPluginsMap().values()) {
-            final PluginContext context = plugin.getContext();
-            if (context.getAppConfig() instanceof WrappedAppConfig) {
-                context.setAppConfig(((WrappedAppConfig) context.getAppConfig()).getOriginal());
+            // return the original app config to each plugin
+            for (Plugin plugin : engine.getPluginsMap().values()) {
+                final PluginContext context = plugin.getContext();
+                if (context.getAppConfig() instanceof WrappedAppConfig) {
+                    context.setAppConfig(((WrappedAppConfig) context.getAppConfig()).getOriginal());
+                }
             }
         }
     }
 
     @Override
     public void beforeTestClass(TestContext testContext) throws Exception {
-        final ApplicationContext applicationContext = getAppContext(testContext);
+        final ApplicationContext applicationContext = getAppContext(testContext, true);
         final Class testClass = getTestClass(testContext);
 
         // Load additional properties from the files
@@ -181,7 +192,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
     private void injectTestContext(TestContext testContext) {
         final Class testClass = getTestClass(testContext);
         final Object testObject = testContext.getTestInstance();
-        final ApplicationContext applicationContext = getAppContext(testContext);
+        final ApplicationContext applicationContext = getAppContext(testContext, true);
         try {
             injectTestContextToInstance(testClass, testObject, applicationContext);
         } catch (Exception e) {
