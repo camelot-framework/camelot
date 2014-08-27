@@ -41,16 +41,24 @@ import static ru.yandex.qatools.camelot.util.ServiceUtil.injectAnnotatedField;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public class CamelotTestListener extends AbstractTestExecutionListener {
+    public static final String PROCESSING_ENGINE = "CamelotProcessingEngine";
+    public static final String CLIENT_INITIALIZER = "CamelotMockedClientInitializer";
     final Logger logger = getLogger(getClass());
 
     @Override
     public void beforeTestMethod(TestContext testContext) throws Exception {
         injectTestContext(testContext);
-        final ProcessingEngine engine = getAppContext(testContext, true).getBean(ProcessingEngine.class);
-        for (Plugin plugin : engine.getPluginsMap().values()) {
-            final PluginEndpoints endpoints = plugin.getContext().getEndpoints();
-            getPluginMockEndpoint(engine.getCamelContext(), endpoints.getOutputUri()).reset();
-            getPluginMockEndpoint(engine.getCamelContext(), endpoints.getInputUri()).reset();
+        final ProcessingEngine engine = getProcessingEngine(testContext);
+        if (engine != null) {
+            for (Plugin plugin : engine.getPluginsMap().values()) {
+                final PluginEndpoints endpoints = plugin.getContext().getEndpoints();
+                getPluginMockEndpoint(engine.getCamelContext(), endpoints.getOutputUri()).reset();
+                getPluginMockEndpoint(engine.getCamelContext(), endpoints.getInputUri()).reset();
+            }
+        } else {
+            logger.error("Failed to get the processing engine from the context! " +
+                    "Please make sure you have the JUnit version compatible " +
+                    "with CamelotTest library!");
         }
     }
 
@@ -59,57 +67,10 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
         clearContext(testContext);
     }
 
-    private void clearContext(TestContext testContext) throws Exception {
-        final ApplicationContext applicationContext = getAppContext(testContext, true);
-        final ProcessingEngine engine = applicationContext.getBean(ProcessingEngine.class);
-        final MockedClientSenderInitializer clientInitializer = applicationContext.getBean(MockedClientSenderInitializer.class);
-        final TestBuildersFactory factory = ((TestBuildersFactory) engine.getBuildersFactory());
-        final CamelContext camelContext = engine.getCamelContext();
-        for (Plugin plugin : engine.getPluginsMap().values()) {
-            final Object mock = factory.getMocksStorage().get(plugin.getId());
-            reset(mock);
-            preparePluginMock(plugin, mock);
-        }
-        for (MockedClientSenderInitializer.Provider provider : clientInitializer.getClientSenders().values()) {
-            for (Object mock : provider.getClientSenders().values()) {
-                reset(mock);
-            }
-        }
-        for (Plugin plugin : engine.getPluginsMap().values()) {
-            final PluginContext context = plugin.getContext();
-            final AggregationRepository repo = context.getAggregationRepo();
-            for (String key : repo.getKeys()) {
-                final Exchange exchange = repo.get(camelContext, key);
-                repo.remove(camelContext, key, exchange);
-            }
-
-            // we need to reinitialize the plugin as we have cleared it's state
-            engine.getPluginInitializer().init(plugin);
-        }
-    }
-
-    private synchronized ApplicationContext getAppContext(TestContext testContext, boolean throwOnEmpty) {
-        try {
-            // cache the loaded context within the attribute to reuse
-            if (testContext.getAttribute(APP_CONTEXT) == null) {
-                testContext.setAttribute(APP_CONTEXT, testContext.getApplicationContext());
-            }
-            return (ApplicationContext) testContext.getAttribute(APP_CONTEXT);
-        } catch (Exception e) {
-            logger.error("Failed to load Spring context: \n" + formatStackTrace(e), e);
-            if (throwOnEmpty) {
-                throw new RuntimeException("Failed to load Spring context", e);
-            } else {
-                return null;
-            }
-        }
-    }
-
     @Override
     public void afterTestClass(TestContext testContext) throws Exception {
-        final ApplicationContext applicationContext = getAppContext(testContext, false);
-        if (applicationContext != null) {
-            final ProcessingEngine engine = applicationContext.getBean(ProcessingEngine.class);
+        final ProcessingEngine engine = getProcessingEngine(testContext);
+        if (engine != null) {
             // reset context injector
             ((TestContextInjector) engine.getContextInjector()).reset();
 
@@ -125,15 +86,14 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
 
     @Override
     public void beforeTestClass(TestContext testContext) throws Exception {
-        final ApplicationContext applicationContext = getAppContext(testContext, true);
         final Class testClass = getTestClass(testContext);
 
+        final ProcessingEngine engine = getProcessingEngine(testContext);
         // Load additional properties from the files
-        if (applicationContext != null) {
+        if (engine != null) {
             // override the app config for each plugin
             if (getAnnotation(testClass, UseProperties.class) != null) {
                 try {
-                    final ProcessingEngine engine = applicationContext.getBean(ProcessingEngine.class);
                     String[] locations = (String[]) getAnnotationValue(testClass, UseProperties.class, "value");
                     final Properties properties = new Properties();
                     for (String location : locations) {
@@ -153,7 +113,6 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
             // stop quartz if
             if (getAnnotation(testClass, DisableTimers.class) != null) {
                 try {
-                    final ProcessingEngine engine = applicationContext.getBean(ProcessingEngine.class);
                     final TestBuildersFactory factory = (TestBuildersFactory) engine.getBuildersFactory();
 
                     for (QuartzInitializer initializer : factory.getQuartzInitializers()) {
@@ -168,7 +127,6 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
             // Read test config
             if (getAnnotation(testClass, CamelotTestConfig.class) != null) {
                 try {
-                    final ProcessingEngine engine = applicationContext.getBean(ProcessingEngine.class);
                     final TestContextInjector injector = (TestContextInjector) engine.getContextInjector();
 
                     // override necessary components
@@ -184,6 +142,74 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
         }
     }
 
+    private void clearContext(TestContext testContext) throws Exception {
+        final ProcessingEngine engine = getProcessingEngine(testContext);
+        final MockedClientSenderInitializer clientInitializer = getClientSenderInitializer(testContext);
+
+        if (engine != null && clientInitializer != null) {
+            final TestBuildersFactory factory = ((TestBuildersFactory) engine.getBuildersFactory());
+            final CamelContext camelContext = engine.getCamelContext();
+            for (Plugin plugin : engine.getPluginsMap().values()) {
+                final Object mock = factory.getMocksStorage().get(plugin.getId());
+                reset(mock);
+                preparePluginMock(plugin, mock);
+            }
+            for (MockedClientSenderInitializer.Provider provider : clientInitializer.getClientSenders().values()) {
+                for (Object mock : provider.getClientSenders().values()) {
+                    reset(mock);
+                }
+            }
+            for (Plugin plugin : engine.getPluginsMap().values()) {
+                final PluginContext context = plugin.getContext();
+                final AggregationRepository repo = context.getAggregationRepo();
+                for (String key : repo.getKeys()) {
+                    final Exchange exchange = repo.get(camelContext, key);
+                    repo.remove(camelContext, key, exchange);
+                }
+
+                // we need to reinitialize the plugin as we have cleared it's state
+                engine.getPluginInitializer().init(plugin);
+            }
+        } else {
+            logger.warn("Failed to clear the test context: could not get the ProcessingEngine from the context!");
+        }
+    }
+
+
+    private MockedClientSenderInitializer getClientSenderInitializer(TestContext testContext) {
+        if (testContext.getAttribute(APP_CONTEXT) == null) {
+            testContext.setAttribute(CLIENT_INITIALIZER, getAppContext(testContext, true).getBean(MockedClientSenderInitializer.class));
+        }
+        return (MockedClientSenderInitializer) testContext.getAttribute(CLIENT_INITIALIZER);
+    }
+
+    private ProcessingEngine getProcessingEngine(TestContext testContext) {
+        if (testContext.getAttribute(APP_CONTEXT) == null) {
+            testContext.setAttribute(PROCESSING_ENGINE, getAppContext(testContext, true).getBean(ProcessingEngine.class));
+        }
+        return (ProcessingEngine) testContext.getAttribute(PROCESSING_ENGINE);
+    }
+
+    private synchronized ApplicationContext getAppContext(TestContext testContext, boolean throwOnEmpty) {
+        try {
+            // cache the loaded context within the attribute to reuse
+            if (testContext.getAttribute(APP_CONTEXT) == null) {
+                final ApplicationContext applicationContext = testContext.getApplicationContext();
+                testContext.setAttribute(APP_CONTEXT, applicationContext);
+                testContext.setAttribute(PROCESSING_ENGINE, applicationContext.getBean(ProcessingEngine.class));
+                testContext.setAttribute(CLIENT_INITIALIZER, applicationContext.getBean(MockedClientSenderInitializer.class));
+            }
+            return (ApplicationContext) testContext.getAttribute(APP_CONTEXT);
+        } catch (Exception e) {
+            logger.error("Failed to load Spring context: \n" + formatStackTrace(e), e);
+            if (throwOnEmpty) {
+                throw new RuntimeException("Failed to load Spring context", e);
+            } else {
+                return null;
+            }
+        }
+    }
+
     private Class getTestClass(TestContext testContext) {
         final Class res = (Class) testContext.getAttribute(REAL_TEST_CLASS_ATTR);
         return (res != null) ? res : testContext.getTestClass();
@@ -192,11 +218,10 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
     private void injectTestContext(TestContext testContext) {
         final Class testClass = getTestClass(testContext);
         final Object testObject = testContext.getTestInstance();
-        final ApplicationContext applicationContext = getAppContext(testContext, true);
         try {
-            injectTestContextToInstance(testClass, testObject, applicationContext);
+            injectTestContextToInstance(testClass, testObject, getAppContext(testContext, true));
         } catch (Exception e) {
-            throw new RuntimeException("Could not prepare camelot test context", e);
+            throw new RuntimeException("Could not prepare Camelot test context", e);
         }
     }
 
