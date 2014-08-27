@@ -48,7 +48,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
     @Override
     public void beforeTestMethod(TestContext testContext) throws Exception {
         injectTestContext(testContext);
-        final ProcessingEngine engine = getProcessingEngine(testContext);
+        final ProcessingEngine engine = getProcessingEngine(testContext, true);
         if (engine != null) {
             for (Plugin plugin : engine.getPluginsMap().values()) {
                 final PluginEndpoints endpoints = plugin.getContext().getEndpoints();
@@ -69,7 +69,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
 
     @Override
     public void afterTestClass(TestContext testContext) throws Exception {
-        final ProcessingEngine engine = getProcessingEngine(testContext);
+        final ProcessingEngine engine = getProcessingEngine(testContext, false);
         if (engine != null) {
             // reset context injector
             ((TestContextInjector) engine.getContextInjector()).reset();
@@ -88,7 +88,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
     public void beforeTestClass(TestContext testContext) throws Exception {
         final Class testClass = getTestClass(testContext);
 
-        final ProcessingEngine engine = getProcessingEngine(testContext);
+        final ProcessingEngine engine = getProcessingEngine(testContext, true);
         // Load additional properties from the files
         if (engine != null) {
             // override the app config for each plugin
@@ -143,8 +143,8 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
     }
 
     private void clearContext(TestContext testContext) throws Exception {
-        final ProcessingEngine engine = getProcessingEngine(testContext);
-        final MockedClientSenderInitializer clientInitializer = getClientSenderInitializer(testContext);
+        final ProcessingEngine engine = getProcessingEngine(testContext, false);
+        final MockedClientSenderInitializer clientInitializer = getClientSenderInitializer(testContext, false);
 
         if (engine != null && clientInitializer != null) {
             final TestBuildersFactory factory = ((TestBuildersFactory) engine.getBuildersFactory());
@@ -176,16 +176,18 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
     }
 
 
-    private MockedClientSenderInitializer getClientSenderInitializer(TestContext testContext) {
-        if (testContext.getAttribute(APP_CONTEXT) == null) {
-            testContext.setAttribute(CLIENT_INITIALIZER, getAppContext(testContext, true).getBean(MockedClientSenderInitializer.class));
+    private MockedClientSenderInitializer getClientSenderInitializer(TestContext testContext, boolean throwOnEmpty) {
+        if (testContext.getAttribute(CLIENT_INITIALIZER) == null) {
+            testContext.setAttribute(CLIENT_INITIALIZER, getAppContext(testContext, throwOnEmpty)
+                    .getBean(MockedClientSenderInitializer.class));
         }
         return (MockedClientSenderInitializer) testContext.getAttribute(CLIENT_INITIALIZER);
     }
 
-    private ProcessingEngine getProcessingEngine(TestContext testContext) {
-        if (testContext.getAttribute(APP_CONTEXT) == null) {
-            testContext.setAttribute(PROCESSING_ENGINE, getAppContext(testContext, true).getBean(ProcessingEngine.class));
+    private ProcessingEngine getProcessingEngine(TestContext testContext, boolean throwOnEmpty) {
+        if (testContext.getAttribute(PROCESSING_ENGINE) == null) {
+            testContext.setAttribute(PROCESSING_ENGINE, getAppContext(testContext, throwOnEmpty)
+                    .getBean(ProcessingEngine.class));
         }
         return (ProcessingEngine) testContext.getAttribute(PROCESSING_ENGINE);
     }
