@@ -1,4 +1,6 @@
 # Camelot 
+[![release](http://github-release-version.herokuapp.com/github/camelot-framework/camelot/release.svg?style=flat)](https://github.com/camelot-framework/camelot/releases/latest) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.camelot/camelot/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.camelot/camelot)
+
 
 Simplified scalable aggregation and processing framework built upon Apache Camel.
 
