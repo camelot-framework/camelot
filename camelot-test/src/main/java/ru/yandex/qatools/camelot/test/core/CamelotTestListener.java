@@ -178,16 +178,20 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
 
     private MockedClientSenderInitializer getClientSenderInitializer(TestContext testContext, boolean throwOnEmpty) {
         if (testContext.getAttribute(CLIENT_INITIALIZER) == null) {
-            testContext.setAttribute(CLIENT_INITIALIZER, getAppContext(testContext, throwOnEmpty)
-                    .getBean(MockedClientSenderInitializer.class));
+            final ApplicationContext appContext = getAppContext(testContext, throwOnEmpty);
+            if (appContext != null) {
+                testContext.setAttribute(CLIENT_INITIALIZER, appContext.getBean(MockedClientSenderInitializer.class));
+            }
         }
         return (MockedClientSenderInitializer) testContext.getAttribute(CLIENT_INITIALIZER);
     }
 
     private ProcessingEngine getProcessingEngine(TestContext testContext, boolean throwOnEmpty) {
         if (testContext.getAttribute(PROCESSING_ENGINE) == null) {
-            testContext.setAttribute(PROCESSING_ENGINE, getAppContext(testContext, throwOnEmpty)
-                    .getBean(ProcessingEngine.class));
+            final ApplicationContext appContext = getAppContext(testContext, throwOnEmpty);
+            if (appContext != null) {
+                testContext.setAttribute(PROCESSING_ENGINE, appContext.getBean(ProcessingEngine.class));
+            }
         }
         return (ProcessingEngine) testContext.getAttribute(PROCESSING_ENGINE);
     }
