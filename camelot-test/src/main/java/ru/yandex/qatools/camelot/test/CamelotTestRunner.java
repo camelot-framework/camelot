@@ -34,6 +34,7 @@ import static ru.yandex.qatools.camelot.util.ReflectUtil.*;
  */
 public class CamelotTestRunner extends CamelSpringJUnit4ClassRunner {
     public static final String REAL_TEST_CLASS_ATTR = "CamelotRealTestClassAttr";
+    public static final String APP_CONTEXT = "CamelotAppContext";
 
     public CamelotTestRunner(Class<?> clazz) throws InitializationError {
         super(clazz);
