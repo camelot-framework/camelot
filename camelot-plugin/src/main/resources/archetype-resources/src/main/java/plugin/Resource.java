@@ -23,7 +23,7 @@ public class Resource {
     @GET
     @Produces({MediaType.APPLICATION_XML})
     public Set<Object> getAggregated() {
-        Set<Object> res = new HashSet<Object>();
+        Set<Object> res = new HashSet<>();
         for(Object key : repo.keys()) {
             res.add(repo.get((String) key));
         }

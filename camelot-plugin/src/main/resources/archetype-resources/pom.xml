@@ -7,11 +7,14 @@
     <packaging>jar</packaging>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.compiler.version>1.7</java.compiler.version>
+
         <camelot-test.runForked>true</camelot-test.runForked>
         <jetty.port>8080</jetty.port>
         <activemq.port>62618</activemq.port>
         <activemq.brokers>tcp://localhost:62618</activemq.brokers>
-        <camelot.version>1.0</camelot.version>
+        <camelot.version>${project.version}</camelot.version>
     </properties>
 
     <dependencies>
@@ -39,6 +42,15 @@
                     <jettyPort>${jetty.port}</jettyPort>
                     <activemqPort>${activemq.port}</activemqPort>
                     <activemqBrokers>${activemq.brokers}</activemqBrokers>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>${java.compiler.version}</source>
+                    <target>${java.compiler.version}</target>
                 </configuration>
             </plugin>
         </plugins>
