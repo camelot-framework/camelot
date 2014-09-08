@@ -3,9 +3,10 @@
   <sources>
     <source>src/main/java/plugin/Aggregator.java</source>
     <source>src/main/java/plugin/Resource.java</source>
+    <source>src/main/java/plugin/State.java</source>
   </sources>
   <resources>
-      <resource>src/main/resources/camelot.xml</resource>
+    <resource>src/main/resources/camelot.xml</resource>
   </resources>
   <testSources>
     <source>src/test/java/plugin/AggregatorTest.java</source>

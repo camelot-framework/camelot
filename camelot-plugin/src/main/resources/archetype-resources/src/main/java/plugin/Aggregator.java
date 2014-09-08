@@ -12,7 +12,7 @@ import ru.yandex.qatools.fsm.annotations.Transitions;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 @Aggregate
-@FSM(start = String.class)
+@FSM(start = State.class)
 @Transitions({
         @Transit(on = String.class),
 })
@@ -21,7 +21,7 @@ public class Aggregator {
     EventProducer out;
 
     @OnTransit
-    public void onMessage(String state, String message){
-        // stub
+    public void onMessage(State state, String message){
+       state.setLastMessage(message);
     }
 }
