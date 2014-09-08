@@ -15,7 +15,7 @@ import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
  */
 class AggregatorStateStorageImpl implements AggregatorStateStorage {
 
-    private static final String TO_STRING_INDENT = "    ";
+    private static final String TO_STRING_INDENT = "        ";
 
     private final PluginContext context;
     private final StateLoader stateLoader;

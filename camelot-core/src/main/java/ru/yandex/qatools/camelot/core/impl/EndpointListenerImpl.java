@@ -50,12 +50,12 @@ public class EndpointListenerImpl implements EndpointListener {
 
     public Object notifyOnMessage(@Body final Object body, @Headers Map<String, Object> headers) {
         try {
-            LOGGER.debug(String.format("Notifying listeners %s of plugin %s: body received %s",
-                    listenerName, context.getId(), body));
+            LOGGER.debug(String.format("Notifying listeners %s of plugin %s: received event of type %s",
+                    listenerName, context.getId(), headers.get(BODY_CLASS)));
             Iterator<Pair<ListenerProcessor, Thread>> it = executors.iterator();
             while (it.hasNext()) {
                 final Pair<ListenerProcessor, Thread> next = it.next();
-                LOGGER.info(String.format("Endpoint notify live listener:%s about message %s", next.getKey(), body));
+                LOGGER.info(String.format("Endpoint notify live listener %s about message %s", next.getKey(), body));
                 boolean remove = true;
                 try {
                     remove = next.getKey().onMessage(body, headers);

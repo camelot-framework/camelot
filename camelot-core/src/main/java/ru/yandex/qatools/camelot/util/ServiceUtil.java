@@ -41,10 +41,11 @@ import static ru.yandex.qatools.camelot.util.TypesUtil.isAssignableFrom;
  */
 public class ServiceUtil {
 
-    private static Logger logger = LoggerFactory.getLogger(ServiceUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceUtil.class);
 
     /**
-     * Search for the annotated field within the procClass and initialize the Camel producer for the uri
+     * Search for the annotated field within the procClass
+     * and initialize the Camel producer for the uri
      */
     public static EventProducer initEventProducer(CamelContext camelContext, final String uri)
             throws Exception {
@@ -67,7 +68,8 @@ public class ServiceUtil {
     /**
      * Initializes the client sender to the topic with uri
      */
-    public static ClientMessageSender initEventSender(CamelContext camelContext, String uri, final String topic) throws Exception {
+    public static ClientMessageSender initEventSender(
+            CamelContext camelContext, String uri, final String topic) throws Exception {
         final EventProducer producer = initEventProducer(camelContext, uri);
         return new ClientMessageSender() {
             @Override
@@ -85,7 +87,9 @@ public class ServiceUtil {
     /**
      * Initialize the plugin source app configuration
      */
-    public static AppConfig initPluginAppConfig(final AppConfig baseConfig, ClassLoader loader, String path) throws IOException, ClassNotFoundException, URISyntaxException {
+    public static AppConfig initPluginAppConfig(
+            AppConfig baseConfig, ClassLoader loader, String path)
+            throws IOException, ClassNotFoundException, URISyntaxException {
         final Properties properties = new Properties();
         for (Resource resource : resolveResourcesFromPattern(path, loader)) {
             properties.load(readResource(resource.getURL()));
@@ -96,7 +100,8 @@ public class ServiceUtil {
     /**
      * Wrap application config with properties
      */
-    public static AppConfig wrapPluginAppConfig(final AppConfig baseConfig, final Properties properties) {
+    public static AppConfig wrapPluginAppConfig(final AppConfig baseConfig,
+                                                final Properties properties) {
         return new AppConfigSystemProperties() {
             @Override
             public String getProperty(String key) {
@@ -118,7 +123,8 @@ public class ServiceUtil {
             @Override
             public T found(Field field, U annValue) throws Exception {
                 T res = value.found(field, annValue);
-                if (instance != null && res != null && isAssignableFrom(field.getType(), res.getClass())) {
+                if (instance != null && res != null
+                        && isAssignableFrom(field.getType(), res.getClass())) {
                     boolean oldAccessible = field.isAccessible();
                     field.setAccessible(true);
                     field.set(instance, res);
@@ -132,7 +138,8 @@ public class ServiceUtil {
     /**
      * Sets the value for the field of the instance
      */
-    public static <T> T setFieldValue(Field field, Object instance, T value) throws IllegalAccessException {
+    public static <T> T setFieldValue(Field field, Object instance, T value)
+            throws IllegalAccessException {
         if (instance != null) {
             boolean oldAccessible = field.isAccessible();
             field.setAccessible(true);
@@ -147,7 +154,9 @@ public class ServiceUtil {
      * Perform an action on each annotated method
      */
     @SuppressWarnings("unchecked")
-    public static <T, A> void forEachAnnotatedMethod(Class clazz, Class<A> annotation, AnnotatedMethodListener<T, A> listener) throws Exception {
+    public static <T, A> void forEachAnnotatedMethod(
+            Class clazz, Class<A> annotation, AnnotatedMethodListener<T, A> listener)
+            throws Exception {
         for (Method method : getMethodsInClassHierarchy(clazz)) {
             final A annValue = (A) getAnnotation(method, annotation);
             if (annValue != null) {
@@ -165,6 +174,7 @@ public class ServiceUtil {
             AnnotatedFieldListener<T, U> listener
     ) throws Exception {
         for (Field field : getFieldsInClassHierarchy(clazz)) {
+            //noinspection unchecked
             final U annValue = (U) getAnnotation(field, annotationClass);
             if (annValue != null) {
                 listener.found(field, annValue);
@@ -237,14 +247,14 @@ public class ServiceUtil {
      */
     public static void gracefullyRemoveEndpoints(CamelContext camelContext, String uri) throws Exception {
         try {
-            logger.info("Gracefully removing endpoint " + uri);
+            LOGGER.info("Gracefully removing endpoint " + uri);
             final Endpoint endpoint = camelContext.getEndpoint(uri);
             if (endpoint != null) {
                 endpoint.stop();
                 camelContext.removeEndpoints(endpoint.getEndpointUri());
             }
         } catch (Exception e) {
-            logger.debug("Failed to remove endpoint: " + uri, e);
+            LOGGER.debug("Failed to remove endpoint: " + uri, e);
         }
     }
 
@@ -253,26 +263,26 @@ public class ServiceUtil {
      */
     public static void gracefullyRemoveRoute(CamelContext camelContext, String id) throws Exception {
         if (camelContext.getRoute(id) != null) {
-            logger.info("Gracefully removing route " + id);
+            LOGGER.info("Gracefully removing route " + id);
             try {
                 camelContext.stopRoute(id, 10, TimeUnit.SECONDS);
                 camelContext.removeRoute(id);
             } catch (Exception e) {
-                logger.debug("Failed to remove route: " + id, e);
+                LOGGER.debug("Failed to remove route: " + id, e);
             }
         }
     }
 
     /**
-     * Sart the route by id
+     * Start the route by id
      */
     public static void gracefullyStartRoute(CamelContext camelContext, String id) throws Exception {
         if (camelContext.getRoute(id) != null) {
-            logger.info("Gracefully starting route " + id);
+            LOGGER.info("Gracefully starting route " + id);
             try {
                 camelContext.startRoute(id);
             } catch (Exception e) {
-                logger.error("Failed to start route: " + id, e);
+                LOGGER.error("Failed to start route: " + id, e);
             }
         }
     }
