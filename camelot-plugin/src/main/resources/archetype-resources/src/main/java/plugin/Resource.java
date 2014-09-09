@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response;
 import java.util.HashSet;
 import java.util.Set;
 
-@Path("/plugin/")
+@Path("/input")
 public class Resource {
 
     @Repository
@@ -21,9 +21,9 @@ public class Resource {
     EventProducer input;
 
     @GET
-    @Produces({MediaType.APPLICATION_XML})
+    @Produces({MediaType.APPLICATION_JSON})
     public Set<Object> getAggregated() {
-        Set<Object> res = new HashSet<Object>();
+        Set<Object> res = new HashSet<>();
         for(Object key : repo.keys()) {
             res.add(repo.get((String) key));
         }
@@ -33,8 +33,8 @@ public class Resource {
 
     @PUT
     @Path("/events")
-    @Consumes({MediaType.APPLICATION_XML})
-    public Response sendMessage(String event) {
+    @Consumes({MediaType.APPLICATION_JSON})
+    public Response sendMessage(@QueryParam("event") String event) {
         input.produce(event);
         return Response.ok("ok").build();
     }
