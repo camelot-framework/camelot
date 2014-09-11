@@ -255,7 +255,7 @@ public class RunMojo extends AbstractMojo {
 
     public void appendPluginResources(StringBuilder pluginsScripts, Plugin plugin, String baseClass) {
         for (String js : findTemplatePaths(baseClass, "*", ".js")) {
-            final String prePath = (contextPath.endsWith("/")) ? contextPath.substring(0, contextPath.length()) : contextPath;
+            final String prePath = (contextPath.endsWith("/")) ? contextPath.substring(0, contextPath.length() - 1) : contextPath;
             pluginsScripts.append("        script(src='").append(prePath).append("/plugin/").
                     append(plugin.getId()).append("/").append(new File(js).getName()).append("')\n");
         }
