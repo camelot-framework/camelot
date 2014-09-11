@@ -12,13 +12,6 @@
 
     <name>Camelot Web</name>
 
-    <repositories>
-        <repository>
-            <id>jade4j-releases</id>
-            <url>https://raw.github.com/neuland/jade4j/master/releases</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -118,9 +111,9 @@
             <artifactId>wro4j-extensions</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.neuland</groupId>
+            <groupId>de.neuland-bfi</groupId>
             <artifactId>jade4j</artifactId>
-            <version>0.3.16</version>
+            <version>0.4.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.spullara.mustache.java</groupId>
