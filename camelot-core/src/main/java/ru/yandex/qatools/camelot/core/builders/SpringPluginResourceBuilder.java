@@ -78,7 +78,7 @@ public class SpringPluginResourceBuilder implements ResourceBuilder, BeanFactory
     }
 
     private void initResourcesConfig(Class baseClass, Plugin plugin) throws Exception {
-        plugin.getContext().setCssPath(findTemplatePath(baseClass, "styles", CSS_EXTS));
+        plugin.getContext().setCssPath(findTemplatePath(baseClass, "**/*", CSS_EXTS));
         plugin.getContext().getJsPaths().addAll(findTemplatePaths(baseClass, "**/*", JS_EXTS));
         plugin.getContext().setDashboardPath(findTemplatePath(baseClass, "dashboard", TPL_EXTS));
         plugin.getContext().setWidgetPath(findTemplatePath(baseClass, "widget", TPL_EXTS));
