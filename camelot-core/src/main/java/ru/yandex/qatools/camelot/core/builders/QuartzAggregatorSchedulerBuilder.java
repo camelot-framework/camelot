@@ -1,13 +1,7 @@
 package ru.yandex.qatools.camelot.core.builders;
 
-import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import org.apache.camel.CamelContext;
-import org.quartz.CronTrigger;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.Scheduler;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.camelot.api.annotations.OnTimer;
@@ -28,9 +22,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import static java.lang.System.identityHashCode;
 import static jodd.util.StringUtil.isEmpty;
-import static ru.yandex.qatools.camelot.util.ReflectUtil.getAnnotation;
-import static ru.yandex.qatools.camelot.util.ReflectUtil.getAnnotationValue;
-import static ru.yandex.qatools.camelot.util.ReflectUtil.getMethodsInClassHierarchy;
+import static ru.yandex.qatools.camelot.util.ReflectUtil.*;
 import static ru.yandex.qatools.camelot.util.ServiceUtil.forEachAnnotatedMethod;
 
 
@@ -199,7 +191,7 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
         try {
             invoker.invoke(method);
             return true;
-        } catch (HazelcastInstanceNotActiveException e) {
+        } catch (IllegalStateException e) {
             LOGGER.debug(String.format("Failed to invoke scheduler job %s, because %s", job.getName(), e.getMessage()), e);
         } catch (Exception e) {
             LOGGER.warn(String.format("Failed to invoke scheduler job %s, because %s", job.getName(), e.getMessage()), e);

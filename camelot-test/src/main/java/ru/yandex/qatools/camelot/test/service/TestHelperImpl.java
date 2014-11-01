@@ -1,6 +1,5 @@
 package ru.yandex.qatools.camelot.test.service;
 
-import com.hazelcast.core.HazelcastInstance;
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
 import org.apache.camel.ProducerTemplate;
@@ -23,9 +22,6 @@ public class TestHelperImpl implements CamelContextAware, TestHelper {
     final private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     ProcessingEngine pluginsService;
-
-    @Autowired
-    HazelcastInstance hazelcastInstance;
 
     ProducerTemplate producerTemplate;
     CamelContext camelContext;
