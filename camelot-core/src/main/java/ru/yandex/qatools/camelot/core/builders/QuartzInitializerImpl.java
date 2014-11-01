@@ -1,6 +1,5 @@
 package ru.yandex.qatools.camelot.core.builders;
 
-import com.hazelcast.core.OperationTimeoutException;
 import org.quartz.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +56,7 @@ public class QuartzInitializerImpl implements QuartzInitializer {
                                 throw new PluginsSystemException(e);
                             }
                             return;
-                        } catch (OperationTimeoutException e) {
+                        } catch (Exception e) {
                             scheduler.standby();
                             logger.warn("This node is not the master Quartz and failed to wait for the lock!", e);
                         }
