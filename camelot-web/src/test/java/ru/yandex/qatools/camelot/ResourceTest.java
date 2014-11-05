@@ -10,7 +10,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ru.yandex.qatools.camelot.core.beans.StopAllSkipped;
 import ru.yandex.qatools.camelot.core.plugins.AllSkippedService;
 
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestSkipped;
@@ -32,8 +35,10 @@ public class ResourceTest extends BasicAggregatorsTest {
         final Object bean = applicationContext.getBean(pluginResourceBeanName("all-skipped"));
         assertNotNull("Resouce must be added to the context", bean);
         assertTrue("Resouce must be added to the context", bean instanceof AllSkippedService);
-        assertNotNull("Resouce must contain producer", ((AllSkippedService) bean).getProducer());
-        assertNotNull("Resouce must contain repository", ((AllSkippedService) bean).getRepository());
+        final AllSkippedService allSkipped = (AllSkippedService) bean;
+        assertNotNull("Resouce must contain producer", allSkipped.getProducer());
+        assertNotNull("Resouce must contain repository", allSkipped.getRepository());
+        assertThat(allSkipped.getCounterRepo(), not(sameInstance(allSkipped.getRepository())));
     }
 
     @Test

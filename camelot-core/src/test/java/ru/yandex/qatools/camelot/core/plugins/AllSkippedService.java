@@ -11,6 +11,7 @@ import ru.yandex.qatools.camelot.api.annotations.Listener;
 import ru.yandex.qatools.camelot.api.annotations.PluginStorage;
 import ru.yandex.qatools.camelot.api.annotations.Repository;
 import ru.yandex.qatools.camelot.core.beans.CounterState;
+import ru.yandex.qatools.camelot.core.builders.ReadonlyAggregatorRepository;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -33,6 +34,9 @@ public class AllSkippedService {
     @Repository
     private AggregatorRepository repository;
 
+    @Repository(ByLabelBrokenAggregator.class)
+    private ReadonlyAggregatorRepository<CounterState> counterRepo;
+
     @PluginStorage
     private Storage storage;
 
@@ -49,6 +53,10 @@ public class AllSkippedService {
 
     public EndpointListener getListener() {
         return listener;
+    }
+
+    public ReadonlyAggregatorRepository<CounterState> getCounterRepo() {
+        return counterRepo;
     }
 
     @GET
