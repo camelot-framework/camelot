@@ -110,8 +110,7 @@ public class PluginsResourceLocator extends ClasspathUriLocator {
         });
         for (Plugin plugin : pluginsList) {
             if (plugin != null) {
-                final String cssUri = plugin.getContext().getCssPath();
-                if (cssUri != null) {
+                for (String cssUri : plugin.getContext().getCssPaths()) {
                     pluginsCache.put(cssUri, plugin);
                 }
                 for (String jsUri : plugin.getContext().getJsPaths()) {
