@@ -33,8 +33,11 @@ public class PluginsServiceTest {
         final PluginContext conf = pluginsService.getPluginContext("all-skipped");
         final String basePath = AllSkippedService.class.getName().replaceAll("\\.", "/") + "/";
         assertEquals(basePath, conf.getResDirPath());
-        assertEquals(basePath + "styles.css", conf.getCssPath());
         assertEquals(basePath + "dashboard.html", conf.getDashboardPath());
+        assertThat(conf.getCssPaths(), containsInAnyOrder(
+                basePath + "styles.css",
+                basePath + "more-styles.less"
+        ));
         assertThat(conf.getJsPaths(), containsInAnyOrder(
                 basePath + "script.js",
                 basePath + "script.coffee",
