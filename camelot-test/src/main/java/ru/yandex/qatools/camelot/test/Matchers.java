@@ -27,7 +27,7 @@ public class Matchers {
         @Override
         public void describeTo(Description description) {
             description.appendText(String.format(
-                    "Storage containing not null object by key '%s'", key));
+                    "storage containing aggregator state by key '%s'", key));
         }
     }
 
