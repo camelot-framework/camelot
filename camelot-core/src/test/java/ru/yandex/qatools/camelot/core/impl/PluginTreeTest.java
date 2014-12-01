@@ -1,6 +1,6 @@
 package ru.yandex.qatools.camelot.core.impl;
 
-import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.collections4.map.ListOrderedMap;
 import org.junit.Before;
 import org.junit.Test;
 import ru.yandex.qatools.camelot.config.Plugin;

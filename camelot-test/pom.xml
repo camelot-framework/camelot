@@ -16,12 +16,10 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>camelot-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>ru.yandex.qatools.clay</groupId>
             <artifactId>clay-utils</artifactId>
-            <version>${clay.version}</version>
         </dependency>
 
         <dependency>
@@ -46,34 +44,26 @@
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
-            <version>${easymock.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
-            <version>${hamcrest.version}</version>
         </dependency>
         <dependency>
             <groupId>ru.yandex.qatools.matchers</groupId>
             <artifactId>matcher-decorators</artifactId>
-            <version>${matchers.version}</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.lambdaj</groupId>
             <artifactId>lambdaj</artifactId>
-            <version>2.3.3</version>
         </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>${mockito.version}</version>
         </dependency>
 
         <dependency>

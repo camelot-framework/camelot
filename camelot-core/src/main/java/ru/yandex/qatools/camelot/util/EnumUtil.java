@@ -1,10 +1,10 @@
 package ru.yandex.qatools.camelot.util;
 
-import org.apache.commons.collections.Transformer;
+import org.apache.commons.collections4.Transformer;
 
 import java.util.*;
 
-import static org.apache.commons.collections.CollectionUtils.collect;
+import static org.apache.commons.collections4.CollectionUtils.collect;
 import static ru.yandex.qatools.camelot.util.RandomUtil.randomInt;
 
 /**

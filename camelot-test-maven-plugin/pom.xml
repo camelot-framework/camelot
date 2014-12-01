@@ -20,12 +20,10 @@
         <dependency>
             <groupId>ru.yandex.qatools.clay</groupId>
             <artifactId>clay-aether</artifactId>
-            <version>${clay.version}</version>
         </dependency>
         <dependency>
             <groupId>ru.yandex.qatools.clay</groupId>
             <artifactId>clay-utils</artifactId>
-            <version>${clay.version}</version>
         </dependency>
         <dependency>
             <groupId>org.freemarker</groupId>
@@ -49,17 +47,14 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-deploy</artifactId>
-            <version>${jetty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
-            <version>${jetty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>${jetty.version}</version>
         </dependency>
 
         <dependency>
