@@ -1,6 +1,6 @@
 package ru.yandex.qatools.camelot.util;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import ru.yandex.qatools.camelot.config.Parameter;
 import ru.yandex.qatools.camelot.config.Plugin;
 
@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static ru.yandex.qatools.camelot.util.MapUtil.mapParams;
 
 /**

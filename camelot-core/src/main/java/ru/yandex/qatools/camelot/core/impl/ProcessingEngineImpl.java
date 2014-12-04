@@ -4,8 +4,8 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.StartupListener;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.spi.ShutdownPrepared;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Transformer;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.Scheduler;
 import org.springframework.core.io.Resource;
@@ -21,11 +21,7 @@ import ru.yandex.qatools.camelot.core.builders.NoSchedulerBuildersFactory;
 import ru.yandex.qatools.camelot.core.builders.QuartzInitializer;
 import ru.yandex.qatools.camelot.core.builders.SchedulerBuildersFactory;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.String.format;
 import static org.apache.camel.LoggingLevel.DEBUG;

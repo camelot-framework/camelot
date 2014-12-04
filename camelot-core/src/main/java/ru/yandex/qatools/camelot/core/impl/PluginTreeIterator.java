@@ -1,6 +1,6 @@
 package ru.yandex.qatools.camelot.core.impl;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Iterator;
 import java.util.Stack;
@@ -18,7 +18,7 @@ public class PluginTreeIterator implements Iterator {
         }
     }
 
-    private Stack<State> states = new Stack<State>();
+    private Stack<State> states = new Stack<>();
 
     public PluginTreeIterator(PluginTree pluginTree) {
         states.push(new State(pluginTree));

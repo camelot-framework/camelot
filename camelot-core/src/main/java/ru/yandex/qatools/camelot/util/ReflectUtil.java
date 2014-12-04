@@ -1,6 +1,6 @@
 package ru.yandex.qatools.camelot.util;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -20,7 +20,7 @@ import java.net.URL;
 import java.util.*;
 
 import static java.util.Arrays.asList;
-import static org.apache.commons.lang.ClassUtils.getAllInterfaces;
+import static org.apache.commons.lang3.ClassUtils.getAllInterfaces;
 
 /**
  * Util class allowing to scan all the classes inside the specified package and other class operations
@@ -101,7 +101,7 @@ public class ReflectUtil {
      * Collect all interfaces of a class
      */
     private static Set<Class> collectAllClassInterfaces(final Class objClazz) {
-        Set<Class> interfaces = new HashSet<Class>();
+        Set<Class> interfaces = new HashSet<>();
         Class clazz = objClazz;
         // search through superclasses
         while (clazz != null) {
@@ -169,7 +169,7 @@ public class ReflectUtil {
      */
     private static Class<?>[] wrapTypesForClassLoader(ClassLoader cl, Class<?>[] types)
             throws ClassNotFoundException {
-        List<Class<?>> res = new ArrayList<Class<?>>();
+        List<Class<?>> res = new ArrayList<>();
         if (types != null) {
             for (Class<?> type : types) {
                 Class<?> clazz = classLoaderType(cl, type);
@@ -186,9 +186,9 @@ public class ReflectUtil {
      * @param method  specifies a method that should be used for wrapping
      * @param guestCL specifies a guest class loader (which is supposed to be the actual consumer of the arguments)
      */
-    private static <T> Object[] wrapArgsForClassLoader(ClassLoader hostCL, ClassLoader guestCL, Method method, Object[] args)
+    private static Object[] wrapArgsForClassLoader(ClassLoader hostCL, ClassLoader guestCL, Method method, Object[] args)
             throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
-        List<Object> wrappedArgs = new ArrayList<Object>();
+        List<Object> wrappedArgs = new ArrayList<>();
         if (args != null) {
             if (method.getParameterTypes().length != args.length) {
                 throw new RuntimeException("Cannot wrap arguments: method " + method.getName() + " is expecting " +
@@ -272,7 +272,7 @@ public class ReflectUtil {
      * Returns non-basic java interfaces of a class
      */
     private static List<Class<?>> getNonBasicJavaInterfaces(Class<?> clazz, boolean includeSuperClasses) {
-        List<Class<?>> result = new ArrayList<Class<?>>();
+        List<Class<?>> result = new ArrayList<>();
         final List allInterfaces = (includeSuperClasses) ? getAllInterfaces(clazz) : asList(clazz.getInterfaces());
         for (Object iface : allInterfaces) {
             if (!isBasicJavaType((Class<?>) iface)) {
@@ -286,7 +286,7 @@ public class ReflectUtil {
      * Returns the list of classes for the arguments from the different classloader
      */
     public static Class<?>[] getArgTypes(Object[] arguments, ClassLoader classLoader) throws ClassNotFoundException {
-        List<Class<?>> types = new ArrayList<Class<?>>();
+        List<Class<?>> types = new ArrayList<>();
         for (Object arg : arguments) {
             types.add(classLoader.loadClass(arg.getClass().getName()));
         }
@@ -320,7 +320,7 @@ public class ReflectUtil {
         final ClassLoader classLoader = baseClass.getClassLoader();
         MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(classLoader);
 
-        Set<Class<?>> candidates = new HashSet<Class<?>>();
+        Set<Class<?>> candidates = new HashSet<>();
         String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
                 resolveBasePackage(basePackage) + "/" + "**/*.class";
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(classLoader);
@@ -344,12 +344,11 @@ public class ReflectUtil {
      * @throws ClassNotFoundException
      */
     public static List<Class> findClasses(File directory, String packageName) throws ClassNotFoundException {
-        List<Class> classes = new ArrayList<Class>();
+        List<Class> classes = new ArrayList<>();
         if (!directory.exists()) {
             return classes;
         }
-        File[] files = directory.listFiles();
-        for (File file : files) {
+        for (File file : directory.listFiles()) {
             if (file.isDirectory()) {
                 assert !file.getName().contains("");
                 classes.addAll(findClasses(file, packageName + "" + file.getName()));
@@ -386,7 +385,7 @@ public class ReflectUtil {
             throws IOException, ClassNotFoundException {
         final ClassLoader classLoader = baseClass.getClassLoader();
         final ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(classLoader);
-        final Collection<String> classes = new LinkedList<String>();
+        final Collection<String> classes = new LinkedList<>();
         final Resource[] resources = resolver.getResources(pattern);
         for (final Resource resource : resources) {
             final URL url = resource.getURL();
@@ -420,12 +419,10 @@ public class ReflectUtil {
      */
     public static Collection<Resource> resolveResourcesFromPattern(final String pattern, final ClassLoader classLoader)
             throws IOException, ClassNotFoundException {
-        final Collection<Resource> classes = new LinkedList<Resource>();
+        final Collection<Resource> classes = new LinkedList<>();
         final ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(classLoader);
         final Resource[] resources = resolver.getResources(pattern);
-        for (final Resource resource : resources) {
-            classes.add(resource);
-        }
+        Collections.addAll(classes, resources);
         return classes;
     }
 
@@ -467,7 +464,7 @@ public class ReflectUtil {
     public static Field[] getFieldsInClassHierarchy(Class<?> clazz) {
         Field[] fields = {};
         while (clazz != null) {
-            fields = (Field[]) ArrayUtils.addAll(fields, clazz.getDeclaredFields());
+            fields = ArrayUtils.addAll(fields, clazz.getDeclaredFields());
             clazz = clazz.getSuperclass();
         }
         return fields;
@@ -498,7 +495,7 @@ public class ReflectUtil {
     public static Method[] getMethodsInClassHierarchy(Class<?> clazz) {
         Method[] methods = {};
         while (clazz != null) {
-            methods = (Method[]) ArrayUtils.addAll(methods, clazz.getDeclaredMethods());
+            methods = ArrayUtils.addAll(methods, clazz.getDeclaredMethods());
             clazz = clazz.getSuperclass();
         }
         return methods;
@@ -525,7 +522,7 @@ public class ReflectUtil {
     public static <T> Object invokeAnyMethod(Class<?> clazz, T instance, String method, Class<?>[] argTypes,
                                              Object... arguments) throws
             NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        List<Class<?>> types = new ArrayList<Class<?>>();
+        List<Class<?>> types = new ArrayList<>();
         if (argTypes == null) {
             for (Object arg : arguments) {
                 types.add(arg.getClass());
