@@ -38,6 +38,7 @@
         <jetty.version>9.3.0.M1</jetty.version>
         <jersey.version>2.13</jersey.version>
         <slf4j.version>1.7.7</slf4j.version>
+        <atmosphere.version>2.2.4</atmosphere.version>
         <spring.version>3.2.10.RELEASE</spring.version>
         <wro4j.version>1.7.5</wro4j.version>
         <yatomata.version>1.6</yatomata.version>
@@ -181,6 +182,16 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-deploy</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-continuation</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.websocket</groupId>
+                <artifactId>websocket-server</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
             <dependency>

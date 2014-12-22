@@ -1,6 +1,6 @@
 package ru.yandex.qatools.camelot.core;
 
-import org.glassfish.jersey.media.sse.SseBroadcaster;
+import org.atmosphere.cpr.Broadcaster;
 import ru.yandex.qatools.camelot.config.PluginWeb;
 import ru.yandex.qatools.camelot.config.PluginWebContext;
 
@@ -13,7 +13,7 @@ public interface WebfrontEngine extends PluginsService, ReloadableService {
     /**
      * Creates/gets the broadcaster for the plugin
      */
-    SseBroadcaster getBroadcaster(String pluginId, String topic);
+    Broadcaster getBroadcaster(String pluginId, String topic);
 
     /**
      * Returns web enabled plugin

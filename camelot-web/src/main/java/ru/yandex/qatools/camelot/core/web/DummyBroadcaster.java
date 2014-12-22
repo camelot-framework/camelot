@@ -8,7 +8,7 @@ import ru.yandex.qatools.camelot.core.web.jackson.JsonSerializer;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public class DummyBroadcaster extends PluginSseBroadcaster {
+public class DummyBroadcaster extends PluginBroadcaster {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
