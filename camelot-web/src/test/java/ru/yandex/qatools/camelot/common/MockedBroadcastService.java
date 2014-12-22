@@ -1,16 +1,16 @@
 package ru.yandex.qatools.camelot.common;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.CamelContextAware;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import ru.yandex.qatools.camelot.config.PluginWeb;
 import ru.yandex.qatools.camelot.core.WebfrontEngine;
-import ru.yandex.qatools.camelot.core.web.LocalClientBroadcastersProviderImpl;
-import ru.yandex.qatools.camelot.core.web.PluginSseBroadcaster;
-import ru.yandex.qatools.camelot.core.web.jackson.JsonSerializer;
+import ru.yandex.qatools.camelot.core.web.AtmosphereClientBroadcastersProvider;
+import ru.yandex.qatools.camelot.core.web.PluginBroadcaster;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,17 +21,14 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public class MockedBroadcastService implements ApplicationListener, CamelContextAware {
+public class MockedBroadcastService implements ApplicationListener, ApplicationContextAware {
 
-    final Map<String, Map<String, PluginSseBroadcaster>> mocks = new ConcurrentHashMap<>();
+    final Map<String, Map<String, PluginBroadcaster>> mocks = new ConcurrentHashMap<>();
 
     @Autowired
     WebfrontEngine pluginsService;
 
-    @Autowired
-    JsonSerializer jsonSerializer;
-
-    CamelContext camelContext;
+    ApplicationContext applicationContext;
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
@@ -39,9 +36,9 @@ public class MockedBroadcastService implements ApplicationListener, CamelContext
             for (final PluginWeb plugin : pluginsService.getPlugins()) {
                 try {
                     plugin.getContext().setLocalBroadcastersProvider(
-                            new LocalClientBroadcastersProviderImpl(camelContext, jsonSerializer, plugin) {
+                            new AtmosphereClientBroadcastersProvider(applicationContext, plugin) {
                                 @Override
-                                public synchronized PluginSseBroadcaster getBroadcaster(String topic) {
+                                public synchronized PluginBroadcaster getBroadcaster(String topic) {
                                     return getOrAddBroadcaster(plugin.getId(), topic);
                                 }
                             });
@@ -52,31 +49,26 @@ public class MockedBroadcastService implements ApplicationListener, CamelContext
         }
     }
 
-    public PluginSseBroadcaster getBroadcaster(String pluginId, String topic) {
+    public PluginBroadcaster getBroadcaster(String pluginId, String topic) {
         return getOrAddBroadcaster(pluginId, topic);
     }
 
-    public PluginSseBroadcaster getBroadcaster(String pluginId) {
+    public PluginBroadcaster getBroadcaster(String pluginId) {
         return getOrAddBroadcaster(pluginId, "");
     }
 
-    private synchronized PluginSseBroadcaster getOrAddBroadcaster(String pluginId, String topic) {
+    private synchronized PluginBroadcaster getOrAddBroadcaster(String pluginId, String topic) {
         if (!mocks.containsKey(pluginId)) {
-            mocks.put(pluginId, new HashMap<String, PluginSseBroadcaster>());
+            mocks.put(pluginId, new HashMap<String, PluginBroadcaster>());
         }
         if (!mocks.get(pluginId).containsKey(topic)) {
-            mocks.get(pluginId).put(topic, mock(PluginSseBroadcaster.class));
+            mocks.get(pluginId).put(topic, mock(PluginBroadcaster.class));
         }
         return mocks.get(pluginId).get(topic);
     }
 
     @Override
-    public void setCamelContext(CamelContext camelContext) {
-        this.camelContext = camelContext;
-    }
-
-    @Override
-    public CamelContext getCamelContext() {
-        return camelContext;
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }

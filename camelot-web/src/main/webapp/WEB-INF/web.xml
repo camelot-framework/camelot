@@ -26,6 +26,27 @@
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 
+    <!-- Atmosphere -->
+    <servlet>
+        <description>AtmosphereServlet</description>
+        <servlet-name>AtmosphereServlet</servlet-name>
+        <servlet-class>ru.yandex.qatools.camelot.core.web.AtmosphereServlet</servlet-class>
+        <init-param>
+            <param-name>org.atmosphere.cpr.packages</param-name>
+            <param-value>org.atmosphere.samples.chat.jersey.web</param-value>
+        </init-param>
+        <init-param>
+            <param-name>org.atmosphere.websocket.messageContentType</param-name>
+            <param-value>application/json</param-value>
+        </init-param>
+        <async-supported>true</async-supported>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AtmosphereServlet</servlet-name>
+        <url-pattern>/client-channel/*</url-pattern>
+    </servlet-mapping>
+
     <!-- Wro4j config -->
     <filter>
         <filter-name>WebResourceOptimizer</filter-name>

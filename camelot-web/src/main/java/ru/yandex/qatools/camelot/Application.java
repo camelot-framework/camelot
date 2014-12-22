@@ -1,7 +1,6 @@
 package ru.yandex.qatools.camelot;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
-import org.glassfish.jersey.media.sse.SseFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.internal.scanning.PackageNamesScanner;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
@@ -18,7 +17,6 @@ public class Application extends ResourceConfig {
     public Application() {
         register(RequestContextFilter.class);
         register(JacksonFeature.class);
-        register(SseFeature.class);
         register(LoadPluginResourceFeature.class);
         registerFinder(packageScanner(".web"));
         registerFinder(packageScanner(".core.web"));
