@@ -9,7 +9,7 @@
       res
 
     getUrl = (pluginId, topic) ->
-      "#{basePath}/client-channel?pluginId=#{pluginId}&topic=#{topic}"
+      "#{basePath}/websocket?pluginId=#{pluginId}&topic=#{topic}"
 
     sourcesMap = {}
     socket = $.atmosphere

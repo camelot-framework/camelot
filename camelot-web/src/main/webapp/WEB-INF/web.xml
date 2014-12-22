@@ -44,7 +44,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>AtmosphereServlet</servlet-name>
-        <url-pattern>/client-channel/*</url-pattern>
+        <url-pattern>/websocket/*</url-pattern>
     </servlet-mapping>
 
     <!-- Wro4j config -->
