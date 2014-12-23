@@ -29,7 +29,7 @@ public class PluginBroadcaster extends DefaultBroadcaster implements Broadcaster
     @Override
     public Future<Object> broadcast(Object msg) {
         try {
-            return super.broadcast(jsonSerializer.toJson(msg));
+            return super.broadcast(msg == null ? null : jsonSerializer.toJson(msg));
         } catch (Exception e) {
             logger.error(String.format("Failed to broadcast the message for plugin '%s'", plugin.getId()), e);
         }
