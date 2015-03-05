@@ -22,8 +22,6 @@ public class PluginsListResource extends BasicViewResource {
 
     @Autowired
     WebfrontEngine webfront;
-    @Autowired
-    ProcessingEngine processing;
 
     public PluginTree getPluginTree() {
         return webfront.getPluginTree();
@@ -33,15 +31,11 @@ public class PluginsListResource extends BasicViewResource {
         return webfront;
     }
 
-    public ProcessingEngine processing() {
-        return processing;
-    }
-
     @GET
     @Path("get")
     @Produces({APP_JSON})
     public Map<String, Plugin> asJson(@Context ServletContext context, @Context HttpServletRequest request) throws IOException {
-        return processing.getPluginsMap();
+        return webfront().getPluginsMap();
     }
 
     @Override
