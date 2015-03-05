@@ -32,7 +32,7 @@
         <activemq.version>5.10.0</activemq.version>
         <camel.version>2.13.2</camel.version>
         <clay.version>2.3</clay.version>
-        <hazelcast.version>3.3.5</hazelcast.version>
+        <hazelcast.version>3.4.1</hazelcast.version>
         <jackson.version>1.9.13</jackson.version>
         <jaxb.basics.version>0.6.5</jaxb.basics.version>
         <jetty.version>9.3.0.M1</jetty.version>

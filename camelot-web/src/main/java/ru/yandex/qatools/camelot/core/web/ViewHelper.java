@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
-import ru.yandex.qatools.camelot.core.ProcessingEngine;
 import ru.yandex.qatools.camelot.core.WebfrontEngine;
 import ru.yandex.qatools.camelot.core.web.jackson.JsonSerializer;
 
@@ -39,9 +38,6 @@ public class ViewHelper {
     final WebfrontEngine pluginsService;
     final ApplicationContext context;
     final Map<String, Map<String, Object>> pluginRenderAttrs = new HashMap<String, Map<String, Object>>();
-
-    @Autowired
-    ProcessingEngine processing;
 
     @Autowired
     JsonSerializer jsonSerializer;
@@ -72,7 +68,7 @@ public class ViewHelper {
      * Print plugins data serialized to json
      */
     public String printPluginsData() throws IOException, JAXBException {
-        Map<String, Plugin> plugins = processing.getPluginsMap();
+        Map<String, Plugin> plugins = pluginsService.getPluginsMap();
         return jsonSerializer.toJson(plugins);
     }
 
