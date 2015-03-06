@@ -9,8 +9,11 @@ import java.lang.annotation.Target;
  * Annotation which is used for injection of custom plugin components
  *
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PluginComponent {
+
+    public Class impl() default Object.class;
 }

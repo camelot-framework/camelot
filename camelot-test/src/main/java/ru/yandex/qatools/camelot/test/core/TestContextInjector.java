@@ -12,6 +12,7 @@ import java.util.Map;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public class TestContextInjector<P> extends PluginContextInjectorImpl<P> implements PluginContextInjector<P> {
     private final Map<Class, Class> overridenComponents = new HashMap<>();
@@ -36,22 +37,28 @@ public class TestContextInjector<P> extends PluginContextInjectorImpl<P> impleme
         injectOverridenComponents(pluginObj, context, exchange);
     }
 
-    private void injectOverridenComponents(Object pluginObj, final PluginContext context, final Exchange exchange) {
+    private void injectOverridenComponents(final Object pluginObj, final PluginContext context, final Exchange exchange) {
         try {
             final Map<Class, Object> components = new HashMap<>();
             injectField(pluginObj.getClass(), PluginComponent.class, pluginObj, new FieldListener<Object>() {
                 @Override
                 public Object found(Field field, AnnotationInfo info) throws Exception {
-                    final Class<?> type = (overridenComponents.containsKey(field.getType())) ?
-                            overridenComponents.get(field.getType()) : field.getType();
-                    try {
-                        if (!components.containsKey(type)) {
+
+                    final Class<?> type = overridenComponents.get(field.getType());
+                    if (type == null) {
+                        return field.get(pluginObj);
+                    }
+
+                    if (!components.containsKey(type)) {
+                        try {
                             final Object instance = type.newInstance();
                             injectComponents(instance, context, exchange);
                             components.put(type, instance);
+                        } catch (Exception e) {
+                            LOGGER.warn(String.format("Failed to inject plugin component into field %s!",
+                                    field.getName()), e);
+                            return null;
                         }
-                    } catch (Exception e) {
-                        LOGGER.warn(String.format("Failed to inject plugin component into field %s!", field.getName()), e);
                     }
                     return components.get(type);
                 }

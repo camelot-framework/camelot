@@ -1,14 +1,15 @@
 package ru.yandex.qatools.camelot.test;
 
+import ru.yandex.qatools.camelot.api.ClientMessageSender;
 import ru.yandex.qatools.camelot.api.annotations.*;
 import ru.yandex.qatools.fsm.annotations.*;
-import ru.yandex.qatools.camelot.api.ClientMessageSender;
 
 import static jodd.util.StringUtil.isEmpty;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.UUID;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 @Filter(instanceOf = {Float.class, String.class})
 @Aggregate
@@ -21,11 +22,17 @@ public class TestAggregator {
     @ClientSender
     ClientMessageSender sender;
 
-    @ClientSender(topic = "test")
-    ClientMessageSender senderTopic;
+    @ClientSender(topic = "someComponent")
+    ClientMessageSender senderComponentTopic;
+
+    @ClientSender(topic = "someInterface")
+    ClientMessageSender senderInterfaceTopic;
 
     @PluginComponent
     SomeComponent someComponent;
+
+    @PluginComponent(impl = SomeComponent.class)
+    SomeInterface someInterface;
 
     @ConfigValue("camelot-test.property.mustExists")
     String mustExistProperty = null;
@@ -36,7 +43,7 @@ public class TestAggregator {
     }
 
     @OnTransit
-    public void onNodeEvent(TestState state, String event) {
+    public void onEvent(TestState state, String event) {
         if (isEmpty(mustExistProperty)) {
             throw new RuntimeException("Property must exist!");
         }
@@ -45,7 +52,8 @@ public class TestAggregator {
         }
         state.setMessage(event);
         sender.send(state);
-        senderTopic.send(someComponent.getClass().getName());
+        senderComponentTopic.send(someComponent.getClass().getName());
+        senderInterfaceTopic.send(someInterface.getClass().getName());
     }
 
     @OnTransit

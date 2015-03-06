@@ -55,8 +55,8 @@ public class CamelotTestRunnerCustomTest {
     public void testRoute() throws Exception {
         final String uuid = randomUUID().toString();
         helper.send("test", UUID, uuid);
-        verify(prcMock, timeout(TIMEOUT)).onNodeEvent(eq("test"));
-        verify(aggMock, timeout(TIMEOUT)).onNodeEvent(any(TestState.class), eq(STATE_MESSAGE));
+        verify(prcMock, timeout(TIMEOUT)).onEvent(eq("test"));
+        verify(aggMock, timeout(TIMEOUT)).onEvent(any(TestState.class), eq(STATE_MESSAGE));
         verify(sender, timeout(TIMEOUT)).send(any(TestState.class));
 
         assertThat("State with uuid must exist", stateStorage.get(TestState.class, uuid),
