@@ -1,5 +1,6 @@
 package ru.yandex.qatools.camelot.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import ru.yandex.qatools.camelot.core.web.LocalClientBroadcastersProvider;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,6 +16,7 @@ import javax.xml.bind.annotation.XmlType;
         "localBroadcastersProvider",
 })
 public class PluginWebContext extends PluginContext {
+    @JsonIgnore
     @XmlElement(required = true, type = Object.class)
     protected LocalClientBroadcastersProvider localBroadcastersProvider;
 
