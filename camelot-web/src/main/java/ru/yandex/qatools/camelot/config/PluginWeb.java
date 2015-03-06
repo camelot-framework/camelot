@@ -1,5 +1,7 @@
 package ru.yandex.qatools.camelot.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -13,6 +15,7 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class PluginWeb extends Plugin {
 
+    @JsonIgnore
     protected PluginWebContext context;
 
     public PluginWeb() {
