@@ -12,7 +12,7 @@ import java.io.IOException;
 @javax.ws.rs.Consumes({"application/json", "text/json"})
 @javax.ws.rs.Produces({"application/json", "text/json"})
 @Component
-public class JacksonJaxbJsonProvider extends org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider implements JsonSerializer {
+public class JacksonJaxbJsonProvider extends com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider implements JsonSerializer {
 
     @Override
     public String toJson(Object instance) throws IOException {
