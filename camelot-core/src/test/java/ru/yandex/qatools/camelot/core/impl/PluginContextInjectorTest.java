@@ -23,12 +23,14 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 @RunWith(CamelSpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath*:camelot-core-context.xml", "classpath*:test-camelot-core-context.xml"})
 @SuppressWarnings("unchecked")
 @DirtiesContext(classMode = AFTER_CLASS)
 public class PluginContextInjectorTest {
+
     @Autowired
     ProcessingEngine processingEngine;
 
@@ -65,5 +67,8 @@ public class PluginContextInjectorTest {
         assertNotNull("Context must be injected", agg.injectableComponent);
         assertEquals("Context must be injected", agg.input1, agg.injectableComponent.input);
         assertEquals("Plugin storage must be injected", agg.storage1, agg.injectableComponent.otherPluginStorage);
+        assertNotNull("Context must be injected", agg.injectableInterface);
+        assertEquals("Context must be injected", agg.input1, ((InjectableInterfaceImpl) agg.injectableInterface).input);
+        assertEquals("Plugin storage must be injected", agg.storage1, ((InjectableInterfaceImpl) agg.injectableInterface).otherPluginStorage);
     }
 }

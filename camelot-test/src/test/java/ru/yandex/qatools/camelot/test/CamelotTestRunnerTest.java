@@ -19,12 +19,14 @@ import static ru.yandex.qatools.matchers.decorators.MatcherDecorators.should;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 @RunWith(CamelotTestRunner.class)
 @UseProperties("camelot-test.properties")
 @DisableTimers
 @CamelotTestConfig(components = {
-        @OverrideComponent(from = SomeComponent.class, to = AnotherComponent.class)
+        @OverrideComponent(from = SomeComponent.class, to = AnotherComponent.class),
+        @OverrideComponent(from = SomeInterface.class, to = AnotherComponent.class)
 })
 public class CamelotTestRunnerTest {
 
@@ -46,8 +48,11 @@ public class CamelotTestRunnerTest {
     @ClientSenderMock(TestAggregator.class)
     ClientMessageSender sender;
 
-    @ClientSenderMock(value = TestAggregator.class, topic = "test")
-    ClientMessageSender senderTopic;
+    @ClientSenderMock(value = TestAggregator.class, topic = "someComponent")
+    ClientMessageSender senderComponentTopic;
+
+    @ClientSenderMock(value = TestAggregator.class, topic = "someInterface")
+    ClientMessageSender senderInterfaceTopic;
 
     @Resource(TestProcessor.class)
     TestResource testResource;
@@ -57,10 +62,11 @@ public class CamelotTestRunnerTest {
         helper.send("test1", UUID, "uuid1");
         helper.send("test1", UUID, "uuid2");
 
-        verify(prcMock, timeout(TIMEOUT).times(2)).onNodeEvent(eq("test1"));
-        verify(aggMock, timeout(TIMEOUT).times(2)).onNodeEvent(any(TestState.class), eq(CHECK_VALUE));
+        verify(prcMock, timeout(TIMEOUT).times(2)).onEvent(eq("test1"));
+        verify(aggMock, timeout(TIMEOUT).times(2)).onEvent(any(TestState.class), eq(CHECK_VALUE));
         verify(sender, timeout(TIMEOUT).times(2)).send(any(TestState.class));
-        verify(senderTopic, timeout(TIMEOUT).times(2)).send(eq(AnotherComponent.class.getName()));
+        verify(senderComponentTopic, timeout(TIMEOUT).times(2)).send(eq(AnotherComponent.class.getName()));
+        verify(senderInterfaceTopic, timeout(TIMEOUT).times(2)).send(eq(AnotherComponent.class.getName()));
 
         verify(aggMock, timeout(5000).never()).resetState(any(TestState.class));
 
@@ -78,7 +84,7 @@ public class CamelotTestRunnerTest {
     @Test
     public void testRouteAgain() throws Exception {
         helper.send("test2", UUID, "uuid3");
-        verify(prcMock, timeout(TIMEOUT).times(1)).onNodeEvent(eq("test2"));
-        verify(aggMock, timeout(TIMEOUT).times(1)).onNodeEvent(any(TestState.class), eq("test2processedtestValue"));
+        verify(prcMock, timeout(TIMEOUT).times(1)).onEvent(eq("test2"));
+        verify(aggMock, timeout(TIMEOUT).times(1)).onEvent(any(TestState.class), eq("test2processedtestValue"));
     }
 }
