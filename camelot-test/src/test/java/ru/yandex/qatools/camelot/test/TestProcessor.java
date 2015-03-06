@@ -11,7 +11,7 @@ public class TestProcessor {
     String property = "";
 
     @Processor
-    public String onNodeEvent(String event) {
+    public String onEvent(String event) {
         return event + "processed" + property;
     }
 

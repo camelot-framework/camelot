@@ -8,8 +8,8 @@
 
 package ru.yandex.qatools.camelot.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.camel.spi.AggregationRepository;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import ru.yandex.qatools.camelot.api.*;
 import ru.yandex.qatools.camelot.core.PluginContextInjector;
 import ru.yandex.qatools.camelot.core.builders.SchedulerBuilder;

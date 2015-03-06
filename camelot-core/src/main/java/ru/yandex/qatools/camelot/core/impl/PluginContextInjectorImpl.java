@@ -27,6 +27,7 @@ import static ru.yandex.qatools.camelot.util.TypesUtil.*;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public class PluginContextInjectorImpl<P> implements PluginContextInjector<P> {
     protected final static Logger LOGGER = LoggerFactory.getLogger(PluginContextInjectorImpl.class);
@@ -184,7 +185,8 @@ public class PluginContextInjectorImpl<P> implements PluginContextInjector<P> {
                     final Class<?> type = field.getType();
                     try {
                         if (!components.containsKey(type)) {
-                            final Object instance = type.newInstance();
+                            final Class defaultClass = info.impl;
+                            final Object instance = (defaultClass == Object.class ? type : defaultClass).newInstance();
                             performInjection(instance, context, exchange);
                             components.put(type, instance);
                         }
@@ -219,6 +221,7 @@ public class PluginContextInjectorImpl<P> implements PluginContextInjector<P> {
         public String id;
         public Object value;
         public String topic;
+        public Class impl;
 
         public <T extends Annotation> AnnotationInfo(T annotation) {
             try {
@@ -235,6 +238,11 @@ public class PluginContextInjectorImpl<P> implements PluginContextInjector<P> {
                 topic = (String) getAnnotationValue(annotation, "topic");
             } catch (Exception e) {
                 LOGGER.trace("Failed to get annotation field `topic` for " + annotation, e);
+            }
+            try {
+                impl = (Class) getAnnotationValue(annotation, "impl");
+            } catch (Exception e) {
+                LOGGER.trace("Failed to get annotation field `impl` for " + annotation, e);
             }
         }
     }
