@@ -15,13 +15,11 @@
         <hz:config>
             <hz:group name="${hazelcast.group.name}" password="${hazelcast.group.password}"/>
             <hz:properties>
-                <hz:property name="hazelcast.merge.first.run.delay.seconds">${hazelcast.merge.first.run.delay.seconds}
-                </hz:property>
-                <hz:property name="hazelcast.merge.next.run.delay.seconds">${hazelcast.merge.next.run.delay.seconds}
-                </hz:property>
-                <hz:property name="hazelcast.max.no.heartbeat.seconds">${hazelcast.max.no.heartbeat.seconds}
-                </hz:property>
+                <hz:property name="hazelcast.merge.first.run.delay.seconds">${hazelcast.merge.first.run.delay.seconds}</hz:property>
+                <hz:property name="hazelcast.merge.next.run.delay.seconds">${hazelcast.merge.next.run.delay.seconds}</hz:property>
+                <hz:property name="hazelcast.max.no.heartbeat.seconds">${hazelcast.max.no.heartbeat.seconds}</hz:property>
                 <hz:property name="hazelcast.logging.type">${hazelcast.logging.type}</hz:property>
+                <hz:property name="hazelcast.prefer.ipv4.stack">${hazelcast.prefer.ipv4.stack}</hz:property>
             </hz:properties>
             <hz:network port="${hazelcast.port}" port-auto-increment="${hazelcast.port.auto.increment}">
                 <hz:join>
