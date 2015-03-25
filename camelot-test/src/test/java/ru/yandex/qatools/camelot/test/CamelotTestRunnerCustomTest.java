@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -84,6 +83,6 @@ public class CamelotTestRunnerCustomTest {
                 return success.get();
             }
         });
-        assertTrue("Output listener must be called", success.get());
+        assertThat("Output listener must be called", success.get());
     }
 }

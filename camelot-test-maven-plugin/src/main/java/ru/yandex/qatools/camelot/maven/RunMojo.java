@@ -19,14 +19,14 @@ import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
+import ru.qatools.clay.aether.Aether;
+import ru.qatools.clay.aether.AetherException;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginsConfig;
 import ru.yandex.qatools.camelot.config.PluginsSource;
 import ru.yandex.qatools.camelot.maven.web.ConfigurableWroManagerFactory;
 import ru.yandex.qatools.camelot.maven.web.WroFilter;
-import ru.yandex.qatools.clay.Aether;
-import ru.yandex.qatools.clay.AetherException;
-import ru.yandex.qatools.clay.utils.archive.PathJarEntryFilter;
+import ru.qatools.clay.utils.archive.PathJarEntryFilter;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -47,8 +47,8 @@ import static ru.yandex.qatools.camelot.maven.util.FileUtil.processTemplate;
 import static ru.yandex.qatools.camelot.maven.util.FileUtil.replaceInFile;
 import static ru.yandex.qatools.camelot.util.MapUtil.map;
 import static ru.yandex.qatools.camelot.util.ReflectUtil.resolveResourcesAsStringsFromPattern;
-import static ru.yandex.qatools.clay.Aether.aether;
-import static ru.yandex.qatools.clay.utils.archive.ArchiveUtil.unpackJar;
+import static ru.qatools.clay.aether.Aether.aether;
+import static ru.qatools.clay.utils.archive.ArchiveUtil.unpackJar;
 
 /**
  * @author Dmitry Baev charlie@yandex-team.ru

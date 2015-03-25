@@ -2,11 +2,11 @@ package ru.yandex.qatools.camelot.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.qatools.clay.aether.Aether;
 import ru.yandex.qatools.camelot.config.PluginsSource;
 import ru.yandex.qatools.camelot.core.PluginLoader;
-import ru.yandex.qatools.clay.Aether;
-import ru.yandex.qatools.clay.maven.settings.FluentProfileBuilder;
-import ru.yandex.qatools.clay.maven.settings.FluentRepositoryPolicyBuilder;
+import ru.qatools.clay.maven.settings.FluentProfileBuilder;
+import ru.qatools.clay.maven.settings.FluentRepositoryPolicyBuilder;
 
 import java.io.File;
 import java.io.InputStream;
@@ -24,12 +24,12 @@ import static org.apache.commons.lang3.ArrayUtils.nullToEmpty;
 import static org.codehaus.plexus.util.FileUtils.copyFile;
 import static org.codehaus.plexus.util.FileUtils.createTempFile;
 import static ru.yandex.qatools.camelot.util.FileUtil.createTempDirectory;
-import static ru.yandex.qatools.clay.Aether.MAVEN_CENTRAL_URL;
-import static ru.yandex.qatools.clay.Aether.aether;
-import static ru.yandex.qatools.clay.maven.settings.FluentProfileBuilder.newProfile;
-import static ru.yandex.qatools.clay.maven.settings.FluentRepositoryBuilder.newRepository;
-import static ru.yandex.qatools.clay.maven.settings.FluentRepositoryPolicyBuilder.newRepositoryPolicy;
-import static ru.yandex.qatools.clay.maven.settings.FluentSettingsBuilder.newSettings;
+import static ru.qatools.clay.aether.Aether.MAVEN_CENTRAL_URL;
+import static ru.qatools.clay.aether.Aether.aether;
+import static ru.qatools.clay.maven.settings.FluentProfileBuilder.newProfile;
+import static ru.qatools.clay.maven.settings.FluentRepositoryBuilder.newRepository;
+import static ru.qatools.clay.maven.settings.FluentRepositoryPolicyBuilder.newRepositoryPolicy;
+import static ru.qatools.clay.maven.settings.FluentSettingsBuilder.newSettings;
 
 /**
  * Plugins loader from the remote maven repository (using Eclipse Aether)

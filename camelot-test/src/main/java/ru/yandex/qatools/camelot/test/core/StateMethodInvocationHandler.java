@@ -4,7 +4,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.yandex.qatools.clay.utils.lang3.NoClassNameStyle;
+import ru.qatools.clay.utils.lang3.NoClassNameStyle;
 
 import java.lang.reflect.Method;
 

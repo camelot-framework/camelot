@@ -7,7 +7,6 @@ import ru.yandex.qatools.matchers.decorators.MatcherDecorators;
 
 import static ch.lambdaj.Lambda.having;
 import static ch.lambdaj.Lambda.on;
-import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Matchers.any;
@@ -78,7 +77,7 @@ public class CamelotTestRunnerTest {
 
     @Test
     public void testRouteWithinResource() throws Exception {
-        assertTrue("Failed to check routes: must return true", testResource.checkRoutes());
+        assertThat("Failed to check routes: must return true", testResource.checkRoutes());
     }
 
     @Test

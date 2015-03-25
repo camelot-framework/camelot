@@ -182,7 +182,7 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
 
     private void error(final String message, Exception e, String... keys) {
         logger.error(format("[%s] " + message + ": \n%s",
-                addAll(addAll(new String[]{repository}, keys), formatStackTrace(e)))
+                addAll(new String[]{repository}, keys, formatStackTrace(e)))
                 , e);
     }
 }
