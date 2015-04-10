@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Thread.currentThread;
 import static java.util.Arrays.asList;
 import static org.apache.camel.test.spring.CamelSpringTestHelper.setTestClass;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode;
 import static ru.yandex.qatools.camelot.util.MapUtil.map;
-import static ru.yandex.qatools.camelot.util.RandomUtil.randomInt;
 import static ru.yandex.qatools.camelot.util.ReflectUtil.*;
 
 /**
@@ -46,7 +46,7 @@ public class CamelotTestRunner extends CamelSpringJUnit4ClassRunner {
             //pool creation
             ClassPool pool = ClassPool.getDefault();
             //extracting the class
-            CtClass cc = pool.makeClass(clazz.getName() + "$CamelotTest" + randomInt());
+            CtClass cc = pool.makeClass(clazz.getName() + "$CamelotTest" + currentThread().getId());
             // create the annotation
             ClassFile ccFile = cc.getClassFile();
             final ConstPool constPool = ccFile.getConstPool();
@@ -83,11 +83,11 @@ public class CamelotTestRunner extends CamelSpringJUnit4ClassRunner {
 
             // transform the ctClass to java class
             Class enhancedClass = cc.toClass();
+            setTestClass(enhancedClass);
             CamelTestContextManager res = new CamelTestContextManager(enhancedClass, getDefaultContextLoaderClassName(clazz));
             // FIXME: hack - we're overriding some vital properties of TestContext!
             for (Method m : getMethodsInClassHierarchy(res.getClass())) {
                 if (m.getName().equals("getTestContext")) {
-                    setTestClass(enhancedClass);
                     m.setAccessible(true);
                     TestContext context = (TestContext) m.invoke(res);
                     context.setAttribute(REAL_TEST_CLASS_ATTR, clazz);
