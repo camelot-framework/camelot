@@ -9,11 +9,11 @@
 
     <amq:broker useJmx="false" persistent="false">
         <amq:transportConnectors>
-            <amq:transportConnector uri="tcp://localhost:62617"/>
+            <amq:transportConnector uri="tcp://${activemq.embedded.bind}"/>
         </amq:transportConnectors>
     </amq:broker>
 
-    <amq:connectionFactory id="jmsFactory" brokerURL="vm://localhost:62617"/>
+    <amq:connectionFactory id="jmsFactory" brokerURL="vm://${activemq.embedded.bind}"/>
 
     <import resource="classpath*:/camelot-core-context.xml"/>
     <import resource="classpath*:/camelot-test-empty-context.xml"/>
