@@ -18,7 +18,6 @@
             http://activemq.apache.org/schema/core
             http://activemq.apache.org/schema/core/activemq-core.xsd">
 
-    <import resource="classpath*:/camelot-test-empty-context.xml"/>
 
     <amq:broker useJmx="false" persistent="false">
         <amq:transportConnectors>
@@ -29,20 +28,6 @@
     <amq:connectionFactory id="jmsFactory" brokerURL="vm://localhost:62617"/>
 
     <import resource="classpath*:/camelot-core-context.xml"/>
+    <import resource="classpath*:/camelot-test-empty-context.xml"/>
 
-    <!-- Beans -->
-    <bean id="configurationProperties" class="ru.yandex.qatools.camelot.test.service.TestPropertiesLoader">
-        <property name="locations">
-            <list>
-                <value>classpath*:camelot.properties</value>
-                <value>classpath:/camelot-test-config.properties</value>
-            </list>
-        </property>
-        <property name="properties">
-            <util:properties>
-                <prop key="activemq.embedded.bind">localhost:#{T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort()}</prop>
-                <prop key="hazelcast.port">#{new String(T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort())}</prop>
-            </util:properties>
-        </property>
-    </bean>
 </beans>
