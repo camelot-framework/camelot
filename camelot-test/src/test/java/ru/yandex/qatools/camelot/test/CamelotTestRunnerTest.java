@@ -30,7 +30,7 @@ import static ru.yandex.qatools.matchers.decorators.MatcherDecorators.should;
 public class CamelotTestRunnerTest {
 
     private static final int TIMEOUT = 3000;
-    public static final String CHECK_VALUE = "test1processedtestValue";
+    private static final String CHECK_VALUE = "test1-processed-test-value";
 
     @PluginMock
     TestAggregator aggMock;
@@ -84,6 +84,6 @@ public class CamelotTestRunnerTest {
     public void testRouteAgain() throws Exception {
         helper.send("test2", UUID, "uuid3");
         verify(prcMock, timeout(TIMEOUT).times(1)).onEvent(eq("test2"));
-        verify(aggMock, timeout(TIMEOUT).times(1)).onEvent(any(TestState.class), eq("test2processedtestValue"));
+        verify(aggMock, timeout(TIMEOUT).times(1)).onEvent(any(TestState.class), eq("test2-processed-test-value"));
     }
 }

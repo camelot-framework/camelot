@@ -45,7 +45,7 @@ public class CamelotTestRunnerWithTimerTest {
         helper.send("test", UUID, KEY);
 
         verify(prcMock, timeout(TIMEOUT).times(1)).onEvent(eq("test"));
-        verify(aggMock, timeout(TIMEOUT).times(1)).onEvent(any(TestState.class), eq("testprocessedtestValue"));
+        verify(aggMock, timeout(TIMEOUT).times(1)).onEvent(any(TestState.class), eq("test-processed-test-value"));
 
         assertThat(stateStorage, should(containStateFor(KEY))
                 .whileWaitingUntil(timeoutHasExpired(TIMEOUT)));

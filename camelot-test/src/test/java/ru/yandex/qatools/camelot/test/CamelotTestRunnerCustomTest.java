@@ -30,7 +30,7 @@ public class CamelotTestRunnerCustomTest {
 
     private static final int TIMEOUT = 5000;
 
-    private static final String STATE_MESSAGE = "testprocessedoverriden";
+    private static final String STATE_MESSAGE = "test-processed-overridden";
 
     @PluginMock(id = "test-aggregator")
     TestAggregator aggMock;
@@ -69,7 +69,7 @@ public class CamelotTestRunnerCustomTest {
             @Override
             public void run() {
                 try {
-                    currentThread().sleep(1000);
+                    sleep(1000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
