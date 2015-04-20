@@ -67,7 +67,7 @@ public class TestAggregator {
     }
 
     @NewState
-    public Object initState(Class stateClass) {
+    public TestState initState(Class<TestState> stateClass) {
         if (isEmpty(mustExistProperty)) {
             throw new RuntimeException("Property must exist!");
         }

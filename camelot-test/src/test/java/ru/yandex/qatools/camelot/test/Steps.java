@@ -20,7 +20,7 @@ import static ru.yandex.qatools.matchers.decorators.MatcherDecorators.should;
  */
 public class Steps {
     private static final int TIMEOUT = 3000;
-    public static final String CHECK_VALUE = "test4processedoverriden";
+    public static final String CHECK_VALUE = "test4-processed-overridden";
 
     @PluginMock
     TestAggregator aggMock;

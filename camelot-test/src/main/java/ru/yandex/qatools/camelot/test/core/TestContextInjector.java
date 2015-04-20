@@ -15,7 +15,7 @@ import java.util.Map;
  * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public class TestContextInjector<P> extends PluginContextInjectorImpl<P> implements PluginContextInjector<P> {
-    private final Map<Class, Class> overridenComponents = new HashMap<>();
+    private final Map<Class, Class> overriddenComponents = new HashMap<>();
     private final PluginContextInjector<P> original;
 
     public TestContextInjector(PluginContextInjector<P> original) {
@@ -32,26 +32,27 @@ public class TestContextInjector<P> extends PluginContextInjectorImpl<P> impleme
         injectComponents(pluginObj, context, exchange);
     }
 
-    private void injectComponents(Object pluginObj, final PluginContext context, final Exchange exchange){
-        original.inject((P) pluginObj, context, exchange);
-        injectOverridenComponents(pluginObj, context, exchange);
+    private void injectComponents(P pluginObj, final PluginContext context, final Exchange exchange){
+        original.inject(pluginObj, context, exchange);
+        injectOverriddenComponents(pluginObj, context, exchange);
     }
 
-    private void injectOverridenComponents(final Object pluginObj, final PluginContext context, final Exchange exchange) {
+    private void injectOverriddenComponents(final Object pluginObj, final PluginContext context, final Exchange exchange) {
         try {
             final Map<Class, Object> components = new HashMap<>();
             injectField(pluginObj.getClass(), PluginComponent.class, pluginObj, new FieldListener<Object>() {
                 @Override
                 public Object found(Field field, AnnotationInfo info) throws Exception {
 
-                    final Class<?> type = overridenComponents.get(field.getType());
+                    @SuppressWarnings("unchecked")
+                    final Class<P> type = (Class<P>) overriddenComponents.get(field.getType());
                     if (type == null) {
                         return field.get(pluginObj);
                     }
 
                     if (!components.containsKey(type)) {
                         try {
-                            final Object instance = type.newInstance();
+                            final P instance = type.newInstance();
                             injectComponents(instance, context, exchange);
                             components.put(type, instance);
                         } catch (Exception e) {
@@ -69,11 +70,11 @@ public class TestContextInjector<P> extends PluginContextInjectorImpl<P> impleme
     }
 
     public void reset() {
-        overridenComponents.clear();
+        overriddenComponents.clear();
     }
 
     public void overrideComponent(Class from, Class to) {
-        overridenComponents.put(from, to);
+        overriddenComponents.put(from, to);
     }
 
 }

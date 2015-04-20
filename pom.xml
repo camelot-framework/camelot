@@ -31,7 +31,7 @@
 
         <activemq.version>5.10.0</activemq.version>
         <camel.version>2.13.2</camel.version>
-        <clay.version>2.3</clay.version>
+        <clay.version>2.4</clay.version>
         <hazelcast.version>3.4.1</hazelcast.version>
         <jackson.version>2.4.4</jackson.version>
         <jaxb.basics.version>0.6.5</jaxb.basics.version>
@@ -334,7 +334,7 @@
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
+                <artifactId>mockito-core</artifactId>
                 <version>1.9.5</version>
             </dependency>
             <dependency>

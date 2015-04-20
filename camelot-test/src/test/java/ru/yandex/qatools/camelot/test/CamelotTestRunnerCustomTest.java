@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -31,7 +30,7 @@ public class CamelotTestRunnerCustomTest {
 
     private static final int TIMEOUT = 5000;
 
-    private static final String STATE_MESSAGE = "testprocessedoverriden";
+    private static final String STATE_MESSAGE = "test-processed-overridden";
 
     @PluginMock(id = "test-aggregator")
     TestAggregator aggMock;
@@ -70,7 +69,7 @@ public class CamelotTestRunnerCustomTest {
             @Override
             public void run() {
                 try {
-                    currentThread().sleep(1000);
+                    sleep(1000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -84,6 +83,6 @@ public class CamelotTestRunnerCustomTest {
                 return success.get();
             }
         });
-        assertTrue("Output listener must be called", success.get());
+        assertThat("Output listener must be called", success.get());
     }
 }

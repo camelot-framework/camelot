@@ -7,7 +7,6 @@ import ru.yandex.qatools.matchers.decorators.MatcherDecorators;
 
 import static ch.lambdaj.Lambda.having;
 import static ch.lambdaj.Lambda.on;
-import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Matchers.any;
@@ -31,7 +30,7 @@ import static ru.yandex.qatools.matchers.decorators.MatcherDecorators.should;
 public class CamelotTestRunnerTest {
 
     private static final int TIMEOUT = 3000;
-    public static final String CHECK_VALUE = "test1processedtestValue";
+    private static final String CHECK_VALUE = "test1-processed-test-value";
 
     @PluginMock
     TestAggregator aggMock;
@@ -78,13 +77,13 @@ public class CamelotTestRunnerTest {
 
     @Test
     public void testRouteWithinResource() throws Exception {
-        assertTrue("Failed to check routes: must return true", testResource.checkRoutes());
+        assertThat("Failed to check routes: must return true", testResource.checkRoutes());
     }
 
     @Test
     public void testRouteAgain() throws Exception {
         helper.send("test2", UUID, "uuid3");
         verify(prcMock, timeout(TIMEOUT).times(1)).onEvent(eq("test2"));
-        verify(aggMock, timeout(TIMEOUT).times(1)).onEvent(any(TestState.class), eq("test2processedtestValue"));
+        verify(aggMock, timeout(TIMEOUT).times(1)).onEvent(any(TestState.class), eq("test2-processed-test-value"));
     }
 }

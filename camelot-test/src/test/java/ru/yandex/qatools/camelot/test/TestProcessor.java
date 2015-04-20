@@ -12,7 +12,7 @@ public class TestProcessor {
 
     @Processor
     public String onEvent(String event) {
-        return event + "processed" + property;
+        return event + "-processed-" + property;
     }
 
     @Processor
