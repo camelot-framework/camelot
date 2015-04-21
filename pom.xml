@@ -43,6 +43,7 @@
         <wro4j.version>1.7.5</wro4j.version>
         <yatomata.version>1.6</yatomata.version>
         <aspectj.version>1.8.4</aspectj.version>
+        <argLine></argLine>
     </properties>
 
     <scm>
@@ -439,7 +440,7 @@
                 <configuration>
                     <testFailureIgnore>false</testFailureIgnore>
                     <argLine>
-                        -javaagent:${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar
+                        ${argLine} -javaagent:${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar
                     </argLine>
                     <properties>
                         <property>
