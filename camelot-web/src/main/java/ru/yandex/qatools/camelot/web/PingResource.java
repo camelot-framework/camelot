@@ -28,6 +28,6 @@ public class PingResource {
     @Produces({MediaType.TEXT_PLAIN})
     public Response ping() {
         testProducer.sendBodyAndHeader(null, UUID, "ping");
-        return Response.ok("0;Ok", MediaType.TEXT_PLAIN).build();
+        return Response.ok().build();
     }
 }
