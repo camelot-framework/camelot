@@ -17,20 +17,17 @@ import javax.ws.rs.core.Response;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.UUID;
 
 @Component
-@Path("/events")
+@Path("/ping")
 @Scope("request")
 public class PingResource {
-
-    private static final Logger logger = LoggerFactory.getLogger(PingResource.class);
 
     @Produce(uri = Constants.INPUT_QUEUE)
     private ProducerTemplate testProducer;
 
     @GET
-    @Path("/ping")
     @Produces({MediaType.TEXT_PLAIN})
     public Response ping() {
         testProducer.sendBodyAndHeader(null, UUID, "ping");
-        return Response.ok("0;Ok", MediaType.TEXT_PLAIN).build();
+        return Response.ok().build();
     }
 }
