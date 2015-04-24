@@ -4,11 +4,11 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.qatools.clay.utils.lang3.NoClassNameStyle;
 
 import java.lang.reflect.Method;
 
 import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
+import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 /**
  * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
@@ -34,7 +34,7 @@ class StateMethodInvocationHandler implements MethodInterceptor {
         Object fetchedObject = stateStorage.fetchState(key);
         if (isToString(method)) {
             return stateClass.getSimpleName()
-                    + reflectionToString(fetchedObject, new NoClassNameStyle());
+                    + reflectionToString(fetchedObject, SHORT_PREFIX_STYLE);
         }
 
         if (fetchedObject != null) {
