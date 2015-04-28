@@ -17,10 +17,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>camelot-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>ru.yandex.qatools.clay</groupId>
-            <artifactId>clay-utils</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>javassist</groupId>
