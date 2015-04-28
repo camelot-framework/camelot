@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.apache.commons.lang.ArrayUtils.addAll;
+import static org.apache.commons.lang3.ArrayUtils.addAll;
 import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 
 public class HazelcastAggregationRepository extends ServiceSupport implements AggregationRepository,
@@ -182,7 +182,7 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
 
     private void error(final String message, Exception e, String... keys) {
         logger.error(format("[%s] " + message + ": \n%s",
-                addAll(addAll(new String[]{repository}, keys), new String[]{formatStackTrace(e)}))
+                addAll(new String[]{repository}, keys, formatStackTrace(e)))
                 , e);
     }
 }

@@ -47,7 +47,7 @@ public class TestResource {
                 @Override
                 public boolean onMessage(Object message, Map<String, Object> headers) {
                     if (message instanceof String) {
-                        checkSuccess.set(message.equals(uuid + "processed" + property));
+                        checkSuccess.set(message.equals(uuid + "-processed-" + property));
                         return true;
                     }
                     return false;

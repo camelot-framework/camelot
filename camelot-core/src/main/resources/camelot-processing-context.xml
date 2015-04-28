@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+            http://camel.apache.org/schema/spring
+            http://camel.apache.org/schema/spring/camel-spring.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <!-- Beans -->
+    <bean id="processingEngine" class="ru.yandex.qatools.camelot.core.impl.ProcessingEngineImpl" init-method="init">
+        <constructor-arg name="configResources" value="${plugins.config.path}"/>
+        <constructor-arg name="camelContext" ref="camelotCamelContext"/>
+        <constructor-arg name="pluginLoader" ref="${camelot.pluginLoader}"/>
+        <constructor-arg name="inputUri" value="ref:events.input"/>
+        <constructor-arg name="outputUri" value="ref:events.output"/>
+        <property name="scheduler" ref="scheduler"/>
+        <property name="buildersFactory" ref="${camelot.factory}"/>
+        <property name="contextInjector">
+            <bean class="ru.yandex.qatools.camelot.core.impl.PluginContextInjectorImpl"/>
+        </property>
+        <property name="resourceBuilder">
+            <bean class="ru.yandex.qatools.camelot.core.builders.SpringPluginResourceBuilder"/>
+        </property>
+        <property name="appConfig">
+            <bean class="ru.yandex.qatools.camelot.core.impl.AppConfigSpringProperties"/>
+        </property>
+        <property name="pluginInitializer">
+            <bean class="ru.yandex.qatools.camelot.core.impl.PluginInitializerWithHazelcastImpl">
+                <constructor-arg name="hazelcastInstance" ref="hazelcastInstance"/>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- ThreadPool profiles -->
+    <bean id="camelotDefaultProfile" class="org.apache.camel.spi.ThreadPoolProfile">
+        <property name="id" value="camelotDefaultProfile"/>
+        <property name="defaultProfile" value="true"/>
+        <property name="timeUnit" value="MILLISECONDS"/>
+        <property name="keepAliveTime" value="${camelot.threadpool.default.keepAliveMillis}"/>
+        <property name="poolSize" value="${camelot.threadpool.default.size}"/>
+        <property name="maxPoolSize" value="${camelot.threadpool.default.maxSize}"/>
+    </bean>
+
+    <bean id="camelotMulticastProfile" class="org.apache.camel.spi.ThreadPoolProfile">
+        <property name="id" value="camelotMulticastProfile"/>
+        <property name="defaultProfile" value="false"/>
+        <property name="timeUnit" value="MILLISECONDS"/>
+        <property name="keepAliveTime" value="${camelot.threadpool.multicast.keepAliveMillis}"/>
+        <property name="poolSize" value="${camelot.threadpool.multicast.size}"/>
+        <property name="maxPoolSize" value="${camelot.threadpool.multicast.maxSize}"/>
+    </bean>
+
+
+</beans>

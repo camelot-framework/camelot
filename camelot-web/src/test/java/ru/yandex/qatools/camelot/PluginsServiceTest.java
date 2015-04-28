@@ -13,8 +13,7 @@ import ru.yandex.qatools.camelot.core.plugins.LifecycleFSM;
 import ru.yandex.qatools.camelot.core.plugins.TestStartedCounterAggregator;
 import ru.yandex.qatools.camelot.error.PluginsSystemException;
 
-import static java.util.Arrays.asList;
-import static org.apache.commons.collections.CollectionUtils.intersection;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
@@ -34,14 +33,16 @@ public class PluginsServiceTest {
         final PluginContext conf = pluginsService.getPluginContext("all-skipped");
         final String basePath = AllSkippedService.class.getName().replaceAll("\\.", "/") + "/";
         assertEquals(basePath, conf.getResDirPath());
-        assertEquals(basePath + "styles.css", conf.getCssPath());
         assertEquals(basePath + "dashboard.html", conf.getDashboardPath());
-        assertEquals(3, intersection(
-                asList(
-                        basePath + "script.js",
-                        basePath + "script.coffee",
-                        basePath + "script2.js"
-                ), conf.getJsPaths()).size());
+        assertThat(conf.getCssPaths(), containsInAnyOrder(
+                basePath + "styles.css",
+                basePath + "more-styles.less"
+        ));
+        assertThat(conf.getJsPaths(), containsInAnyOrder(
+                basePath + "script.js",
+                basePath + "script.coffee",
+                basePath + "script2.js"
+        ));
         assertEquals(basePath + "widget.jade", conf.getWidgetPath());
 
         assertNotNull(conf.getClassLoader());

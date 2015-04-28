@@ -4,11 +4,11 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.yandex.qatools.clay.utils.lang3.NoClassNameStyle;
 
 import java.lang.reflect.Method;
 
 import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
+import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 /**
  * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
@@ -18,9 +18,7 @@ class StateMethodInvocationHandler implements MethodInterceptor {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final StateLoader stateStorage;
-
     private final Class stateClass;
-
     private final String key;
 
     public StateMethodInvocationHandler(StateLoader stateStorage, Class stateClass, String key) {
@@ -30,33 +28,23 @@ class StateMethodInvocationHandler implements MethodInterceptor {
     }
 
     @Override
-    public Object intercept(Object o,
-                            Method method,
-                            Object[] objects,
-                            MethodProxy methodProxy) throws Throwable {
+    public Object intercept(Object o, Method method,
+                            Object[] objects, MethodProxy methodProxy) throws Throwable {
 
         Object fetchedObject = stateStorage.fetchState(key);
         if (isToString(method)) {
             return stateClass.getSimpleName()
-                    + reflectionToString(fetchedObject, new NoClassNameStyle());
+                    + reflectionToString(fetchedObject, SHORT_PREFIX_STYLE);
         }
 
-        if (fetchedObject == null) {
-            try {
-                fetchedObject = stateClass.newInstance();
-            } catch (InstantiationException
-                    | IllegalAccessException
-                    | ExceptionInInitializerError
-                    | SecurityException e) {
-                logger.warn("Unable to find the desired state in the repo " +
-                        "and unable to instantiate a new one with an empty " +
-                        "public constructor. Will have to return null as " +
-                        "a result of " + method.getName() + " invocation!", e);
-                return null;
-            }
+        if (fetchedObject != null) {
+            return method.invoke(fetchedObject, objects);
         }
 
-        return method.invoke(fetchedObject, objects);
+        logger.warn("Unable to find the desired state in the repo. " +
+                "Will have to return null as a result of " +
+                method.getName() + " invocation!");
+        return null;
     }
 
     private boolean isToString(Method method) {

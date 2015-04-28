@@ -16,10 +16,11 @@ import static ru.yandex.qatools.matchers.decorators.MatcherDecorators.should;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public class Steps {
     private static final int TIMEOUT = 3000;
-    public static final String CHECK_VALUE = "test4processedoverriden";
+    public static final String CHECK_VALUE = "test4-processed-overridden";
 
     @PluginMock
     TestAggregator aggMock;
@@ -36,8 +37,11 @@ public class Steps {
     @ClientSenderMock(TestAggregator.class)
     ClientMessageSender sender;
 
-    @ClientSenderMock(value = TestAggregator.class, topic = "test")
-    ClientMessageSender senderTopic;
+    @ClientSenderMock(value = TestAggregator.class, topic = "someComponent")
+    ClientMessageSender senderComponentTopic;
+
+    @ClientSenderMock(value = TestAggregator.class, topic = "someInterface")
+    ClientMessageSender senderInterfaceTopic;
 
     @Resource(TestProcessor.class)
     TestResource testResource;
@@ -46,10 +50,11 @@ public class Steps {
         helper.send("test4", UUID, "uuid1");
         helper.send("test4", UUID, "uuid2");
 
-        verify(prcMock, timeout(TIMEOUT).times(2)).onNodeEvent(eq("test4"));
-        verify(aggMock, timeout(TIMEOUT).times(2)).onNodeEvent(any(TestState.class), eq(CHECK_VALUE));
+        verify(prcMock, timeout(TIMEOUT).times(2)).onEvent(eq("test4"));
+        verify(aggMock, timeout(TIMEOUT).times(2)).onEvent(any(TestState.class), eq(CHECK_VALUE));
         verify(sender, timeout(TIMEOUT).times(2)).send(any(TestState.class));
-        verify(senderTopic, timeout(TIMEOUT).times(2)).send(eq(SomeComponent.class.getName()));
+        verify(senderComponentTopic, timeout(TIMEOUT).times(2)).send(eq(SomeComponent.class.getName()));
+        verify(senderInterfaceTopic, timeout(TIMEOUT).times(2)).send(eq(SomeComponent.class.getName()));
 
         verify(aggMock, timeout(5000).never()).resetState(any(TestState.class));
 

@@ -1,11 +1,11 @@
 h1
     | Plugins
     - display = "none"
-    if this.processing().isLoading() || this.webfront().isLoading()
+    if this.webfront().isLoading()
         - display = "none"
     button.reload-plugins.btn.btn-default(type="button", style="display: #{display}") Reload plugins!
     - display = "none"
-    if this.processing().isLoading() || this.webfront().isLoading()
+    if this.webfront().isLoading()
         - display = "block"
     .progress.progress-striped.active.reload-plugins-loader(style='display: #{display}')
         .progress-bar(role='progressbar', style='width:100%;')

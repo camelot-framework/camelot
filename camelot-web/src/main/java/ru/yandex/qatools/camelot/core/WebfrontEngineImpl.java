@@ -2,7 +2,6 @@ package ru.yandex.qatools.camelot.core;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
-import org.glassfish.jersey.media.sse.SseBroadcaster;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -10,9 +9,8 @@ import org.springframework.core.io.Resource;
 import ru.yandex.qatools.camelot.config.*;
 import ru.yandex.qatools.camelot.core.impl.GenericPluginsEngine;
 import ru.yandex.qatools.camelot.core.impl.IncomingMessagesQueueProcessor;
-import ru.yandex.qatools.camelot.core.web.LocalClientBroadcastersProviderImpl;
+import ru.yandex.qatools.camelot.core.web.AtmosphereClientBroadcastersProvider;
 import ru.yandex.qatools.camelot.core.web.SpringServletFacade;
-import ru.yandex.qatools.camelot.core.web.jackson.JsonSerializer;
 import ru.yandex.qatools.camelot.web.ApiResource;
 
 import java.util.ArrayList;
@@ -96,7 +94,7 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
      * Creates/gets the broadcaster for the plugin
      */
     @Override
-    public SseBroadcaster getBroadcaster(String pluginId, String topic) {
+    public Broadcaster getBroadcaster(String pluginId, String topic) {
         try {
             return getPlugin(pluginId).getContext().getLocalBroadcastersProvider().getBroadcaster(topic);
         } catch (Exception e) {
@@ -157,9 +155,8 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
                 final PluginWeb pluginWeb = new PluginWeb(plugin, new PluginWebContext());
                 plugins.add(pluginWeb);
                 pluginWeb.getContext().setLocalBroadcastersProvider(
-                        new LocalClientBroadcastersProviderImpl(
-                                camelContext,
-                                applicationContext.getBean(JsonSerializer.class),
+                        new AtmosphereClientBroadcastersProvider(
+                                applicationContext,
                                 pluginWeb
                         )
                 );

@@ -8,8 +8,8 @@
 
 package ru.yandex.qatools.camelot.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.camel.spi.AggregationRepository;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import ru.yandex.qatools.camelot.api.*;
 import ru.yandex.qatools.camelot.core.PluginContextInjector;
 import ru.yandex.qatools.camelot.core.builders.SchedulerBuilder;
@@ -27,7 +27,7 @@ import java.util.List;
         "widgetPath",
         "dashboardPath",
         "jsPaths",
-        "cssPath",
+        "cssPaths",
         "resDirPath",
         "resPathMapping",
         "pluginClass",
@@ -42,7 +42,8 @@ public class PluginContext
     protected String dashboardPath;
     @XmlElement(name = "jsPath")
     protected List<String> jsPaths;
-    protected String cssPath;
+    @XmlElement(name = "cssPath")
+    protected List<String> cssPaths;
     protected String resDirPath;
     protected String resPathMapping;
     protected String tmpBufferUri;
@@ -184,23 +185,30 @@ public class PluginContext
     }
 
     /**
-     * Gets the value of the cssPath property.
-     *
-     * @return possible object is
-     *         {@link String }
+     * Gets the value of the cssPaths property.
+     * <p/>
+     * <p/>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the jsPaths property.
+     * <p/>
+     * <p/>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getCssPaths().add(newItem);
+     * </pre>
+     * <p/>
+     * <p/>
+     * <p/>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
      */
-    public String getCssPath() {
-        return cssPath;
-    }
-
-    /**
-     * Sets the value of the cssPath property.
-     *
-     * @param value allowed object is
-     *              {@link String }
-     */
-    public void setCssPath(String value) {
-        this.cssPath = value;
+    public List<String> getCssPaths() {
+        if (cssPaths == null) {
+            cssPaths = new ArrayList<>();
+        }
+        return cssPaths;
     }
 
     /**

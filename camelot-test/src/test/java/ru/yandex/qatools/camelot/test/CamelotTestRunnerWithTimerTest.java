@@ -11,10 +11,10 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static ru.yandex.qatools.matchers.decorators.MatcherDecorators.should;
-import static ru.yandex.qatools.matchers.decorators.TimeoutWaiter.timeoutHasExpired;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.UUID;
 import static ru.yandex.qatools.camelot.test.Matchers.containStateFor;
+import static ru.yandex.qatools.matchers.decorators.MatcherDecorators.should;
+import static ru.yandex.qatools.matchers.decorators.TimeoutWaiter.timeoutHasExpired;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -44,8 +44,8 @@ public class CamelotTestRunnerWithTimerTest {
     public void testRoute() throws Exception {
         helper.send("test", UUID, KEY);
 
-        verify(prcMock, timeout(TIMEOUT).times(1)).onNodeEvent(eq("test"));
-        verify(aggMock, timeout(TIMEOUT).times(1)).onNodeEvent(any(TestState.class), eq("testprocessedtestValue"));
+        verify(prcMock, timeout(TIMEOUT).times(1)).onEvent(eq("test"));
+        verify(aggMock, timeout(TIMEOUT).times(1)).onEvent(any(TestState.class), eq("test-processed-test-value"));
 
         assertThat(stateStorage, should(containStateFor(KEY))
                 .whileWaitingUntil(timeoutHasExpired(TIMEOUT)));

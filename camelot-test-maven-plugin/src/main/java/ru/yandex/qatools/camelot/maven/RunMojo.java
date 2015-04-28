@@ -19,14 +19,14 @@ import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
+import ru.qatools.clay.aether.Aether;
+import ru.qatools.clay.aether.AetherException;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginsConfig;
 import ru.yandex.qatools.camelot.config.PluginsSource;
 import ru.yandex.qatools.camelot.maven.web.ConfigurableWroManagerFactory;
 import ru.yandex.qatools.camelot.maven.web.WroFilter;
-import ru.yandex.qatools.clay.Aether;
-import ru.yandex.qatools.clay.AetherException;
-import ru.yandex.qatools.clay.utils.archive.PathJarEntryFilter;
+import ru.qatools.clay.utils.archive.PathJarEntryFilter;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -47,8 +47,8 @@ import static ru.yandex.qatools.camelot.maven.util.FileUtil.processTemplate;
 import static ru.yandex.qatools.camelot.maven.util.FileUtil.replaceInFile;
 import static ru.yandex.qatools.camelot.util.MapUtil.map;
 import static ru.yandex.qatools.camelot.util.ReflectUtil.resolveResourcesAsStringsFromPattern;
-import static ru.yandex.qatools.clay.Aether.aether;
-import static ru.yandex.qatools.clay.utils.archive.ArchiveUtil.unpackJar;
+import static ru.qatools.clay.aether.Aether.aether;
+import static ru.qatools.clay.utils.archive.ArchiveUtil.unpackJar;
 
 /**
  * @author Dmitry Baev charlie@yandex-team.ru
@@ -254,9 +254,10 @@ public class RunMojo extends AbstractMojo {
     }
 
     public void appendPluginResources(StringBuilder pluginsScripts, Plugin plugin, String baseClass) {
-        for (String js : findTemplatePaths(baseClass, "*", ".js")) {
-            pluginsScripts.append("        script(src='").append(contextPath).append("/plugin/").
-                    append(plugin.getId()).append("/").append(new File(js).getName()).append("')\n");
+        for (String js : findTemplatePaths(baseClass, "**/*", ".js", ".coffee")) {
+            final String prePath = (contextPath.endsWith("/")) ? contextPath.substring(0, contextPath.length() - 1) : contextPath;
+            pluginsScripts.append("        script(src='").append(prePath).append("/plugin/").
+                    append(plugin.getId()).append("/").append(js).append("')\n");
         }
     }
 
@@ -269,7 +270,7 @@ public class RunMojo extends AbstractMojo {
         for (String ext : extensions) {
             try {
                 for (String res : resolveResourcesAsStringsFromPattern("file:" + srcResDir + separator + basePath + fileBaseName + ext)) {
-                    paths.add(res.substring(res.indexOf(basePath)));
+                    paths.add(res.substring(res.indexOf(basePath) + basePath.length()));
                 }
             } catch (Exception e) {
                 getLog().warn("Failed to find template paths", e);

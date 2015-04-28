@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 import java.util.Set;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang.ArrayUtils.addAll;
+import static org.apache.commons.lang3.ArrayUtils.addAll;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
 import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 import static ru.yandex.qatools.camelot.util.SerializeUtil.deserializeFromBytes;

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import ru.yandex.qatools.camelot.api.annotations.Repository;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.error.PluginsSystemException;
 import ru.yandex.qatools.camelot.spring.ClassLoaderBeanDefinition;
@@ -25,7 +24,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
 import static ru.yandex.qatools.camelot.util.NameUtil.pluginResourceBeanName;
 import static ru.yandex.qatools.camelot.util.ReflectUtil.*;
-import static ru.yandex.qatools.camelot.util.ServiceUtil.injectAnnotatedField;
 import static ru.yandex.qatools.camelot.util.ServiceUtil.injectTmpInputBufferProducers;
 
 /**
@@ -78,8 +76,8 @@ public class SpringPluginResourceBuilder implements ResourceBuilder, BeanFactory
     }
 
     private void initResourcesConfig(Class baseClass, Plugin plugin) throws Exception {
-        plugin.getContext().setCssPath(findTemplatePath(baseClass, "styles", CSS_EXTS));
-        plugin.getContext().getJsPaths().addAll(findTemplatePaths(baseClass, "*", JS_EXTS));
+        plugin.getContext().getCssPaths().addAll(findTemplatePaths(baseClass, "**/*", CSS_EXTS));
+        plugin.getContext().getJsPaths().addAll(findTemplatePaths(baseClass, "**/*", JS_EXTS));
         plugin.getContext().setDashboardPath(findTemplatePath(baseClass, "dashboard", TPL_EXTS));
         plugin.getContext().setWidgetPath(findTemplatePath(baseClass, "widget", TPL_EXTS));
         plugin.getContext().setResDirPath(findTemplatePath(baseClass, "", ""));
@@ -135,7 +133,6 @@ public class SpringPluginResourceBuilder implements ResourceBuilder, BeanFactory
             DefaultCamelBeanPostProcessor processor = new DefaultCamelBeanPostProcessor(camelContext);
             processor.postProcessBeforeInitialization(res, null);
             plugin.getContext().getInjector().inject(res, plugin.getContext(), null);
-            injectAnnotatedField(clazz, res, Repository.class, plugin.getContext().getRepository());
             defaultBeanFactory.registerSingleton(beanName, res);
             return res;
         } finally {

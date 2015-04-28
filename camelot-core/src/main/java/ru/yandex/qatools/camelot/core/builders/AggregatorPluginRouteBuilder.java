@@ -47,8 +47,8 @@ public class AggregatorPluginRouteBuilder extends GenericPluginRouteBuilder impl
 
         final Expression aggKey = aggKeyExpression(aggregatorConfig);
         // main aggregation route
-        final RouteDefinition definition = route.
-                setHeader(PLUGIN_ID, constant(pluginId))
+        final RouteDefinition definition = route
+                .setHeader(PLUGIN_ID, constant(pluginId))
                 .setHeader(CORRELATION_KEY, aggKey)
                 .log(DEBUG, pluginId + " input ${in.header.bodyClass}, correlationKey: ${in.header.correlationKey}")
                 .process(strategy);

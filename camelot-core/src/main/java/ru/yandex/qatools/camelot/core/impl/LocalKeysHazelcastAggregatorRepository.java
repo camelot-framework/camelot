@@ -12,6 +12,10 @@ public class LocalKeysHazelcastAggregatorRepository extends HazelcastAggregation
         implements AggregationRepositoryWithLocalKeys {
     @Override
     public Set<String> localKeys() {
-        return getMap().localKeySet();
+        try {
+            return getMap().localKeySet();
+        } catch (UnsupportedOperationException e) {
+            return getMap().keySet();
+        }
     }
 }
