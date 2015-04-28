@@ -13,6 +13,6 @@ public class AtmosphereServlet extends org.atmosphere.cpr.AtmosphereServlet {
     @Override
     public void init(ServletConfig sc) throws ServletException {
         super.init(sc);
-        sc.getServletContext().setAttribute(FRAMEWORK_ATTR, framework);
+        sc.getServletContext().setAttribute(FRAMEWORK_ATTR, framework());
     }
 }
