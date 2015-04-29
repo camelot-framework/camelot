@@ -2,8 +2,7 @@ package ru.yandex.qatools.camelot.core.builders;
 
 import com.hazelcast.core.HazelcastInstance;
 import org.apache.camel.CamelContext;
-
-import static java.util.concurrent.TimeUnit.MINUTES;
+import org.quartz.Scheduler;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -11,7 +10,6 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 public class BuildersFactoryWithHazelcastImpl extends BuildersFactoryImpl {
 
     final HazelcastInstance hazelcastInstance;
-    private long waitForLockSec = MINUTES.toSeconds(5);
 
     public BuildersFactoryWithHazelcastImpl(HazelcastInstance hazelcastInstance) {
         this.hazelcastInstance = hazelcastInstance;
@@ -19,14 +17,11 @@ public class BuildersFactoryWithHazelcastImpl extends BuildersFactoryImpl {
 
     @Override
     public AggregationRepositoryBuilder newRepositoryBuilder(CamelContext camelContext) throws Exception {
-        return new HazelcastAggregationRepositoryBuilder(hazelcastInstance, camelContext, waitForLockSec);
+        return new HazelcastAggregationRepositoryBuilder(hazelcastInstance, camelContext, getWaitForLockSec());
     }
 
-    public long getWaitForLockSec() {
-        return waitForLockSec;
-    }
-
-    public void setWaitForLockSec(long waitForLockSec) {
-        this.waitForLockSec = waitForLockSec;
+    @Override
+    public QuartzInitializer newQuartzInitializer(Scheduler scheduler) throws Exception {
+        return new QuartzHazelcastInitializerImpl(hazelcastInstance, scheduler);
     }
 }

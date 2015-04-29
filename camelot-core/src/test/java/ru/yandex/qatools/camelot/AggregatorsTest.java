@@ -26,6 +26,7 @@ import static ru.yandex.qatools.camelot.core.util.TestEventsUtils.copyOf;
 import static ru.yandex.qatools.camelot.util.DateUtil.calThen;
 import static ru.yandex.qatools.camelot.util.DateUtil.hourAgo;
 import static ru.yandex.qatools.camelot.util.SerializeUtil.checkAndGetBytesInput;
+import static org.hamcrest.Matchers.*;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -292,22 +293,18 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         sendTestEvent("with-timer", new StopAggregatorWithTimer(), uuid1);
         endpointWithTimer.assertIsSatisfied(2000);
         expectExchangeExists(endpointWithTimer,
-                "Output must contain 2 < count1 <= 10 && 1 <= count2 < 5",
+                "Output must contain 1 <= count1 <= 10, 1 <= count2 <= 5",
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
                         CounterState first = checkAndGetBytesInput(CounterState.class,
                                 exchange.getIn().getBody(), classLoader);
                         assertNotNull("First must not be null", first);
-                        boolean res = first.count2 >= 1
-                                && first.count2 <= 10
-                                && first.count >= 1
-                                && first.count <= 5;
-                        assertTrue(String.format(
-                                "Expect 1 <= count1(%d) <= 10, 1 <= count(%d) <= 5 ",
-                                first.count2, first.count), res);
-                        //noinspection ConstantConditions
-                        return res;
+                        assertThat(first.count2, greaterThanOrEqualTo(1));
+                        assertThat(first.count2, lessThanOrEqualTo(10));
+                        assertThat(first.count, greaterThanOrEqualTo(1));
+                        assertThat(first.count, lessThanOrEqualTo(5));
+                        return true;
                     }
                 });
     }
