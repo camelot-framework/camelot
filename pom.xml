@@ -42,8 +42,9 @@
         <spring.version>3.2.10.RELEASE</spring.version>
         <wro4j.version>1.7.5</wro4j.version>
         <yatomata.version>1.6</yatomata.version>
-        <aspectj.version>1.8.4</aspectj.version>
-        <argLine></argLine>
+        <javax.rs-api.version>2.0.1</javax.rs-api.version>
+        <aspectj.version>1.8.5</aspectj.version>
+        <argLine/>
     </properties>
 
     <scm>
@@ -336,7 +337,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>1.9.5</version>
+                <version>1.10.19</version>
             </dependency>
             <dependency>
                 <groupId>org.easymock</groupId>
