@@ -11,6 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.UUID;
@@ -67,7 +68,7 @@ public class CamelotTestRunnerTest {
         verify(senderComponentTopic, timeout(TIMEOUT).times(2)).send(eq(AnotherComponent.class.getName()));
         verify(senderInterfaceTopic, timeout(TIMEOUT).times(2)).send(eq(AnotherComponent.class.getName()));
 
-        verify(aggMock, timeout(5000).never()).resetState(any(TestState.class));
+        verify(aggMock, after(5000).never()).resetState(any(TestState.class));
 
         TestState state = stateStorage.get(TestState.class, "uuid1");
         assertThat(state, should(having(
