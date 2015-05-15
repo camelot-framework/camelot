@@ -27,5 +27,8 @@
         <plugin id="dependent" source="by-custom-header">
             <aggregator>ru.yandex.qatools.camelot.core.plugins.DependentAggregator</aggregator>
         </plugin>
+        <plugin id="resource-only">
+            <resource>ru.yandex.qatools.camelot.core.plugins.ResourceOnlyService</resource>
+        </plugin>
     </source>
 </plugins-config>
