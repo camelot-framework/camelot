@@ -182,7 +182,9 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     private void buildRoutes(final PluginsConfig config) throws Exception {
         for (final PluginsSource source : config.getSources()) {
             for (final Plugin plugin : source.getPlugins()) {
-                addPluginRoutes(plugin);
+                if (pluginCanConsume(plugin)) {
+                    addPluginRoutes(plugin);
+                }
             }
         }
     }
@@ -210,8 +212,9 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
                 }
                 // The rest of the plugins messages go to OUTPUT
                 for (String fromId : pluginsMap.keySet()) {
-                    if (!consumersMap.keySet().contains(fromId)) {
-                        final PluginEndpoints endpoints = pluginsMap.get(fromId).getContext().getEndpoints();
+                    final Plugin plugin = pluginsMap.get(fromId);
+                    if (!consumersMap.keySet().contains(fromId) && pluginCanConsume(plugin)) {
+                        final PluginEndpoints endpoints = plugin.getContext().getEndpoints();
                         from(endpoints.getOutputUri())
                                 .routeId(endpoints.getOutputRouteId())
                                 .multicast()
@@ -249,12 +252,14 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     private Map<String, Set<String>> getPluginsConsumersMap(final Map<String, Plugin> pluginsMap) {
         Map<String, Set<String>> result = new HashMap<>();
         for (final Plugin plugin : pluginsMap.values()) {
-            final String from = plugin.getSource();
-            final String id = plugin.getId();
-            if (!result.containsKey(from)) {
-                result.put(from, new HashSet<String>());
+            if (pluginCanConsume(plugin)) {
+                final String from = plugin.getSource();
+                final String id = plugin.getId();
+                if (!result.containsKey(from)) {
+                    result.put(from, new HashSet<String>());
+                }
+                result.get(from).add(id);
             }
-            result.get(from).add(id);
         }
         return result;
     }
@@ -274,9 +279,11 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
      * Invoke init methods upon the plugin
      */
     protected void initPlugin(Plugin plugin) throws Exception {
-        getPluginInitializer().init(plugin);
-        plugin.getContext().setSchedulerBuilder(schedulerBuildersFactory.build(plugin));
-        plugin.getContext().getSchedulerBuilder().schedule();
+        if (pluginCanConsume(plugin)) {
+            getPluginInitializer().init(plugin);
+            plugin.getContext().setSchedulerBuilder(schedulerBuildersFactory.build(plugin));
+            plugin.getContext().getSchedulerBuilder().schedule();
+        }
     }
 
     /**

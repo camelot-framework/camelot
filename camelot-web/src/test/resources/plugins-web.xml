@@ -16,5 +16,8 @@
         <plugin id="test-started" brokerConfig="?maxConcurrentConsumers=5">
             <aggregator>ru.yandex.qatools.camelot.core.plugins.TestStartedCounterAggregator</aggregator>
         </plugin>
+        <plugin id="resource-only">
+            <resource>ru.yandex.qatools.camelot.core.plugins.ResourceOnlyService</resource>
+        </plugin>
     </source>
 </plugins-config>

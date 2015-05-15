@@ -19,6 +19,7 @@ import ru.yandex.qatools.camelot.core.builders.AggregationRepositoryBuilder;
 import ru.yandex.qatools.camelot.core.builders.BuildersFactory;
 import ru.yandex.qatools.camelot.core.builders.BuildersFactoryImpl;
 import ru.yandex.qatools.camelot.core.builders.ResourceBuilder;
+import ru.yandex.qatools.camelot.error.MetadataException;
 import ru.yandex.qatools.camelot.error.PluginsSystemException;
 
 import javax.xml.bind.JAXBContext;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import static java.lang.String.format;
 import static jodd.util.StringUtil.isEmpty;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
 import static ru.yandex.qatools.camelot.util.IOUtils.readResource;
@@ -310,6 +312,15 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     }
 
     /**
+     * Returns true if plugin contains aggregator or processor
+     * @param plugin
+     */
+    @Override
+    public boolean pluginCanConsume(Plugin plugin) {
+        return !isEmpty(plugin.getAggregator()) || !isEmpty(plugin.getProcessor());
+    }
+
+    /**
      * Is currently plugins are reloading
      */
     @Override
@@ -423,7 +434,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
         camelContext.addRoutes(new RouteBuilder() {
             @Override
             public void configure() throws Exception {
-                if (isListenersEnabled()) {
+                if (isListenersEnabled() && pluginCanConsume(plugin)) {
                     from(plugin.getContext().getEndpoints().getEndpointListenerUri())
                             .log(LoggingLevel.DEBUG, "Plugin " + plugin.getId() + " endpoint listener input " +
                                     "${in.headers." + BODY_CLASS + "}")
@@ -471,7 +482,14 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     protected void initPluginContext(PluginsSource source, final Plugin plugin, PluginContext context, ClassLoader classLoader) throws Exception {
         context.setSource(source);
         plugin.setContext(context);
-        context.setPluginClass(isEmpty(plugin.getAggregator()) ? plugin.getProcessor() : plugin.getAggregator());
+        if (pluginCanConsume(plugin)) {
+            context.setPluginClass(isEmpty(plugin.getAggregator()) ? plugin.getProcessor() : plugin.getAggregator());
+        } else {
+            context.setPluginClass(plugin.getResource());
+        }
+        if (isEmpty(context.getPluginClass())) {
+            throw new MetadataException(format("Plugin class cannot be empty for plugin %s!", plugin.getId()));
+        }
         if (isEmpty(plugin.getId())) {
             plugin.setId(defaultPluginId(plugin));
         }
@@ -483,15 +501,21 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
         context.setId(plugin.getId());
         context.setClassLoader(classLoader);
         context.setInterop(interop);
-        context.setStorage(repositoryBuilder.initStorage(plugin));
-        context.setAggregationRepo(repositoryBuilder.initWritable(plugin));
-        context.setRepository(repositoryBuilder.initReadonly(plugin));
         context.setOutput(initEventProducer(camelContext, endpoints.getProducerUri()));
         context.setMainInput(initEventProducer(camelContext, endpoints.getMainInputUri()));
-        context.setInput(initEventProducer(camelContext, endpoints.getConsumerUri()));
         context.setClientSendersProvider(new ClientSendersProviderImpl(camelContext, endpoints.getClientSendUri()));
-        context.setListener(new EndpointListenerImpl(context));
         context.setInjector(getContextInjector());
+
+        if (pluginCanConsume(plugin)) {
+            context.setInput(initEventProducer(camelContext, endpoints.getConsumerUri()));
+            context.setStorage(repositoryBuilder.initStorage(plugin));
+            context.setAggregationRepo(repositoryBuilder.initWritable(plugin));
+            context.setRepository(repositoryBuilder.initReadonly(plugin));
+            context.setListener(new EndpointListenerImpl(context));
+        } else {
+            logger.warn("Plugin {} does not contain processing code! It contains resource only", plugin.getId());
+        }
+
         context.setAppConfig(initPluginAppConfig(getAppConfig(), classLoader, PROPS_PATH));
     }
 

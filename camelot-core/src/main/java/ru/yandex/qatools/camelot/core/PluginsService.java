@@ -116,4 +116,5 @@ public interface PluginsService {
      */
     String getEngineName();
 
+    boolean pluginCanConsume(Plugin plugin);
 }
