@@ -150,9 +150,11 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
             final TestBuildersFactory factory = ((TestBuildersFactory) engine.getBuildersFactory());
             final CamelContext camelContext = engine.getCamelContext();
             for (Plugin plugin : engine.getPluginsMap().values()) {
-                final Object mock = factory.getMocksStorage().get(plugin.getId());
-                reset(mock);
-                preparePluginMock(plugin, mock);
+                if (engine.pluginCanConsume(plugin)) {
+                    final Object mock = factory.getMocksStorage().get(plugin.getId());
+                    reset(mock);
+                    preparePluginMock(plugin, mock);
+                }
             }
             for (MockedClientSenderInitializer.Provider provider : clientInitializer.getClientSenders().values()) {
                 for (Object mock : provider.getClientSenders().values()) {
@@ -162,13 +164,14 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
             for (Plugin plugin : engine.getPluginsMap().values()) {
                 final PluginContext context = plugin.getContext();
                 final AggregationRepository repo = context.getAggregationRepo();
-                for (String key : repo.getKeys()) {
-                    final Exchange exchange = repo.get(camelContext, key);
-                    repo.remove(camelContext, key, exchange);
+                if (repo != null) {
+                    for (String key : repo.getKeys()) {
+                        final Exchange exchange = repo.get(camelContext, key);
+                        repo.remove(camelContext, key, exchange);
+                    }
+                    // we need to reinitialize the plugin as we have cleared it's state
+                    engine.getPluginInitializer().init(plugin);
                 }
-
-                // we need to reinitialize the plugin as we have cleared it's state
-                engine.getPluginInitializer().init(plugin);
             }
         } else {
             logger.warn("Failed to clear the test context: could not get the ProcessingEngine from the context!");
