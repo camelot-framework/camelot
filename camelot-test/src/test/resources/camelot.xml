@@ -9,5 +9,8 @@
         <plugin id="test-aggregator" source="test-processor">
             <aggregator>ru.yandex.qatools.camelot.test.TestAggregator</aggregator>
         </plugin>
+        <plugin id="resource-only">
+            <resource>ru.yandex.qatools.camelot.core.plugins.ResourceOnlyService</resource>
+        </plugin>
     </source>
 </plugins-config>
