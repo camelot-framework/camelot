@@ -2,6 +2,7 @@ package ru.yandex.qatools.camelot.core;
 
 import org.apache.camel.CamelContext;
 import ru.yandex.qatools.camelot.api.AppConfig;
+import ru.yandex.qatools.camelot.api.EventProducer;
 import ru.yandex.qatools.camelot.api.PluginsInterop;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
@@ -116,5 +117,13 @@ public interface PluginsService {
      */
     String getEngineName();
 
+    /**
+     * Returns the main event producer
+     */
+    EventProducer getMainInput();
+
+    /**
+     * Returns true if plugin has aggregator or processor
+     */
     boolean pluginCanConsume(Plugin plugin);
 }
