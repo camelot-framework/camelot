@@ -12,7 +12,7 @@
 
     <xsd:complexType name="PluginsConfig">
         <xsd:sequence>
-            <xsd:element name="source" type="ns:PluginsSource" minOccurs="1" maxOccurs="unbounded"/>
+            <xsd:element name="source" type="ns:PluginsSource" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
     </xsd:complexType>
 
