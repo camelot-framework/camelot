@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.io.Resource;
 import ru.yandex.qatools.camelot.api.AppConfig;
+import ru.yandex.qatools.camelot.api.EventProducer;
 import ru.yandex.qatools.camelot.api.PluginEndpoints;
 import ru.yandex.qatools.camelot.api.PluginsInterop;
 import ru.yandex.qatools.camelot.config.Plugin;
@@ -60,6 +61,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     private ResourceBuilder resourceBuilder;
     private AppConfig appConfig;
     private String engineName;
+    private EventProducer mainInput;
 
     public GenericPluginsEngine(Resource[] configResources, PluginLoader pluginLoader, CamelContext camelContext,
                                 String inputUri, String outputUri) {
@@ -85,6 +87,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
         this.interop = new PluginsInteropService(this);
 
         try {
+            this.mainInput = initEventProducer(camelContext, inputUri);
             initializePlugins();
             initWebResources();
         } catch (Exception e) {
@@ -311,8 +314,14 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
         this.engineName = engineName;
     }
 
+    @Override
+    public EventProducer getMainInput() {
+        return mainInput;
+    }
+
     /**
      * Returns true if plugin contains aggregator or processor
+     *
      * @param plugin
      */
     @Override
@@ -502,7 +511,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
         context.setClassLoader(classLoader);
         context.setInterop(interop);
         context.setOutput(initEventProducer(camelContext, endpoints.getProducerUri()));
-        context.setMainInput(initEventProducer(camelContext, endpoints.getMainInputUri()));
+        context.setMainInput(mainInput);
         context.setClientSendersProvider(new ClientSendersProviderImpl(camelContext, endpoints.getClientSendUri()));
         context.setInjector(getContextInjector());
 
