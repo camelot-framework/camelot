@@ -38,7 +38,7 @@
         <jetty.version>9.3.0.RC0</jetty.version>
         <jersey.version>2.17</jersey.version>
         <slf4j.version>1.7.12</slf4j.version>
-        <atmosphere.version>2.3.0</atmosphere.version>
+        <atmosphere.version>2.3.1</atmosphere.version>
         <spring.version>4.1.6.RELEASE</spring.version>
         <wro4j.version>1.7.7</wro4j.version>
         <yatomata.version>1.6</yatomata.version>
