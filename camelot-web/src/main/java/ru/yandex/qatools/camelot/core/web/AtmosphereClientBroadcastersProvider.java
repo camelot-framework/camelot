@@ -10,12 +10,14 @@ import ru.yandex.qatools.camelot.core.Broadcaster;
 import ru.yandex.qatools.camelot.core.web.jackson.JsonSerializer;
 import ru.yandex.qatools.camelot.error.PluginsSystemException;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.String.format;
+import static java.net.URLEncoder.encode;
 import static jodd.util.StringUtil.isEmpty;
 
 /**
@@ -58,7 +60,7 @@ public class AtmosphereClientBroadcastersProvider implements LocalClientBroadcas
         }
     }
 
-    private PluginBroadcaster initBroadcaster(String broadcasterId) {
+    private PluginBroadcaster initBroadcaster(String broadcasterId) throws UnsupportedEncodingException {
         AtmosphereFramework framework = null;
         if (appContext instanceof WebApplicationContext) {
             framework = (AtmosphereFramework) ((WebApplicationContext) appContext).getServletContext().
@@ -68,7 +70,7 @@ public class AtmosphereClientBroadcastersProvider implements LocalClientBroadcas
             throw new RuntimeException("Failed to init broadcaster: application context is probably not web application context!");
         }
         final PluginBroadcaster broadcaster = new PluginBroadcaster(plugin, jsonSerializer);
-        broadcaster.initialize(broadcasterId, URI.create("http://localhost/" + broadcasterId), framework.getAtmosphereConfig());
+        broadcaster.initialize(broadcasterId, URI.create(encode("http://localhost/" + broadcasterId, "UTF-8")), framework.getAtmosphereConfig());
         return broadcaster;
     }
 
