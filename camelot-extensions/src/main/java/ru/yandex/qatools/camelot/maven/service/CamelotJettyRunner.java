@@ -128,7 +128,7 @@ public class CamelotJettyRunner {
     public static HandlerList createHandlersForServer(WebAppContext context) {
         HandlerList handlers = new HandlerList();
         final ShutdownHandler shutdownHandler = new JettyKillHandler(SHUTDOWN_PASSWORD, true, true);
-        handlers.setHandlers(new Handler[]{context, shutdownHandler});
+        handlers.setHandlers(new Handler[]{shutdownHandler, context});
         return handlers;
     }
 
