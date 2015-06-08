@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import ru.yandex.qatools.camelot.config.PluginContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -24,18 +25,22 @@ public class ViewHelperTest {
 
     @Test
     public void testLifecycle() {
-        assertEquals("lifecycle", viewHelper.renderPluginDashboard("lifecycle"));
-        assertTrue(viewHelper.renderPluginWidgetContent("lifecycle").contains("No such"));
+        assertEquals("lifecycle", viewHelper.renderPluginDashboard(getContext("lifecycle")));
+        assertTrue(viewHelper.renderPluginWidgetContent(getContext("lifecycle")).contains("No such"));
     }
 
     @Test
     public void testAllSkipped() {
-        assertEquals("all-skipped", viewHelper.renderPluginDashboard("all-skipped"));
-        assertEquals(PluginViewHelper.class.getSimpleName(), viewHelper.renderPluginWidgetContent("all-skipped"));
+        assertEquals("all-skipped", viewHelper.renderPluginDashboard(getContext("all-skipped")));
+        assertEquals(PluginViewHelper.class.getSimpleName(), viewHelper.renderPluginWidgetContent(getContext("all-skipped")));
     }
 
     @Test
     public void testTestStarted() {
-        assertEquals("<p>Hello, World!</p>Hey", viewHelper.renderPluginDashboard("test-started"));
+        assertEquals("<p>Hello, World!</p>Hey", viewHelper.renderPluginDashboard(getContext("test-started")));
+    }
+
+    private PluginContext getContext(String pluginId) {
+        return viewHelper.pluginsService.getPluginContext(pluginId);
     }
 }

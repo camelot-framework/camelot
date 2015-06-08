@@ -3,7 +3,7 @@ package ru.yandex.qatools.camelot.web;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import ru.yandex.qatools.camelot.config.Plugin;
+import ru.yandex.qatools.camelot.config.PluginWebContext;
 import ru.yandex.qatools.camelot.core.WebfrontEngine;
 import ru.yandex.qatools.camelot.core.web.ViewHelper;
 
@@ -29,8 +29,8 @@ public class PluginIndexResource extends BasicViewResource {
         return "Plugin " + pluginId;
     }
 
-    public Plugin getPlugin() {
-        return pluginsService.getPlugin(pluginId);
+    public PluginWebContext getPlugin() {
+        return pluginsService.getPluginContext(pluginId);
     }
 
     public ViewHelper getViewHelper() {
