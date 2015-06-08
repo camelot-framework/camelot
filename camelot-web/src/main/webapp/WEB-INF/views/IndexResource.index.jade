@@ -9,6 +9,6 @@ div(ng-app="camelotDashboard")
         - pContext = plugin.getContext()
         if pContext.getWidgetPath() != null
             script(type="text/ng-template", id="#{plugin.getId()}")
-                != helper.renderPluginWidgetContent(plugin.getId())
+                != helper.renderPluginWidgetContent(pContext)
     script(type="text/ng-template", id="settings")
         != view.render("blocks/SettingsWidget.jade")

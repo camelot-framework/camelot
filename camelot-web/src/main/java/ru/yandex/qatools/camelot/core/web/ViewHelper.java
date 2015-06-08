@@ -51,17 +51,15 @@ public class ViewHelper {
     /**
      * Renders the plugin's dashboard
      */
-    public String renderPluginDashboard(String pluginId) {
-        final PluginContext config = pluginsService.getPluginContext(pluginId);
-        return renderPluginTemplate(pluginId, config.getDashboardPath());
+    public String renderPluginDashboard(PluginContext context) {
+        return renderPluginTemplate(context, context.getDashboardPath());
     }
 
     /**
      * Renders the plugin's widget
      */
-    public String renderPluginWidgetContent(String pluginId) {
-        final PluginContext config = pluginsService.getPluginContext(pluginId);
-        return renderPluginTemplate(pluginId, config.getWidgetPath());
+    public String renderPluginWidgetContent(PluginContext context) {
+        return renderPluginTemplate(context, context.getWidgetPath());
     }
 
     /**
@@ -85,8 +83,7 @@ public class ViewHelper {
     /**
      * Renders the plugin template file with context
      */
-    private String renderPluginTemplate(String pluginId, String templatePath) {
-        final PluginContext context = pluginsService.getPluginContext(pluginId);
+    private String renderPluginTemplate(PluginContext context, String templatePath) {
         if (!isEmpty(templatePath)) {
             try {
                 return renderSource(
@@ -99,7 +96,7 @@ public class ViewHelper {
                 return "Failed to render plugin template: " + e.getMessage();
             }
         }
-        return "No such template found for plugin '" + pluginId + "' (" + templatePath + ")!";
+        return "No such template found for plugin '" + context.getId() + "' (" + templatePath + ")!";
     }
 
     /**

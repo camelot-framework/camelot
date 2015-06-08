@@ -2,4 +2,5 @@
 - plugin = this.getPlugin()
 script
     angular.module('camelotUtil').value('pluginId', '#{plugin.getId()}')
-!= helper.renderPluginDashboard(this.getPluginId())
+div(ng-app="#{plugin.pluginClass}.dashboard")
+    != helper.renderPluginDashboard(plugin)
