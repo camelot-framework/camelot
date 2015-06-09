@@ -2,7 +2,7 @@
     button.close(ng-click='$close()') &times;
     h4.modal-title Plugins settings
 .modal-body.settings_modal
-    .media(ng-repeat='plugin in plugins')
+    .media(ng-repeat="plugin in plugins | orderBy:['-hasWidget','active','name']")
         button.btn.btn-default.pull-right(ng-show='plugin.hasWidget && !plugin.active', ng-click='activate(plugin)') Add to dashboard
         button.btn.btn-danger.pull-right(ng-show='plugin.active', ng-click='deactivate(plugin)') Remove
         h4.media-heading {{plugin.name}}
