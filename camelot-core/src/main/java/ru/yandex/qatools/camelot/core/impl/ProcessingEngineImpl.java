@@ -66,7 +66,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
         }
 
         try {
-            buildConsumersRoutes(getPluginsMap());
+            buildConsumersRoutes();
         } catch (Exception e) {
             logger.error("Could not build consumers routes from plugins", e);
         }
@@ -126,7 +126,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
             for (PluginsConfig config : getConfigs()) {
                 buildRoutes(config);
             }
-            buildConsumersRoutes(getPluginsMap());
+            buildConsumersRoutes();
         } catch (Exception e) {
             logger.error("Failed to reload plugins!", e);
         }
@@ -192,21 +192,25 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     /**
      * Builds all the consumers routes
      */
-    private void buildConsumersRoutes(final Map<String, Plugin> pluginsMap) throws Exception {
-        final Map<String, Set<String>> consumersMap = getPluginsConsumersMap(pluginsMap);
+    private void buildConsumersRoutes() throws Exception {
+        final Map<String, Plugin> pluginsMap = getPluginsMap();
+        final Map<String, Set<String>> consumersMap = getPluginsConsumersMap();
         // Add route to populate all the completed tests events to all the registered plugins or to stop
         camelContext.addRoutes(new RouteBuilder() {
             @Override
             public void configure() throws Exception {
                 // Producer plugins messages go to the consumers from INPUT or other plugin
                 for (String fromId : consumersMap.keySet()) {
-                    final String fromUri = (fromId == null) ? inputUri : pluginsMap.get(fromId).getContext().getEndpoints().getOutputUri();
+                    final String fromUri = fromId == null ? inputUri
+                            : pluginsMap.get(fromId).getContext().getEndpoints().getOutputUri();
                     String[] consumers = calcConsumers(fromId, consumersMap.get(fromId));
                     from(fromUri)
                             .multicast()
                             .executorServiceRef(CAMELOT_MULTICAST_PROFILE)
                             .parallelProcessing()
-                            .log(DEBUG, "Event from " + fromUri + " to [" + StringUtils.join(consumers, ",") + "]: ${in.header.bodyClass}")
+                            .log(DEBUG, format(
+                                    "Event from %s to [%s]: ${in.header.bodyClass}",
+                                    fromUri, StringUtils.join(consumers, ",")))
                             .to(consumers)
                             .routeId(routeId(fromUri, consumers));
                 }
@@ -249,11 +253,15 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     /**
      * Calc consumer plugins map for each plugin
      */
-    private Map<String, Set<String>> getPluginsConsumersMap(final Map<String, Plugin> pluginsMap) {
+    private Map<String, Set<String>> getPluginsConsumersMap() {
         Map<String, Set<String>> result = new HashMap<>();
-        for (final Plugin plugin : pluginsMap.values()) {
+        for (final Plugin plugin : getPluginsMap().values()) {
             if (pluginCanConsume(plugin)) {
-                final String from = plugin.getSource();
+                String source = plugin.getSource();
+                String from = source;
+                if (source != null && !getPluginsMap().containsKey(source)) {
+                    from = getPluginsByClassMap().get(source).getId();
+                }
                 final String id = plugin.getId();
                 if (!result.containsKey(from)) {
                     result.put(from, new HashSet<String>());
@@ -300,7 +308,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     @Override
     protected void stopRoutes(final Plugin plugin) throws Exception {
         super.stopRoutes(plugin);
-        final Map<String, Set<String>> consumersMap = getPluginsConsumersMap(getPluginsMap());
+        final Map<String, Set<String>> consumersMap = getPluginsConsumersMap();
         for (String fromId : consumersMap.keySet()) {
             final String fromUri = (fromId == null) ? inputUri : pluginsMap.get(fromId).getContext().getEndpoints().getOutputUri();
             String[] consumers = calcConsumers(fromId, consumersMap.get(fromId));
