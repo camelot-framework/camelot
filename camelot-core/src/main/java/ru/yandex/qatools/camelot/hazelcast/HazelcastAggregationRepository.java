@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.apache.commons.lang3.ArrayUtils.addAll;
 import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 
 public class HazelcastAggregationRepository extends ServiceSupport implements AggregationRepository,
@@ -45,18 +44,18 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     @Override
     public Exchange add(CamelContext camelContext, String key, Exchange exchange) {
         try {
-            debug("Adding new exchange, updating map.tryPut('%s')...", key);
+            debug("Adding new exchange, updating map.tryPut('{}')...", key);
             DefaultExchangeHolder holder = DefaultExchangeHolder.marshal(exchange);
             map.tryPut(key, holder, waitForLockSec, TimeUnit.SECONDS);
             return toExchange(camelContext, holder);
         } catch (Exception e) {
-            error("Failed to update map for key '%s'", e, key);
+            error("Failed to update map for key '{}", e, key);
         } finally {
-            debug("Unlocking key map.forceUnlock('%s')...", key);
+            debug("Unlocking key map.forceUnlock('{}')...", key);
             try {
                 map.forceUnlock(key);
             } catch (Exception e) {
-                error("Failed to force unlock the exchange for key '%s'", e, key);
+                error("Failed to force unlock the exchange for key '{}'", e, key);
             }
         }
         return null;
@@ -65,13 +64,13 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     @Override
     public Exchange get(CamelContext camelContext, String key) {
         try {
-            debug("Getting from context. map.tryLock('%s'), map.get('%s')...", key, key);
+            debug("Getting from context. map.get('{}')...", key);
             if (map.tryLock(key, waitForLockSec, TimeUnit.SECONDS)) {
                 return toExchange(camelContext, map.get(key));
             }
             throw new RuntimeException("Failed to acquire the lock for the key within timeout of " + waitForLockSec + "s");
         } catch (Exception e) {
-            error("Failed to get the exchange for key '%s'", e, key);
+            error("Failed to get the exchange for key '{}'", e, key);
         }
         return null;
     }
@@ -93,22 +92,22 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     @Override
     public void lock(String key) {
         try {
-            debug("Locking key map.tryLock('%s')...", key);
+            debug("Locking key map.tryLock('{}')...", key);
             if (!map.tryLock(key, waitForLockSec, TimeUnit.SECONDS)) {
                 throw new RuntimeException("Failed to lock within timeout of " + waitForLockSec + "s");
             }
         } catch (Exception e) {
-            error("Failed to lock the key '%s'", e, key);
+            error("Failed to lock the key '{}'", e, key);
         }
     }
 
     @Override
     public void unlock(String key) {
         try {
-            debug("Forcing the unlock of key map.forceUnlock('%s')...", key);
+            debug("Forcing the unlock of key map.forceUnlock('{}')...", key);
             map.forceUnlock(key);
         } catch (Exception e) {
-            error("Failed to unlock the key '%s'", e, key);
+            error("Failed to unlock the key '{}'", e, key);
         }
     }
 
@@ -120,29 +119,29 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     @Override
     public void remove(CamelContext camelContext, String key, Exchange exchange) {
         try {
-            debug("Removing key map.tryRemove('%s')...", key);
+            debug("Removing key map.tryRemove('{}')...", key);
             if (map.containsKey(key) && !map.tryRemove(key, waitForLockSec, TimeUnit.SECONDS)) {
                 throw new RuntimeException("Failed to remove the exchange within timeout of " + waitForLockSec + "s");
             }
         } catch (Exception e) {
-            error("Failed to remove the exchange for key '%s'", e, key);
+            error("Failed to remove the exchange for key '{}'", e, key);
         } finally {
-            debug("Forcing unlock map.forceUnlock('%s')", key);
+            debug("Forcing unlock map.forceUnlock('{}')", key);
             try {
                 map.forceUnlock(key);
             } catch (Exception e) {
-                error("Failed to force unlock the exchange for key '%s'", e, key);
+                error("Failed to force unlock the exchange for key '{}'", e, key);
             }
         }
     }
 
     @Override
     public void confirm(CamelContext camelContext, String key) {
-        debug("Forcing unlock map.forceUnlock('%s')", key);
+        debug("Forcing unlock map.forceUnlock('{}')", key);
         try {
             map.forceUnlock(key);
         } catch (Exception e) {
-            error("Failed to force unlock the exchange for key '%s'", e, key);
+            error("Failed to force unlock the exchange for key '{}'", e, key);
         }
     }
 
@@ -176,13 +175,12 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     }
 
 
-    private void debug(final String message, String... keys) {
-        logger.debug(format("[%s] " + message, addAll(new String[]{repository}, keys)));
+    private void debug(final String message, String key) {
+        logger.debug("[{}] " + message, repository, key);
     }
 
-    private void error(final String message, Exception e, String... keys) {
-        logger.error(format("[%s] " + message + ": \n%s",
-                addAll(new String[]{repository}, keys, formatStackTrace(e)))
-                , e);
+    private void error(final String message, Exception e, String key) {
+        logger.error(format("[{}] " + message + ": \n{}",
+                repository, key, formatStackTrace(e), e));
     }
 }
