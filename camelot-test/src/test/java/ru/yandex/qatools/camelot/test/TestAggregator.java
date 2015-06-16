@@ -16,6 +16,7 @@ import static ru.yandex.qatools.camelot.api.Constants.Headers.UUID;
 @FSM(start = TestState.class)
 @Transitions({@Transit(on = String.class), @Transit(stop = true, on = Float.class)})
 public class TestAggregator {
+
     @InjectHeader(UUID)
     String uuid;
 
@@ -35,11 +36,19 @@ public class TestAggregator {
     SomeInterface someInterface;
 
     @ConfigValue("camelot-test.property.mustExists")
-    String mustExistProperty = null;
+    String mustExistProperty;
 
     @AggregationKey
     public String byUuid(Object event) {
         return uuid;
+    }
+
+    @NewState
+    public TestState initState(Class<TestState> stateClass) {
+        if (isEmpty(mustExistProperty)) {
+            throw new RuntimeException("Property must exist!");
+        }
+        return new TestState();
     }
 
     @OnTransit
@@ -66,11 +75,8 @@ public class TestAggregator {
         state.setMessage(null);
     }
 
-    @NewState
-    public TestState initState(Class<TestState> stateClass) {
-        if (isEmpty(mustExistProperty)) {
-            throw new RuntimeException("Property must exist!");
-        }
-        return new TestState();
+    @OnTimer(cron = "* * * * * ?", readOnly = false)
+    public void setFlag(TestState state) {
+        state.setCronFlag(true);
     }
 }

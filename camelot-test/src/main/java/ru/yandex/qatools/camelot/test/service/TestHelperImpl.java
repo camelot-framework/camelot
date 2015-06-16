@@ -3,8 +3,6 @@ package ru.yandex.qatools.camelot.test.service;
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
 import org.apache.camel.ProducerTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.core.ProcessingEngine;
@@ -17,9 +15,10 @@ import static ru.yandex.qatools.camelot.util.MapUtil.map;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public class TestHelperImpl implements CamelContextAware, TestHelper {
-    final private Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     ProcessingEngine pluginsService;
 
@@ -90,7 +89,31 @@ public class TestHelperImpl implements CamelContextAware, TestHelper {
                     pluginsService.getCamelContext()
             ).build(plugin).invokeJobs();
         } catch (Exception e) {
-            logger.error("Failed to invoke timers for the plugin %s", plugin.getId(), e);
+            // that's an error of the test, rethrowing exception
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void invokeTimerFor(Class pluginClass, String method) {
+        invokeTimer(pluginsService.getPlugin(pluginClass), method);
+    }
+
+    @Override
+    public void invokeTimerFor(String pluginId, String method) {
+        invokeTimer(pluginsService.getPlugin(pluginId), method);
+    }
+
+    @Override
+    public void invokeTimer(Plugin plugin, String method) {
+        try {
+            pluginsService.getBuildersFactory().newSchedulerBuildersFactory(
+                    pluginsService.getScheduler(),
+                    pluginsService.getCamelContext()
+            ).build(plugin).invokeJob(method);
+        } catch (Exception e) {
+            // that's an error of the test, rethrowing exception
+            throw new RuntimeException(e);
         }
     }
 
