@@ -45,7 +45,7 @@ public class CamelotTestRunnerWithTimerTest {
     private TestState state;
 
     @Before
-    public void initAggregator() throws Exception {
+    public void initAggregator() {
         helper.send("test", UUID, KEY);
         verify(prcMock, timeout(TIMEOUT))
                 .onEvent(eq("test"));
@@ -57,7 +57,7 @@ public class CamelotTestRunnerWithTimerTest {
     }
 
     @Test
-    public void testInvokingAllTimers() throws Exception {
+    public void testInvokingAllTimers() {
         helper.invokeTimersFor(TestAggregator.class);
 
         verifyResetStateCalled(1);
@@ -67,7 +67,7 @@ public class CamelotTestRunnerWithTimerTest {
     }
 
     @Test
-    public void testInvokingResetStateTimerOnly() throws Exception {
+    public void testInvokingResetStateTimerOnly() {
         helper.invokeTimerFor(TestAggregator.class, "resetState");
 
         verifyResetStateCalled(1);
@@ -77,7 +77,7 @@ public class CamelotTestRunnerWithTimerTest {
     }
 
     @Test
-    public void testInvokingSetFlagTimerOnly() throws Exception {
+    public void testInvokingSetFlagTimerOnly() {
         helper.invokeTimerFor(TestAggregator.class, "setFlag");
 
         verifyResetStateCalled(0);
@@ -86,14 +86,34 @@ public class CamelotTestRunnerWithTimerTest {
         assertFlag(true);
     }
 
-    @Test
-    public void testInvokingNotExistentTimer() throws Exception {
-        helper.invokeTimerFor(TestAggregator.class, "blkjhsdgfksdyufgks");
+    @Test(expected = NullPointerException.class)
+    public void testInvokingNotExistentTimer() throws Throwable {
+        try {
+            helper.invokeTimerFor(TestAggregator.class, "blkjhsdgfksdyufgks");
+        } catch (RuntimeException e) {
+            assertThat(e.getClass().getName(), is(RuntimeException.class.getName()));
+            throw e.getCause();
+        }
+    }
 
-        verifyResetStateCalled(0);
-        verifySetFlagCalled(0);
-        assertMessage(notNullValue());
-        assertFlag(false);
+    @Test(expected = NullPointerException.class)
+    public void testInvokingTimerWithNullMethodName() throws Throwable {
+        try {
+            helper.invokeTimerFor(TestAggregator.class, null);
+        } catch (RuntimeException e) {
+            assertThat(e.getClass().getName(), is(RuntimeException.class.getName()));
+            throw e.getCause();
+        }
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testInvokingTimerWithEmptyMethodName() throws Throwable {
+        try {
+            helper.invokeTimerFor(TestAggregator.class, "");
+        } catch (RuntimeException e) {
+            assertThat(e.getClass().getName(), is(RuntimeException.class.getName()));
+            throw e.getCause();
+        }
     }
 
     private void verifyResetStateCalled(int numberOfInvocations) {

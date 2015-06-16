@@ -3,8 +3,6 @@ package ru.yandex.qatools.camelot.test.service;
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
 import org.apache.camel.ProducerTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.core.ProcessingEngine;
@@ -20,8 +18,6 @@ import static ru.yandex.qatools.camelot.util.MapUtil.map;
  * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public class TestHelperImpl implements CamelContextAware, TestHelper {
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     ProcessingEngine pluginsService;
@@ -93,7 +89,8 @@ public class TestHelperImpl implements CamelContextAware, TestHelper {
                     pluginsService.getCamelContext()
             ).build(plugin).invokeJobs();
         } catch (Exception e) {
-            logger.error("Failed to invoke timers for plugin {}", plugin.getId(), e);
+            // that's an error of the test, rethrowing exception
+            throw new RuntimeException(e);
         }
     }
 
@@ -115,8 +112,8 @@ public class TestHelperImpl implements CamelContextAware, TestHelper {
                     pluginsService.getCamelContext()
             ).build(plugin).invokeJob(method);
         } catch (Exception e) {
-            logger.error("Failed to invoke timer method {} for plugin {}",
-                    method, plugin.getId(), e);
+            // that's an error of the test, rethrowing exception
+            throw new RuntimeException(e);
         }
     }
 
