@@ -6,6 +6,7 @@ import java.util.Map;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public interface TestHelper {
     void sendTo(Class pluginClass, Object event);
@@ -31,4 +32,10 @@ public interface TestHelper {
     void invokeTimersFor(String pluginId);
 
     void invokeTimers(Plugin plugin);
+
+    void invokeTimerFor(Class pluginClass, String method);
+
+    void invokeTimerFor(String pluginId, String method);
+
+    void invokeTimer(Plugin plugin, String method);
 }

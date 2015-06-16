@@ -74,4 +74,9 @@ public class TestAggregator {
     public void resetState(TestState state) {
         state.setMessage(null);
     }
+
+    @OnTimer(cron = "* * * * * ?", readOnly = false)
+    public void setFlag(TestState state) {
+        state.setCronFlag(true);
+    }
 }

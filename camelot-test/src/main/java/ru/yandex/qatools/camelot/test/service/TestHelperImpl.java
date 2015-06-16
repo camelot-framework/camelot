@@ -17,9 +17,12 @@ import static ru.yandex.qatools.camelot.util.MapUtil.map;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public class TestHelperImpl implements CamelContextAware, TestHelper {
-    final private Logger logger = LoggerFactory.getLogger(getClass());
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     ProcessingEngine pluginsService;
 
@@ -90,7 +93,30 @@ public class TestHelperImpl implements CamelContextAware, TestHelper {
                     pluginsService.getCamelContext()
             ).build(plugin).invokeJobs();
         } catch (Exception e) {
-            logger.error("Failed to invoke timers for the plugin %s", plugin.getId(), e);
+            logger.error("Failed to invoke timers for plugin {}", plugin.getId(), e);
+        }
+    }
+
+    @Override
+    public void invokeTimerFor(Class pluginClass, String method) {
+        invokeTimer(pluginsService.getPlugin(pluginClass), method);
+    }
+
+    @Override
+    public void invokeTimerFor(String pluginId, String method) {
+        invokeTimer(pluginsService.getPlugin(pluginId), method);
+    }
+
+    @Override
+    public void invokeTimer(Plugin plugin, String method) {
+        try {
+            pluginsService.getBuildersFactory().newSchedulerBuildersFactory(
+                    pluginsService.getScheduler(),
+                    pluginsService.getCamelContext()
+            ).build(plugin).invokeJob(method);
+        } catch (Exception e) {
+            logger.error("Failed to invoke timer method {} for plugin {}",
+                    method, plugin.getId(), e);
         }
     }
 
