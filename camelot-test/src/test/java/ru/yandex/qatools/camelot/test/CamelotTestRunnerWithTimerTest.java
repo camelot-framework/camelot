@@ -2,7 +2,6 @@ package ru.yandex.qatools.camelot.test;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import ru.yandex.qatools.matchers.decorators.MatcherDecorators;
 
 import static ch.lambdaj.Lambda.having;
 import static ch.lambdaj.Lambda.on;
@@ -44,8 +43,10 @@ public class CamelotTestRunnerWithTimerTest {
     public void testRoute() throws Exception {
         helper.send("test", UUID, KEY);
 
-        verify(prcMock, timeout(TIMEOUT).times(1)).onEvent(eq("test"));
-        verify(aggMock, timeout(TIMEOUT).times(1)).onEvent(any(TestState.class), eq("test-processed-test-value"));
+        verify(prcMock, timeout(TIMEOUT).times(1))
+                .onEvent(eq("test"));
+        verify(aggMock, timeout(TIMEOUT).times(1))
+                .onEvent(any(TestState.class), eq("test-processed-test-value"));
 
         assertThat(stateStorage, should(containStateFor(KEY))
                 .whileWaitingUntil(timeoutHasExpired(TIMEOUT)));
@@ -54,6 +55,6 @@ public class CamelotTestRunnerWithTimerTest {
         verify(aggMock, times(1)).resetState(any(TestState.class));
         TestState state = stateStorage.get(TestState.class, KEY);
         assertThat(state, should(having(on(TestState.class).getMessage(), nullValue()))
-                .whileWaitingUntil(MatcherDecorators.timeoutHasExpired(TIMEOUT)));
+                .whileWaitingUntil(timeoutHasExpired(TIMEOUT)));
     }
 }
