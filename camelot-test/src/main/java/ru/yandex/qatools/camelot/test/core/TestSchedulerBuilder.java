@@ -53,12 +53,13 @@ class TestSchedulerBuilder implements SchedulerBuilder {
     @Override
     public boolean invokeJob(String method) throws Exception {
         if (original.invokeJob(method)) {
+            Class pluginClass = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass());
+            final Method m = getMethodFromClassHierarchy(pluginClass, method);
+            final OnTimer onTimer = m.getAnnotation(OnTimer.class);
             AggregatorPluginAnnotatedMethodInvoker invoker =
-                    new AggregatorPluginAnnotatedMethodInvoker(camelContext, plugin, OnTimer.class, false);
+                    new AggregatorPluginAnnotatedMethodInvoker(camelContext, plugin, OnTimer.class, !onTimer.readOnly());
             invoker.process();
             invoker.setPluginInstance(pluginMock);
-            Class pluginClass = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass());
-            Method m = getMethodFromClassHierarchy(pluginClass, method);
             invoker.invoke(m);
             return true;
         }
