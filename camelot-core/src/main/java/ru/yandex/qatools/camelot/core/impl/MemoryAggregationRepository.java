@@ -53,8 +53,7 @@ public class MemoryAggregationRepository extends org.apache.camel.processor.aggr
         try {
             LOGGER.info(format("[%s] Getting the state. tryLock(%s)", plugin.getId(), key));
             getLock(key).tryLock(waitForLockSec, SECONDS);
-            final Exchange exchange = super.get(camelContext, key);
-            return (exchange == null) ? null : exchange.copy();
+            return getWithoutLock(camelContext, key);
         } catch (Exception e) {
             LOGGER.error("Failed to get the key " + key + "! Forcing to unlock...", e);
             unlock(key);
@@ -90,7 +89,8 @@ public class MemoryAggregationRepository extends org.apache.camel.processor.aggr
 
     @Override
     public Exchange getWithoutLock(CamelContext camelContext, String key) {
-        return super.get(camelContext, key);
+        final Exchange exchange = super.get(camelContext, key);
+        return (exchange == null) ? null : exchange.copy();
     }
 
     @Override
