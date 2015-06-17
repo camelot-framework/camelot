@@ -53,7 +53,8 @@ public class MemoryAggregationRepository extends org.apache.camel.processor.aggr
         try {
             LOGGER.info(format("[%s] Getting the state. tryLock(%s)", plugin.getId(), key));
             getLock(key).tryLock(waitForLockSec, SECONDS);
-            return super.get(camelContext, key).copy();
+            final Exchange exchange = super.get(camelContext, key);
+            return (exchange == null) ? null : exchange.copy();
         } catch (Exception e) {
             LOGGER.error("Failed to get the key " + key + "! Forcing to unlock...", e);
             unlock(key);
