@@ -8,8 +8,10 @@ import org.quartz.Scheduler;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public class QuartzHazelcastInitializerImpl extends QuartzInitializerImpl {
-    final HazelcastInstance hazelcastInstance;
+
     public static final String DEFAULT_QUARTZ_LOCK = "defaultQuartzLock";
+
+    private final HazelcastInstance hazelcastInstance;
 
     public QuartzHazelcastInitializerImpl(HazelcastInstance hazelcastInstance, Scheduler scheduler) {
         super(scheduler);
