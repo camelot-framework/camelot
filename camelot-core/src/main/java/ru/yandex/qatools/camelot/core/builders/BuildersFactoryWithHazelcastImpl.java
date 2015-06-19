@@ -9,7 +9,7 @@ import org.quartz.Scheduler;
  */
 public class BuildersFactoryWithHazelcastImpl extends BuildersFactoryImpl {
 
-    final HazelcastInstance hazelcastInstance;
+    private final HazelcastInstance hazelcastInstance;
 
     public BuildersFactoryWithHazelcastImpl(HazelcastInstance hazelcastInstance) {
         this.hazelcastInstance = hazelcastInstance;
