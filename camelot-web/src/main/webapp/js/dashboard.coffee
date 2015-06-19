@@ -100,6 +100,9 @@ camelotApp.directive "widget", ["$compile", "$templateCache", 'baseUrl', ($compi
         "#{baseUrl}/plugin/#{scope.widget.name}"
       scope.closeWidget = ->
         scope.$emit "widgetRemove", scope.widget.name
+      scope.$on "widgetRemove", (e, name) ->
+        if name == scope.widget.name
+          angular.element(body).injector().get('$rootScope').$broadcast('$destroy')
 ]
 
 settingsModule = angular.module 'camelotSettingWidget', ['camelotDashboard', 'ui.bootstrap']
