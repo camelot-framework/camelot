@@ -3,18 +3,20 @@ package ru.yandex.qatools.camelot.core.builders;
 import org.quartz.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.yandex.qatools.camelot.error.PluginsSystemException;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public class QuartzInitializerImpl implements QuartzInitializer {
+
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-    protected Lock lock;
     protected final Scheduler scheduler;
+
+    protected Lock lock;
 
     public QuartzInitializerImpl(Scheduler scheduler) {
         this.scheduler = scheduler;
@@ -43,29 +45,26 @@ public class QuartzInitializerImpl implements QuartzInitializer {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    while (true) {
-                        try {
-                            lock();
-                            logger.warn("This node is now the master Quartz!");
-                            try {
-                                scheduler.start();
-                            } catch (Exception e) {
-                                stop();
-                                logger.warn("Some error occured during scheduler starting", e);
-                                throw new PluginsSystemException(e);
-                            }
-                            return;
-                        } catch (Exception e) {
-                            scheduler.standby();
-                            logger.warn("This node is not the master Quartz and failed to wait for the lock!", e);
-                        }
+                while (true) {
+                    if (lockAndStartScheduler()) {
+                        break;
                     }
-                } catch (Exception e) {
-                    logger.error("Error while trying to wait for the lock from Hazelcast!", e);
                 }
             }
         }).start();
+    }
+
+    private boolean lockAndStartScheduler() {
+        try {
+            lock();
+            scheduler.start();
+            logger.warn("This node is now the master Quartz!");
+            return true;
+        } catch (Exception e) {
+            stop();
+            logger.warn("Unable to start scheduler", e);
+            return false;
+        }
     }
 
     @Override
