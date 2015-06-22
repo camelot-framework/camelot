@@ -3,6 +3,7 @@ package ru.yandex.qatools.camelot.test.core;
 import org.apache.camel.CamelContext;
 import org.quartz.Scheduler;
 import org.springframework.context.ApplicationContext;
+import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.core.builders.*;
 
@@ -53,8 +54,9 @@ public class TestBuildersFactory extends BuildersFactoryImpl {
     }
 
     @Override
-    public QuartzInitializer newQuartzInitializer(Scheduler scheduler) throws Exception {
-        final QuartzInitializer initializer = originalBuildersFactory.newQuartzInitializer(scheduler);
+    public QuartzInitializer newQuartzInitializer(Scheduler scheduler, AppConfig config) throws Exception {
+        final QuartzInitializer initializer = originalBuildersFactory.newQuartzInitializer(scheduler,
+                applicationContext.getBean(AppConfig.class));
         quartzInitializers.add(initializer);
         return initializer;
     }

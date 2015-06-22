@@ -73,7 +73,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
 
         try {
             if (getScheduler() != null) {
-                this.quartzInitializer = getBuildersFactory().newQuartzInitializer(scheduler);
+                this.quartzInitializer = getBuildersFactory().newQuartzInitializer(scheduler, getAppConfig());
                 this.quartzInitializer.start();
             }
         } catch (Exception e) {
