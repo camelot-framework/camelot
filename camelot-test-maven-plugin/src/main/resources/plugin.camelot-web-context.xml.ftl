@@ -13,6 +13,7 @@
 
 
     <import resource="file:${originalAppContextFile}"/>
+    <import resource="${hazelcastContextConfigPath}"/>
 
     <#if useEmbeddedActivemq>
     <amq:broker useJmx="false" persistent="false">

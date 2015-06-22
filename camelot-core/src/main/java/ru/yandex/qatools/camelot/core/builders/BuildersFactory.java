@@ -2,6 +2,7 @@ package ru.yandex.qatools.camelot.core.builders;
 
 import org.apache.camel.CamelContext;
 import org.quartz.Scheduler;
+import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.config.Plugin;
 
 /**
@@ -28,7 +29,7 @@ public interface BuildersFactory {
     /**
      * Initializes the quartz initializer
      */
-    QuartzInitializer newQuartzInitializer(Scheduler scheduler) throws Exception;
+    QuartzInitializer newQuartzInitializer(Scheduler scheduler, AppConfig config) throws Exception;
 
     /**
      * Initializes the scheduler builders factory

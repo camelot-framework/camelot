@@ -3,6 +3,7 @@ package ru.yandex.qatools.camelot.core.builders;
 import com.hazelcast.core.HazelcastInstance;
 import org.apache.camel.CamelContext;
 import org.quartz.Scheduler;
+import ru.yandex.qatools.camelot.api.AppConfig;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -21,7 +22,7 @@ public class BuildersFactoryWithHazelcastImpl extends BuildersFactoryImpl {
     }
 
     @Override
-    public QuartzInitializer newQuartzInitializer(Scheduler scheduler) throws Exception {
-        return new QuartzHazelcastInitializerImpl(hazelcastInstance, scheduler);
+    public QuartzInitializer newQuartzInitializer(Scheduler scheduler, AppConfig config) throws Exception {
+        return new QuartzHazelcastInitializerImpl(hazelcastInstance, scheduler, config);
     }
 }

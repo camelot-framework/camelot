@@ -156,6 +156,9 @@ public class RunMojo extends AbstractMojo {
     @Parameter(defaultValue = "62618")
     protected int activemqPort;
 
+    @Parameter(defaultValue = "classpath*:camelot-hz-context.xml")
+    protected String hazelcastContextConfigPath;
+
     @Parameter(property = "camelot-test.inputUri", defaultValue = "activemq:queue:events.input?maxConcurrentConsumers=5")
     protected String mainInputUri;
 
@@ -406,6 +409,7 @@ public class RunMojo extends AbstractMojo {
         processTemplate(cfg, WEB_CONTEXT_XML_FTL, new FileWriter(newCamelotWebContextFile), map(
                 "useEmbeddedActivemq", useEmbeddedActivemq,
                 "originalAppContextFile", originalAppContextFile.getAbsolutePath(),
+                "hazelcastContextConfigPath", hazelcastContextConfigPath,
                 "activemqBrokers", activemqBrokers,
                 "activemqPort", Integer.toString(activemqPort),
                 "newConfigFile", newConfigFile.getAbsolutePath(),

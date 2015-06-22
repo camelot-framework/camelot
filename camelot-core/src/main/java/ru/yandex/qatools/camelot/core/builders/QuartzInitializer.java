@@ -7,7 +7,9 @@ public interface QuartzInitializer {
     /**
      * Start the scheduler
      */
-    void start() throws Exception;
+    void start();
+
+    void restart();
 
     /**
      * Pause the scheduler
@@ -22,11 +24,23 @@ public interface QuartzInitializer {
     /**
      * Get the lock for current schedulers cluster
      */
-    void lock();
+    boolean lock() throws InterruptedException;
 
     /**
      * Unlock schedulers cluster
      */
     void unlock();
 
+
+    /**
+     * Updates heart beat of master node
+     */
+    void updateHeartBeat();
+
+    boolean isMaster();
+
+    /**
+     * Returns last heart beat of master node
+     */
+    long getLastHartbeat();
 }
