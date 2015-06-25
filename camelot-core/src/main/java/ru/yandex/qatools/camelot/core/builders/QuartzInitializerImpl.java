@@ -73,7 +73,7 @@ public class QuartzInitializerImpl implements QuartzInitializer {
      */
     @Override
     public synchronized void restart() {
-        stop();
+        standby();
         start();
     }
 
@@ -117,7 +117,7 @@ public class QuartzInitializerImpl implements QuartzInitializer {
     }
 
     @Override
-    public long getLastHartbeat() {
+    public long getLastHeartbeat() {
         return lastHeartBeatTime;
     }
 
@@ -128,7 +128,7 @@ public class QuartzInitializerImpl implements QuartzInitializer {
                 break;
             }
             logger.debug("Checking if master Quartz if dead...");
-            if (isTimePassedSince(heartBeatTimeout, getLastHartbeat())) {
+            if (isTimePassedSince(heartBeatTimeout, getLastHeartbeat())) {
                 logger.warn("Last master Quartz heartbeat timeout reached! Unlocking the Quartz lock!");
                 unlock();
             }
