@@ -42,5 +42,5 @@ public interface QuartzInitializer {
     /**
      * Returns last heart beat of master node
      */
-    long getLastHartbeat();
+    long getLastHeartbeat();
 }

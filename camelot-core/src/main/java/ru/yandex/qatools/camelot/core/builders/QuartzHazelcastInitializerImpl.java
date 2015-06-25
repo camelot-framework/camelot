@@ -42,7 +42,7 @@ public class QuartzHazelcastInitializerImpl extends QuartzInitializerImpl {
     }
 
     @Override
-    public long getLastHartbeat() {
+    public long getLastHeartbeat() {
         return lastHeartBeatTime.get();
     }
 
