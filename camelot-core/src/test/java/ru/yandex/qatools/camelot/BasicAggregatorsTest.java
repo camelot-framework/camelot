@@ -32,6 +32,9 @@ public class BasicAggregatorsTest implements CamelContextAware {
     @EndpointInject(uri = "mock:activemq:queue:plugin.output.ru.yandex.qatools.camelot.core.plugins.WithoutIdAggregator")
     protected MockEndpoint endpointWithoutIdOutput;
 
+    @EndpointInject(uri = "mock:activemq:queue:plugin.input.all-skipped")
+    protected MockEndpoint endpointAllSkippedInput;
+
     @EndpointInject(uri = "mock:ref:events.output")
     protected MockEndpoint endpointStop;
 

@@ -15,6 +15,7 @@ public final class Constants {
     public static final String FILTERED_POSTFIX = ".filtered";
     public static final String CONSUMER_POSTFIX = ".consumer";
     public static final String PRODUCER_POSTFIX = ".producer";
+    public static final String DELAYED_POSTFIX = ".delayed";
 
     public static final String BROADCAST_CONFIG = "?receiveTimeout=15000&requestTimeout=10000" +
             "&destination.consumer.maximumPendingMessageLimit=1&destination.consumer.prefetchSize=1" +

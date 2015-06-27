@@ -9,10 +9,7 @@
     <bean id="contextInjector" class="ru.yandex.qatools.camelot.core.impl.PluginContextInjectorImpl"/>
     <bean id="resourceBuilder" class="ru.yandex.qatools.camelot.core.builders.SpringPluginResourceBuilder"/>
     <bean id="appConfig" class="ru.yandex.qatools.camelot.core.impl.AppConfigSpringProperties"/>
-
-    <bean id="pluginInitializer" class="ru.yandex.qatools.camelot.core.impl.PluginInitializerWithHazelcastImpl">
-        <constructor-arg name="hazelcastInstance" ref="hazelcastInstance"/>
-    </bean>
+    <bean id="pluginInitializer" class="ru.yandex.qatools.camelot.core.impl.PluginInitializerImpl"/>
 
     <bean id="processingEngine" class="ru.yandex.qatools.camelot.core.impl.ProcessingEngineImpl" init-method="init">
         <constructor-arg name="configResources" value="${plugins.config.path}"/>

@@ -2,6 +2,7 @@ package ru.yandex.qatools.camelot.hazelcast;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.quorum.QuorumException;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultExchange;
@@ -11,6 +12,8 @@ import org.apache.camel.spi.OptimisticLockingAggregationRepository;
 import org.apache.camel.support.ServiceSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.yandex.qatools.camelot.api.error.RepositoryFailureException;
+import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.core.AggregationRepositoryWithLocks;
 
 import java.util.Collections;
@@ -50,6 +53,7 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
             return toExchange(camelContext, holder);
         } catch (Exception e) {
             error("Failed to update map for key '{}", e, key);
+            throw new RepositoryFailureException("Failed to get exchange for key '" + key + "'", e);
         } finally {
             debug("Unlocking key map.forceUnlock('{}')...", key);
             try {
@@ -58,7 +62,6 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
                 error("Failed to force unlock the exchange for key '{}'", e, key);
             }
         }
-        return null;
     }
 
     @Override
@@ -68,11 +71,14 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
             if (map.tryLock(key, waitForLockSec, TimeUnit.SECONDS)) {
                 return toExchange(camelContext, map.get(key));
             }
-            throw new RuntimeException("Failed to acquire the lock for the key within timeout of " + waitForLockSec + "s");
+            logger.error("Failed to acquire the lock for the key within timeout of " + waitForLockSec + "s");
+            return null;
+        } catch (QuorumException e) {
+            throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
         } catch (Exception e) {
             error("Failed to get the exchange for key '{}'", e, key);
+            throw new RepositoryFailureException("Failed to get exchange for key '" + key + "'", e);
         }
-        return null;
     }
 
     @Override
@@ -123,6 +129,8 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
             if (map.containsKey(key) && !map.tryRemove(key, waitForLockSec, TimeUnit.SECONDS)) {
                 throw new RuntimeException("Failed to remove the exchange within timeout of " + waitForLockSec + "s");
             }
+        } catch (QuorumException e) {
+            throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
         } catch (Exception e) {
             error("Failed to remove the exchange for key '{}'", e, key);
         } finally {
@@ -140,6 +148,8 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
         debug("Forcing unlock map.forceUnlock('{}')", key);
         try {
             map.forceUnlock(key);
+        } catch (QuorumException e) {
+            throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
         } catch (Exception e) {
             error("Failed to force unlock the exchange for key '{}'", e, key);
         }

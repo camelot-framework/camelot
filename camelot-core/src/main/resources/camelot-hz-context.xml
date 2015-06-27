@@ -45,6 +45,10 @@
         </hz:config>
     </hz:hazelcast>
 
+    <bean id="pluginInitializer" class="ru.yandex.qatools.camelot.core.impl.PluginInitializerWithHazelcastImpl">
+        <constructor-arg name="hazelcastInstance" ref="hazelcastInstance"/>
+    </bean>
+
     <!-- Builders Factories -->
     <bean id="FACTORY-HZ" class="ru.yandex.qatools.camelot.core.builders.BuildersFactoryWithHazelcastImpl">
         <constructor-arg name="hazelcastInstance" ref="hazelcastInstance"/>

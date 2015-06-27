@@ -1,5 +1,6 @@
 package ru.yandex.qatools.camelot.core.builders;
 
+import org.apache.camel.CamelContext;
 import ru.yandex.qatools.camelot.api.annotations.Aggregate;
 import ru.yandex.qatools.camelot.beans.AggregatorConfig;
 import ru.yandex.qatools.camelot.beans.AggregatorConfigImpl;
@@ -22,13 +23,15 @@ import static ru.yandex.qatools.camelot.util.ReflectUtil.getAnnotationWithinHier
  */
 public class CamelotAggregationStrategyBuilder implements AggregationStrategyBuilder {
 
+    protected final CamelContext camelContext;
     protected final ClassLoader classLoader;
     protected final PluginContext pluginContext;
     protected AggregatorConfigImpl config;
     protected Class<?> fsmClass;
     protected Object fsmBuilder;
 
-    public CamelotAggregationStrategyBuilder(String fsmClass, PluginContext context) throws Exception {
+    public CamelotAggregationStrategyBuilder(CamelContext camelContext, String fsmClass, PluginContext context) throws Exception {
+        this.camelContext = camelContext;
         this.classLoader = context.getClassLoader();
         this.fsmClass = classLoader.loadClass(fsmClass);
         this.pluginContext = context;
@@ -41,7 +44,7 @@ public class CamelotAggregationStrategyBuilder implements AggregationStrategyBui
      */
     @Override
     public CamelotAggregationStrategy build() throws Exception {
-        return new CamelotAggregationStrategy(classLoader, getFsmBuilder(), pluginContext);
+        return new CamelotAggregationStrategy(camelContext, classLoader, getFsmBuilder(), pluginContext);
     }
 
     @Override

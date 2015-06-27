@@ -38,16 +38,20 @@ public class AggregatorPluginRouteBuilder extends GenericPluginRouteBuilder impl
         CamelotAggregationStrategy strategy = getStrategyBuilder().build();
         AggregatorConfig aggregatorConfig = getStrategyBuilder().getConfig();
 
-        // init default first route endpoint
-        RouteDefinition route = appendSplitterRoutes(
+        from(endpoints.getDelayedInputUri())
+                .delay(plugin.getContext().getAppConfig().getLong("camelot.delayedRoute.delay.ms"))
+                .to(endpoints.getConsumerUri());
+
+        // init default first inputRoute endpoint
+        final RouteDefinition inputRoute = appendSplitterRoutes(
                 appendFilterRoutes(
                         from(endpoints.getInputUri())
                 )
         );
 
         final Expression aggKey = aggKeyExpression(aggregatorConfig);
-        // main aggregation route
-        final RouteDefinition definition = route
+        // main aggregation inputRoute
+        final RouteDefinition definition = inputRoute
                 .setHeader(PLUGIN_ID, constant(pluginId))
                 .setHeader(CORRELATION_KEY, aggKey)
                 .log(DEBUG, pluginId + " input ${in.header.bodyClass}, correlationKey: ${in.header.correlationKey}")
@@ -73,7 +77,7 @@ public class AggregatorPluginRouteBuilder extends GenericPluginRouteBuilder impl
     }
 
     private CamelotAggregationStrategyBuilder newAggregationStrategyBuilder(PluginContext context) throws Exception {
-        return new CamelotAggregationStrategyBuilder(context.getPluginClass(), context);
+        return new CamelotAggregationStrategyBuilder(camelContext, context.getPluginClass(), context);
     }
 
     private Expression aggKeyExpression(AggregatorConfig aggregatorConfig) throws Exception {
