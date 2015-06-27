@@ -3,28 +3,15 @@ package ru.yandex.qatools.camelot.core.impl;
 import ru.yandex.qatools.camelot.api.PluginEndpoints;
 import ru.yandex.qatools.camelot.config.Plugin;
 
-import static ru.yandex.qatools.camelot.Constants.BROADCAST_CONFIG;
-import static ru.yandex.qatools.camelot.Constants.CLIENT_SEND_POSTFIX;
-import static ru.yandex.qatools.camelot.Constants.CONSUMER_POSTFIX;
-import static ru.yandex.qatools.camelot.Constants.FILTERED_POSTFIX;
-import static ru.yandex.qatools.camelot.Constants.PRODUCER_POSTFIX;
-import static ru.yandex.qatools.camelot.Constants.RES_LISTENER_POSTFIX;
-import static ru.yandex.qatools.camelot.Constants.SPLIT_POSTFIX;
-import static ru.yandex.qatools.camelot.util.NameUtil.broadcastRouteId;
-import static ru.yandex.qatools.camelot.util.NameUtil.broadcastUri;
-import static ru.yandex.qatools.camelot.util.NameUtil.localRouteId;
-import static ru.yandex.qatools.camelot.util.NameUtil.localUri;
-import static ru.yandex.qatools.camelot.util.NameUtil.pluginBrokerConfig;
-import static ru.yandex.qatools.camelot.util.NameUtil.pluginInputRouteId;
-import static ru.yandex.qatools.camelot.util.NameUtil.pluginInputUri;
-import static ru.yandex.qatools.camelot.util.NameUtil.pluginOutputRouteId;
-import static ru.yandex.qatools.camelot.util.NameUtil.pluginOutputUri;
+import static ru.yandex.qatools.camelot.Constants.*;
+import static ru.yandex.qatools.camelot.util.NameUtil.*;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public class PluginEndpointsImpl implements PluginEndpoints {
     final String inputUri;
+    final String delayedInputUri;
     final String outputUri;
     final String splitUri;
     final String filteredUri;
@@ -34,6 +21,7 @@ public class PluginEndpointsImpl implements PluginEndpoints {
     final String mainInputUri;
     final String endpointListenerUri;
     final String inputRouteId;
+    final String delayedInputRouteId;
     final String outputRouteId;
     final String splitRouteId;
     final String filteredRouteId;
@@ -51,6 +39,7 @@ public class PluginEndpointsImpl implements PluginEndpoints {
         this.plugin = plugin;
         this.mainInputUri = mainInputUri;
         this.inputUri = pluginInputUri(plugin) + brokerConfig;
+        this.delayedInputUri = pluginInputUri(plugin) + DELAYED_POSTFIX + brokerConfig;
         this.outputUri = pluginOutputUri(plugin) + brokerConfig;
         this.splitUri = localUri(plugin.getId(), SPLIT_POSTFIX);
         this.filteredUri = localUri(plugin.getId(), FILTERED_POSTFIX);
@@ -61,6 +50,7 @@ public class PluginEndpointsImpl implements PluginEndpoints {
 
         this.mainInputRouteId = mainInputUri + engineName;
         this.inputRouteId = pluginInputRouteId(inputUri, engineName);
+        this.delayedInputRouteId = pluginInputRouteId(delayedInputUri, engineName);
         this.outputRouteId = pluginOutputRouteId(outputUri, engineName);
         this.splitRouteId = localRouteId(splitUri, engineName);
         this.filteredRouteId = localRouteId(filteredUri, engineName);
@@ -73,6 +63,11 @@ public class PluginEndpointsImpl implements PluginEndpoints {
     @Override
     public String getInputUri() {
         return inputUri;
+    }
+
+    @Override
+    public String getDelayedInputUri() {
+        return delayedInputUri;
     }
 
     @Override
@@ -123,6 +118,11 @@ public class PluginEndpointsImpl implements PluginEndpoints {
     @Override
     public String getInputRouteId() {
         return inputRouteId;
+    }
+
+    @Override
+    public String getDelayedInputRouteId() {
+        return delayedInputRouteId;
     }
 
     @Override

@@ -21,9 +21,19 @@ public interface PluginEndpoints {
     String getInputUri();
 
     /**
+     * Input uri for the plugin with delay
+     */
+    String getDelayedInputUri();
+
+    /**
      * Input route id for the plugin
      */
     String getInputRouteId();
+
+    /**
+     * Input route id for the plugin
+     */
+    String getDelayedInputRouteId();
 
     /**
      * Output uri for the plugin

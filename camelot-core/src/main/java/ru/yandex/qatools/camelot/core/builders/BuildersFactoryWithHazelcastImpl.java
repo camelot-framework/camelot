@@ -10,7 +10,7 @@ import ru.yandex.qatools.camelot.api.AppConfig;
  */
 public class BuildersFactoryWithHazelcastImpl extends BuildersFactoryImpl {
 
-    private final HazelcastInstance hazelcastInstance;
+    protected final HazelcastInstance hazelcastInstance;
 
     public BuildersFactoryWithHazelcastImpl(HazelcastInstance hazelcastInstance) {
         this.hazelcastInstance = hazelcastInstance;
