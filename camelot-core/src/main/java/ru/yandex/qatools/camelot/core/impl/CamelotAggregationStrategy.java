@@ -11,10 +11,8 @@ import ru.yandex.qatools.camelot.config.PluginContext;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static java.lang.String.format;
 import static org.apache.camel.util.ExchangeHelper.createCorrelatedCopy;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.CORRELATION_KEY;
 import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 
@@ -39,54 +37,63 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
 
     @Override
     public void process(Exchange message) {
-        if (context.isShuttingDown()) {
-            logger.warn("Message is not going to be aggregated due to context shutting down: "
-                    + message.getIn().getBody());
-            return;
-        }
         final String key = (String) message.getIn().getHeader(CORRELATION_KEY);
         if (isEmpty(key)) {
-            logger.warn(format("Empty keys are not allowed! " +
-                    "For plugin %s : skipping aggregation!", key));
+            logger.error("Empty keys are not allowed! SKIPPING MESSAGE: {}", message);
             return;
         }
+
+        if (context.isShuttingDown()) {
+            logger.warn("Context is shutting down, resending message: {}",
+                    message.getIn().getBody());
+            resendWithDelay(message);
+        }
+
         final AggregationRepository repo = context.getAggregationRepo();
         try {
-            final Exchange state = repo.get(camelContext, key);
-            try {
-                final Exchange result = createCorrelatedCopy(super.aggregate(state, message), false);
-                if (isCompleted(result)) {
-                    message.setIn(result.getIn());
-                    repo.remove(camelContext, key, result);
-                } else {
-                    message.getIn().setBody(null);
-                    repo.add(camelContext, key, result);
-                }
-            } catch (InvocationTargetException e) {
-                repo.confirm(camelContext, key);
-                logger.trace("Sonar trick", e);
-                logger.error(format("Failed to aggregate for plugin %s with key '%s': %s! \n %s",
-                                context.getId(), key, e.getMessage(), formatStackTrace(e.getTargetException())),
-                        e.getTargetException());
-            } catch (Exception e) {
-                repo.confirm(camelContext, key);
-                logger.error(format("Failed to aggregate for plugin %s with key '%s': %s",
-                        context.getId(), key, e.getMessage()), e);
-            }
-        } catch (RepositoryFailureException e) {
-            // skip message
-            logger.warn("Repository failure is occurred for plugin '{}' and key '{}', SKIPPING EXCHANGE!...",
-                    context.getId(), key, e);
+            processOrDie(message, key, repo);
         } catch (RepositoryUnreachableException e) {
             // resend with delay
-            if (retryProducer == null) {
-                retryProducer = camelContext.createProducerTemplate();
-                retryProducer.setDefaultEndpointUri(context.getEndpoints().getDelayedInputUri());
-            }
-            logger.warn("Repository is unreachable for plugin '{}' and key '{}', " +
-                            "retrying with delay for body of {}...",
-                    context.getId(), key, message.getIn().getHeader(BODY_CLASS));
-            retryProducer.send(message);
+            logger.warn("Repository is unreachable for plugin '{}', resending message: {}",
+                    context.getId(), message);
+            resendWithDelay(message);
+        } catch (RepositoryFailureException e) {
+            // skip message
+            logger.error("Repository failure occurred for plugin '{}', SKIPPING MESSAGE: {}",
+                    context.getId(), message, e);
+        } catch (InvocationTargetException e) {
+            // sonar trick
+            repo.confirm(camelContext, key);
+            logger.trace("Sonar trick", e);
+            logger.error("Failed to aggregate for plugin '{}', SKIPPING MESSAGE: {} \n {}",
+                    context.getId(), message, formatStackTrace(e.getTargetException()),
+                    e.getTargetException());
+        } catch (Exception e) {
+            repo.confirm(camelContext, key);
+            logger.error("Failed to aggregate for plugin '{}', SKIPPING MESSAGE: {}",
+                    context.getId(), message, e);
+        }
+    }
+
+    private void resendWithDelay(Exchange message) {
+        if (retryProducer == null) {
+            retryProducer = camelContext.createProducerTemplate();
+            retryProducer.setDefaultEndpointUri(context.getEndpoints().getDelayedInputUri());
+        }
+        retryProducer.send(message);
+    }
+
+    private void processOrDie(Exchange message, String key, AggregationRepository repo)
+            throws RepositoryFailureException, RepositoryUnreachableException,
+                   NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        final Exchange state = repo.get(camelContext, key);
+        final Exchange result = createCorrelatedCopy(super.aggregate(state, message), false);
+        if (isCompleted(result)) {
+            message.setIn(result.getIn());
+            repo.remove(camelContext, key, result);
+        } else {
+            message.getIn().setBody(null);
+            repo.add(camelContext, key, result);
         }
     }
 
