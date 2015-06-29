@@ -26,6 +26,7 @@ import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 
 public class HazelcastAggregationRepository extends ServiceSupport implements AggregationRepository,
         OptimisticLockingAggregationRepository, AggregationRepositoryWithLocks {
+
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private HazelcastInstance hazelcastInstance;
@@ -71,12 +72,12 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
             if (map.tryLock(key, waitForLockSec, TimeUnit.SECONDS)) {
                 return toExchange(camelContext, map.get(key));
             }
-            logger.error("Failed to acquire the lock for the key within timeout of " + waitForLockSec + "s");
-            return null;
+            throw new RepositoryFailureException(format(
+                    "Failed to acquire the lock for the key '%s' within timeout of %ds",
+                    key, waitForLockSec));
         } catch (QuorumException e) {
             throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
         } catch (Exception e) {
-            error("Failed to get the exchange for key '{}'", e, key);
             throw new RepositoryFailureException("Failed to get exchange for key '" + key + "'", e);
         }
     }
