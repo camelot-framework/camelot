@@ -53,7 +53,7 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
             map.tryPut(key, holder, waitForLockSec, TimeUnit.SECONDS);
             return toExchange(camelContext, holder);
         } catch (Exception e) {
-            error("Failed to update map for key '{}", e, key);
+            error("Failed to update map for key '{}'", e, key);
             throw new RepositoryFailureException("Failed to get exchange for key '" + key + "'", e);
         } finally {
             debug("Unlocking key map.forceUnlock('{}')...", key);
@@ -191,7 +191,6 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     }
 
     private void error(final String message, Exception e, String key) {
-        logger.error(format("[{}] " + message + ": \n{}",
-                repository, key, formatStackTrace(e), e));
+        logger.error("[{}] " + message + ": \n{}", repository, key, formatStackTrace(e), e);
     }
 }
