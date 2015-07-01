@@ -72,14 +72,15 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
             if (map.tryLock(key, waitForLockSec, TimeUnit.SECONDS)) {
                 return toExchange(camelContext, map.get(key));
             }
-            throw new RepositoryFailureException(format(
-                    "Failed to acquire the lock for the key '%s' within timeout of %ds",
-                    key, waitForLockSec));
         } catch (QuorumException e) {
             throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
         } catch (Exception e) {
             throw new RepositoryFailureException("Failed to get exchange for key '" + key + "'", e);
         }
+
+        throw new RepositoryFailureException(format(
+                "Failed to acquire the lock for the key '%s' within timeout of %ds",
+                key, waitForLockSec));
     }
 
     @Override
