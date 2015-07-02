@@ -6,6 +6,7 @@ import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.spi.AggregationRepository;
 import ru.yandex.qatools.camelot.api.error.RepositoryFailureException;
+import ru.yandex.qatools.camelot.api.error.RepositoryLockWaitException;
 import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.config.PluginContext;
 
@@ -19,7 +20,6 @@ import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-@SuppressWarnings("unchecked")
 public class CamelotAggregationStrategy extends FSMAggregationStrategy implements Processor {
 
     private final PluginContext context;
@@ -53,7 +53,7 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
         final AggregationRepository repo = context.getAggregationRepo();
         try {
             processOrDie(message, key, repo);
-        } catch (RepositoryUnreachableException e) {
+        } catch (RepositoryUnreachableException | RepositoryLockWaitException e) {
             // resend with delay
             logger.warn("Repository is unreachable, resending message for plugin '{}' with key '{}'",
                     context.getId(), key);
@@ -64,15 +64,15 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
                     context.getId(), key, e);
         } catch (InvocationTargetException e) {
             // sonar trick
-            repo.confirm(camelContext, key);
             logger.trace("Sonar trick", e);
             logger.error("Failed to aggregate, SKIPPING MESSAGE for plugin '{}' with key '{}': \n {}",
                     context.getId(), key, formatStackTrace(e.getTargetException()),
                     e.getTargetException());
-        } catch (Exception e) {
             repo.confirm(camelContext, key);
+        } catch (Exception e) {
             logger.error("Failed to aggregate, SKIPPING MESSAGE for plugin '{}' with key '{}'",
                     context.getId(), key, e);
+            repo.confirm(camelContext, key);
         }
     }
 
@@ -99,6 +99,7 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void injectFields(Object procInstance, Exchange exchange) {
         context.getInjector().inject(procInstance, context, exchange);
     }
