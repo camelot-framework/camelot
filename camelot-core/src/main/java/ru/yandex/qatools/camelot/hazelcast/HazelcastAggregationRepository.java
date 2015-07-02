@@ -13,6 +13,7 @@ import org.apache.camel.support.ServiceSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.camelot.api.error.RepositoryFailureException;
+import ru.yandex.qatools.camelot.api.error.RepositoryLockWaitException;
 import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.core.AggregationRepositoryWithLocks;
 
@@ -50,19 +51,18 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
         try {
             debug("Adding new exchange, updating map.tryPut('{}')...", key);
             DefaultExchangeHolder holder = DefaultExchangeHolder.marshal(exchange);
-            map.tryPut(key, holder, waitForLockSec, TimeUnit.SECONDS);
-            return toExchange(camelContext, holder);
+            if (map.tryPut(key, holder, waitForLockSec, TimeUnit.SECONDS)) {
+                return toExchange(camelContext, holder);
+            }
         } catch (Exception e) {
             error("Failed to update map for key '{}'", e, key);
             throw new RepositoryFailureException("Failed to get exchange for key '" + key + "'", e);
         } finally {
-            debug("Unlocking key map.forceUnlock('{}')...", key);
-            try {
-                map.forceUnlock(key);
-            } catch (Exception e) {
-                error("Failed to force unlock the exchange for key '{}'", e, key);
-            }
+            forceUnlockKey(key);
         }
+        throw new RepositoryLockWaitException(format(
+                "Failed to acquire the lock for the key '%s' within timeout of %ds",
+                key, waitForLockSec));
     }
 
     @Override
@@ -74,27 +74,36 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
             }
         } catch (QuorumException e) {
             throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
-        } catch (Exception e) {
-            throw new RepositoryFailureException("Failed to get exchange for key '" + key + "'", e);
+        } catch (InterruptedException e) {
+            throw new RepositoryFailureException("Failed to lock exchange for key '" + key + "'", e);
         }
-
-        throw new RepositoryFailureException(format(
+        throw new RepositoryLockWaitException(format(
                 "Failed to acquire the lock for the key '%s' within timeout of %ds",
                 key, waitForLockSec));
     }
 
     @Override
-    public Exchange getWithoutLock(CamelContext camelContext, String key) {
-        return toExchange(camelContext, map.get(key));
+    public Exchange add(CamelContext camelContext, String key, Exchange oldExchange, Exchange newExchange) throws OptimisticLockingException {
+        return add(camelContext, key, newExchange);
     }
 
-    private Exchange toExchange(CamelContext camelContext, DefaultExchangeHolder holder) {
-        Exchange exchange = null;
-        if (holder != null) {
-            exchange = new DefaultExchange(camelContext);
-            DefaultExchangeHolder.unmarshal(exchange, holder);
+    @Override
+    public void remove(CamelContext camelContext, String key, Exchange exchange) {
+        try {
+            debug("Removing key map.tryRemove('{}')...", key);
+            if (map.containsKey(key) && !map.tryRemove(key, waitForLockSec, TimeUnit.SECONDS)) {
+                throw new RepositoryLockWaitException("Failed to remove the exchange within timeout of " + waitForLockSec + "s");
+            }
+        } catch (QuorumException e) {
+            throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
+        } finally {
+            forceUnlockKey(key);
         }
-        return exchange;
+    }
+
+    @Override
+    public Exchange getWithoutLock(CamelContext camelContext, String key) {
+        return toExchange(camelContext, map.get(key));
     }
 
     @Override
@@ -120,41 +129,8 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     }
 
     @Override
-    public Exchange add(CamelContext camelContext, String key, Exchange oldExchange, Exchange newExchange) throws OptimisticLockingException {
-        return add(camelContext, key, newExchange);
-    }
-
-    @Override
-    public void remove(CamelContext camelContext, String key, Exchange exchange) {
-        try {
-            debug("Removing key map.tryRemove('{}')...", key);
-            if (map.containsKey(key) && !map.tryRemove(key, waitForLockSec, TimeUnit.SECONDS)) {
-                throw new RuntimeException("Failed to remove the exchange within timeout of " + waitForLockSec + "s");
-            }
-        } catch (QuorumException e) {
-            throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
-        } catch (Exception e) {
-            error("Failed to remove the exchange for key '{}'", e, key);
-        } finally {
-            debug("Forcing unlock map.forceUnlock('{}')", key);
-            try {
-                map.forceUnlock(key);
-            } catch (Exception e) {
-                error("Failed to force unlock the exchange for key '{}'", e, key);
-            }
-        }
-    }
-
-    @Override
     public void confirm(CamelContext camelContext, String key) {
-        debug("Forcing unlock map.forceUnlock('{}')", key);
-        try {
-            map.forceUnlock(key);
-        } catch (QuorumException e) {
-            throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
-        } catch (Exception e) {
-            error("Failed to force unlock the exchange for key '{}'", e, key);
-        }
+        forceUnlockKey(key);
     }
 
     @Override
@@ -186,6 +162,23 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
         return map;
     }
 
+    private Exchange toExchange(CamelContext camelContext, DefaultExchangeHolder holder) {
+        Exchange exchange = null;
+        if (holder != null) {
+            exchange = new DefaultExchange(camelContext);
+            DefaultExchangeHolder.unmarshal(exchange, holder);
+        }
+        return exchange;
+    }
+
+    private void forceUnlockKey(String key) {
+        debug("Forcing unlock map.forceUnlock('{}')", key);
+        try {
+            map.forceUnlock(key);
+        } catch (Exception e) {
+            error("Failed to force unlock the exchange for key '{}'", e, key);
+        }
+    }
 
     private void debug(final String message, String key) {
         logger.debug("[{}] " + message, repository, key);
