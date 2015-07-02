@@ -39,13 +39,14 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
     public void process(Exchange message) {
         final String key = (String) message.getIn().getHeader(CORRELATION_KEY);
         if (isEmpty(key)) {
-            logger.error("Empty keys are not allowed! SKIPPING MESSAGE: {}", message);
+            logger.error("Empty keys are not allowed! SKIPPING MESSAGE for plugin '{}'",
+                    context.getId());
             return;
         }
 
         if (context.isShuttingDown()) {
-            logger.warn("Context is shutting down, resending message: {}",
-                    message.getIn().getBody());
+            logger.warn("Context is shutting down, resending message for plugin '{}' with key '{}'",
+                    context.getId(), key);
             resendWithDelay(message);
         }
 
@@ -54,24 +55,24 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             processOrDie(message, key, repo);
         } catch (RepositoryUnreachableException e) {
             // resend with delay
-            logger.warn("Repository is unreachable for plugin '{}', resending message: {}",
-                    context.getId(), message);
+            logger.warn("Repository is unreachable, resending message for plugin '{}' with key '{}'",
+                    context.getId(), key);
             resendWithDelay(message);
         } catch (RepositoryFailureException e) {
             // skip message
-            logger.error("Repository failure occurred for plugin '{}', SKIPPING MESSAGE: {}",
-                    context.getId(), message, e);
+            logger.error("Repository failure occurred, SKIPPING MESSAGE for plugin '{}' with key '{}'",
+                    context.getId(), key, e);
         } catch (InvocationTargetException e) {
             // sonar trick
             repo.confirm(camelContext, key);
             logger.trace("Sonar trick", e);
-            logger.error("Failed to aggregate for plugin '{}', SKIPPING MESSAGE: {} \n {}",
-                    context.getId(), message, formatStackTrace(e.getTargetException()),
+            logger.error("Failed to aggregate, SKIPPING MESSAGE for plugin '{}' with key '{}': \n {}",
+                    context.getId(), key, formatStackTrace(e.getTargetException()),
                     e.getTargetException());
         } catch (Exception e) {
             repo.confirm(camelContext, key);
-            logger.error("Failed to aggregate for plugin '{}', SKIPPING MESSAGE: {}",
-                    context.getId(), message, e);
+            logger.error("Failed to aggregate, SKIPPING MESSAGE for plugin '{}' with key '{}'",
+                    context.getId(), key, e);
         }
     }
 
