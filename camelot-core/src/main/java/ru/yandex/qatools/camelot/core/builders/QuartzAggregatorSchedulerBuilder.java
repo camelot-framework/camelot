@@ -1,7 +1,13 @@
 package ru.yandex.qatools.camelot.core.builders;
 
+import com.hazelcast.quorum.QuorumException;
 import org.apache.camel.CamelContext;
-import org.quartz.*;
+import org.quartz.CronTrigger;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.camelot.api.annotations.OnTimer;
@@ -20,9 +26,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+import static java.lang.String.format;
 import static java.lang.System.identityHashCode;
 import static jodd.util.StringUtil.isEmpty;
-import static ru.yandex.qatools.camelot.util.ReflectUtil.*;
+import static ru.yandex.qatools.camelot.util.ReflectUtil.getAnnotation;
+import static ru.yandex.qatools.camelot.util.ReflectUtil.getAnnotationValue;
+import static ru.yandex.qatools.camelot.util.ReflectUtil.getMethodsInClassHierarchy;
 import static ru.yandex.qatools.camelot.util.ServiceUtil.forEachAnnotatedMethod;
 
 
@@ -52,7 +61,7 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
     private final Set<String> runningJobs = new ConcurrentSkipListSet<>();
 
     public static class ScheduledJob implements Job {
-        final Logger logger = LoggerFactory.getLogger(getClass());
+        private static final Logger LOGGER = LoggerFactory.getLogger(ScheduledJob.class);
 
         @Override
         public void execute(JobExecutionContext context) {
@@ -62,8 +71,12 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
             final Method method = (Method) data.get(METHOD);
             try {
                 builder.invokeJob(method.getName());
+            } catch (QuorumException e) {
+                LOGGER.warn("Failed to invoke scheduler job {}, because of {}: {}",
+                        jobDetail.getName(), e.getClass().getCanonicalName(), e.getMessage());
             } catch (Exception e) {
-                logger.warn("Failed to invoke scheduler job " + jobDetail.getName() + ", because " + e.getMessage(), e);
+                LOGGER.warn("Failed to invoke scheduler job {}, because {}",
+                        jobDetail.getName(), e.getMessage(), e);
             }
         }
     }
@@ -80,7 +93,7 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
         try {
             scanJobs();
         } catch (Exception e) {
-            LOGGER.error("Failed to scan the schedule jobs for plugin " + plugin.getId(), e);
+            LOGGER.error("Failed to scan the schedule jobs for plugin {}", plugin.getId(), e);
         }
     }
 
@@ -90,8 +103,8 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
     @SuppressWarnings("unchecked")
     private void scanJobs() throws Exception {
 
-        final SchedulerBuilder self = this;
-        final Class<?> aggClass = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass());
+        final Class<?> aggClass = plugin.getContext().getClassLoader()
+                                        .loadClass(plugin.getContext().getPluginClass());
         forEachAnnotatedMethod(aggClass, OnTimer.class, new AnnotatedMethodListener() {
             @Override
             public Object found(Method method, Object annotation) throws Exception {
@@ -114,14 +127,17 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
                         addNewJob(method, timerInfo, context, invoker);
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Failed to process scheduler method " + method.getName() + " of class " + aggClass, e);
+                    LOGGER.error("Failed to process scheduler method {} of class {}",
+                            method.getName(), aggClass, e);
                 }
                 return null;
             }
         });
     }
 
-    private void addNewJob(Method method, Object timerInfo, PluginContext context, PluginMethodInvoker invoker) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    private void addNewJob(Method method, Object timerInfo, PluginContext context, PluginMethodInvoker invoker)
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+
         final String groupName = plugin.getId();
         final String jobName = groupName + "." + method.getName() + contextId;
         String schedule = (String) getAnnotationValue(timerInfo, CRON);
@@ -145,8 +161,9 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
                     }
                 }
             } catch (Exception e) {
-                throw new PluginsSystemException("Failed to calculate cron expression using method " + cronMethod + "" +
-                        " of class " + context.getPluginClass(), e);
+                throw new PluginsSystemException(format(
+                        "Failed to calculate cron expression using method %s of class %s",
+                        cronMethod, context.getPluginClass()), e);
             }
         }
         JobDetail job = new JobDetail(jobName, groupName, ScheduledJob.class);
@@ -154,7 +171,9 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
         job.getJobDataMap().put(METHOD, method);
         job.getJobDataMap().put(INVOKER, invoker);
         job.getJobDataMap().put(SCHEDULE, schedule);
-        job.getJobDataMap().put(SKIP_IF_NOT_COMPLETED, getAnnotationValue(timerInfo, SKIP_IF_NOT_COMPLETED));
+        job.getJobDataMap().put(
+                SKIP_IF_NOT_COMPLETED,
+                getAnnotationValue(timerInfo, SKIP_IF_NOT_COMPLETED));
         jobs.put(method.getName(), job);
     }
 
@@ -184,7 +203,8 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
         final PluginMethodInvoker invoker = (PluginMethodInvoker) data.get(INVOKER);
         final Boolean skipIfNotCompleted = (Boolean) data.get(SKIP_IF_NOT_COMPLETED);
         if (runningJobs.contains(job.getName()) && skipIfNotCompleted) {
-            LOGGER.info(String.format("Still waiting until previous %s is finished... skipping execution!", job.getName()));
+            LOGGER.info("Still waiting until previous {} is finished... skipping execution!",
+                    job.getName());
             return false;
         }
         runningJobs.add(job.getName());
@@ -192,9 +212,11 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
             invoker.invoke(method);
             return true;
         } catch (IllegalStateException e) {
-            LOGGER.debug(String.format("Failed to invoke scheduler job %s, because %s", job.getName(), e.getMessage()), e);
+            LOGGER.debug("Failed to invoke scheduler job {}, because {}",
+                    job.getName(), e.getMessage(), e);
         } catch (Exception e) {
-            LOGGER.warn(String.format("Failed to invoke scheduler job %s, because %s", job.getName(), e.getMessage()), e);
+            LOGGER.warn("Failed to invoke scheduler job {}, because {}",
+                    job.getName(), e.getMessage(), e);
         } finally {
             runningJobs.remove(job.getName());
         }
@@ -207,7 +229,11 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
     @Override
     public void schedule() throws Exception {
         for (JobDetail job : jobs.values()) {
-            scheduler.scheduleJob(job, new CronTrigger(job.getName(), job.getGroup(), (String) job.getJobDataMap().get("schedule")));
+            scheduler.scheduleJob(job, new CronTrigger(
+                    job.getName(),
+                    job.getGroup(),
+                    (String) job.getJobDataMap().get("schedule")
+            ));
         }
     }
 
