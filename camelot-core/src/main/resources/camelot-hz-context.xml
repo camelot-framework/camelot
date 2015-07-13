@@ -53,6 +53,7 @@
     <bean id="FACTORY-HZ" class="ru.yandex.qatools.camelot.core.builders.BuildersFactoryWithHazelcastImpl">
         <constructor-arg name="hazelcastInstance" ref="hazelcastInstance"/>
         <property name="waitForLockSec" value="${camelot.hazelcast.waitForLockSec}"/>
+        <property name="lockWaitHeartBeatSec" value="${camelot.hazelcast.lockWaitHeartBeatSec}"/>
     </bean>
 
 </beans>

@@ -10,15 +10,20 @@ import ru.yandex.qatools.camelot.api.AppConfig;
  */
 public class BuildersFactoryWithHazelcastImpl extends BuildersFactoryImpl {
 
+    protected long lockWaitHeartBeatSec = 5;
     protected final HazelcastInstance hazelcastInstance;
 
     public BuildersFactoryWithHazelcastImpl(HazelcastInstance hazelcastInstance) {
         this.hazelcastInstance = hazelcastInstance;
     }
 
+    public void setLockWaitHeartBeatSec(long lockWaitHeartBeatSec) {
+        this.lockWaitHeartBeatSec = lockWaitHeartBeatSec;
+    }
+
     @Override
     public AggregationRepositoryBuilder newRepositoryBuilder(CamelContext camelContext) throws Exception {
-        return new HazelcastAggregationRepositoryBuilder(hazelcastInstance, camelContext, getWaitForLockSec());
+        return new HazelcastAggregationRepositoryBuilder(hazelcastInstance, camelContext, getWaitForLockSec(), lockWaitHeartBeatSec);
     }
 
     @Override
