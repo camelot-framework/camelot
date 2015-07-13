@@ -19,7 +19,6 @@ import ru.yandex.qatools.camelot.core.AggregationRepositoryWithLocks;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
@@ -28,8 +27,11 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static ru.yandex.qatools.camelot.util.DateUtil.isTimePassedSince;
 import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 
-public class HazelcastAggregationRepository extends ServiceSupport implements AggregationRepository,
-        OptimisticLockingAggregationRepository, AggregationRepositoryWithLocks {
+public class HazelcastAggregationRepository
+        extends ServiceSupport
+        implements AggregationRepository,
+                   OptimisticLockingAggregationRepository,
+                   AggregationRepositoryWithLocks {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -55,12 +57,13 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
         try {
             debug("Adding new exchange, updating map.tryPut('{}')...", key);
             DefaultExchangeHolder holder = DefaultExchangeHolder.marshal(exchange);
-            if (map.tryPut(key, holder, waitForLockSec, TimeUnit.SECONDS)) {
+            if (map.tryPut(key, holder, waitForLockSec, SECONDS)) {
                 return toExchange(camelContext, holder);
             }
         } catch (Exception e) {
             error("Failed to update map for key '{}'", e, key);
-            throw new RepositoryFailureException("Failed to get exchange for key '" + key + "'", e);
+            throw new RepositoryFailureException(format(
+                    "Failed to get exchange for key '%s'", key), e);
         } finally {
             forceUnlockKey(key);
         }
@@ -79,7 +82,8 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
         } catch (QuorumException e) {
             throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
         } catch (InterruptedException e) {
-            throw new RepositoryFailureException("Failed to lock exchange for key '" + key + "'", e);
+            throw new RepositoryFailureException(format(
+                    "Failed to lock exchange for key '%s'", key), e);
         }
         throw new RepositoryLockWaitException(format(
                 "Failed to acquire the lock for the key '%s' within timeout of %ds",
@@ -87,7 +91,8 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     }
 
     @Override
-    public Exchange add(CamelContext camelContext, String key, Exchange oldExchange, Exchange newExchange) throws OptimisticLockingException {
+    public Exchange add(CamelContext camelContext, String key, Exchange oldExchange, Exchange newExchange)
+            throws OptimisticLockingException {
         return add(camelContext, key, newExchange);
     }
 
@@ -95,8 +100,10 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     public void remove(CamelContext camelContext, String key, Exchange exchange) {
         try {
             debug("Removing key map.tryRemove('{}')...", key);
-            if (map.containsKey(key) && !map.tryRemove(key, waitForLockSec, TimeUnit.SECONDS)) {
-                throw new RepositoryLockWaitException("Failed to remove the exchange within timeout of " + waitForLockSec + "s");
+            if (map.containsKey(key) && !map.tryRemove(key, waitForLockSec, SECONDS)) {
+                throw new RepositoryLockWaitException(format(
+                        "Failed to remove the exchange within timeout of %ds",
+                        waitForLockSec));
             }
         } catch (QuorumException e) {
             throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
@@ -114,12 +121,18 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     public void lock(String key) {
         try {
             debug("Locking key map.tryLock('{}')...", key);
-            if (!tryLock(key)) {
-                throw new RuntimeException("Failed to lock within timeout of " + waitForLockSec + "s");
+            if (tryLock(key)) {
+                return;
             }
-        } catch (Exception e) {
-            error("Failed to lock the key '{}'", e, key);
+        } catch (QuorumException e) {
+            throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
+        } catch (InterruptedException e) {
+            throw new RepositoryFailureException(format(
+                    "Failed to lock exchange for key '%s'", key), e);
         }
+        throw new RepositoryLockWaitException(format(
+                "Failed to acquire the lock for the key '%s' within timeout of %ds",
+                key, waitForLockSec));
     }
 
     @Override
@@ -135,7 +148,7 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     private boolean tryLock(String key) throws InterruptedException {
         long startedTime = currentTimeMillis();
         boolean timeout = false;
-        while (!map.tryLock(key, lockWaitHeartbeatSec, TimeUnit.SECONDS) && !timeout) {
+        while (!map.tryLock(key, lockWaitHeartbeatSec, SECONDS) && !timeout) {
             debug("Lock is still not available, waiting for key {}...", key);
             timeout = isTimePassedSince(SECONDS.toMillis(waitForLockSec), startedTime);
         }
