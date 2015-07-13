@@ -55,8 +55,16 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             processOrDie(message, key, repo);
         } catch (RepositoryUnreachableException e) {
             // resend with delay
-            logger.warn("Repository is unreachable, resending message for plugin '{}' with key '{}'",
-                    context.getId(), key);
+            logger.warn("Repository is unreachable, resending message "
+                            + "for plugin '{}' with key '{}', because {}",
+                    context.getId(), key, e.getMessage());
+            resendWithDelay(message);
+        } catch (RepositoryLockWaitException e) {
+            // unlock and resend with delay
+            logger.warn("Unable to lock the entry, forcing unlock and resending message "
+                            + "for plugin '{}' and key '{}', because {}",
+                    context.getId(), key, e.getClass().getCanonicalName(), e.getMessage());
+            repo.confirm(camelContext, key);
             resendWithDelay(message);
         } catch (RepositoryFailureException e) {
             // skip message
@@ -69,11 +77,6 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
                     context.getId(), key, formatStackTrace(e.getTargetException()),
                     e.getTargetException());
             repo.confirm(camelContext, key);
-        } catch (RepositoryLockWaitException e) {
-            logger.warn("We've been waiting for too long for plugin '{}' and key '{}'! Forcing unlock and resending!",
-                    context.getId(), key, e);
-            repo.confirm(camelContext, key);
-            resendWithDelay(message);
         } catch (Exception e) {
             logger.error("Failed to aggregate, SKIPPING MESSAGE for plugin '{}' with key '{}'",
                     context.getId(), key, e);
