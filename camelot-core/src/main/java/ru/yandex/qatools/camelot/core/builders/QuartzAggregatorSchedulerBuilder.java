@@ -65,18 +65,18 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
 
         @Override
         public void execute(JobExecutionContext context) {
-            final JobDetail jobDetail = context.getJobDetail();
-            final JobDataMap data = jobDetail.getJobDataMap();
+            final JobDetail job = context.getJobDetail();
+            final JobDataMap data = job.getJobDataMap();
             final SchedulerBuilder builder = (SchedulerBuilder) data.get(BUILDER);
             final Method method = (Method) data.get(METHOD);
             try {
                 builder.invokeJob(method.getName());
             } catch (QuorumException e) {
                 LOGGER.warn("Failed to invoke scheduler job {}, because of {}: {}",
-                        jobDetail.getName(), e.getClass().getCanonicalName(), e.getMessage());
+                        job.getName(), e.getClass().getCanonicalName(), e.getMessage());
             } catch (Exception e) {
                 LOGGER.warn("Failed to invoke scheduler job {}, because {}",
-                        jobDetail.getName(), e.getMessage(), e);
+                        job.getName(), e.getMessage(), e);
             }
         }
     }
@@ -214,6 +214,9 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
         } catch (IllegalStateException e) {
             LOGGER.debug("Failed to invoke scheduler job {}, because {}",
                     job.getName(), e.getMessage(), e);
+        } catch (QuorumException e) {
+            LOGGER.warn("Failed to invoke scheduler job {}, because of {}: {}",
+                    job.getName(), e.getClass().getCanonicalName(), e.getMessage());
         } catch (Exception e) {
             LOGGER.warn("Failed to invoke scheduler job {}, because {}",
                     job.getName(), e.getMessage(), e);
