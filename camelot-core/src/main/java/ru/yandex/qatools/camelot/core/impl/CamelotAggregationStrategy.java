@@ -53,7 +53,7 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
         final AggregationRepository repo = context.getAggregationRepo();
         try {
             processOrDie(message, key, repo);
-        } catch (RepositoryUnreachableException | RepositoryLockWaitException e) {
+        } catch (RepositoryUnreachableException e) {
             // resend with delay
             logger.warn("Repository is unreachable, resending message for plugin '{}' with key '{}'",
                     context.getId(), key);
@@ -69,6 +69,11 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
                     context.getId(), key, formatStackTrace(e.getTargetException()),
                     e.getTargetException());
             repo.confirm(camelContext, key);
+        } catch (RepositoryLockWaitException e) {
+            logger.warn("We've been waiting for too long for plugin '{}' and key '{}'! Forcing unlock and resending!",
+                    context.getId(), key, e);
+            repo.confirm(camelContext, key);
+            resendWithDelay(message);
         } catch (Exception e) {
             logger.error("Failed to aggregate, SKIPPING MESSAGE for plugin '{}' with key '{}'",
                     context.getId(), key, e);
