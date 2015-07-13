@@ -18,12 +18,14 @@ public class HazelcastAggregationRepositoryBuilder extends MemoryAggregationRepo
 
     private final HazelcastInstance hazelcastInstance;
     private final long waitForLockSec;
+    private final long lockWaitHeartBeatSec;
 
     public HazelcastAggregationRepositoryBuilder(HazelcastInstance hazelcastInstance, CamelContext camelContext,
-                                                 long waitForLockSec) {
+                                                 long waitForLockSec, long lockWaitHeartBeatSec) {
         super(camelContext, waitForLockSec);
         this.hazelcastInstance = hazelcastInstance;
         this.waitForLockSec = waitForLockSec;
+        this.lockWaitHeartBeatSec = lockWaitHeartBeatSec;
     }
 
     /**
@@ -35,6 +37,7 @@ public class HazelcastAggregationRepositoryBuilder extends MemoryAggregationRepo
         aggregationRepository.setRepository(plugin.getId());
         aggregationRepository.setHazelcastInstance(hazelcastInstance);
         aggregationRepository.setWaitForLockSec(waitForLockSec);
+        aggregationRepository.setLockWaitHeartbeatSec(lockWaitHeartBeatSec);
         aggregationRepository.doStart();
         return aggregationRepository;
     }

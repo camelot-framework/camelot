@@ -22,7 +22,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static ru.yandex.qatools.camelot.util.DateUtil.isTimePassedSince;
 import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 
 public class HazelcastAggregationRepository extends ServiceSupport implements AggregationRepository,
@@ -34,6 +37,7 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     private String repository;
     private IMap<String, DefaultExchangeHolder> map;
 
+    private long lockWaitHeartbeatSec = 5; // 5 seconds between lock trials
     private long waitForLockSec = MINUTES.toSeconds(5);
 
     @Override
@@ -69,7 +73,7 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     public Exchange get(CamelContext camelContext, String key) {
         try {
             debug("Getting from context. map.get('{}')...", key);
-            if (map.tryLock(key, waitForLockSec, TimeUnit.SECONDS)) {
+            if (tryLock(key)) {
                 return toExchange(camelContext, map.get(key));
             }
         } catch (QuorumException e) {
@@ -110,7 +114,7 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
     public void lock(String key) {
         try {
             debug("Locking key map.tryLock('{}')...", key);
-            if (!map.tryLock(key, waitForLockSec, TimeUnit.SECONDS)) {
+            if (!tryLock(key)) {
                 throw new RuntimeException("Failed to lock within timeout of " + waitForLockSec + "s");
             }
         } catch (Exception e) {
@@ -126,6 +130,16 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
         } catch (Exception e) {
             error("Failed to unlock the key '{}'", e, key);
         }
+    }
+
+    private boolean tryLock(String key) throws InterruptedException {
+        long startedTime = currentTimeMillis();
+        boolean timeout = false;
+        while (!map.tryLock(key, lockWaitHeartbeatSec, TimeUnit.SECONDS) && !timeout) {
+            debug("Lock is still not available, waiting for key {}...", key);
+            timeout = isTimePassedSince(SECONDS.toMillis(waitForLockSec), startedTime);
+        }
+        return !timeout;
     }
 
     @Override
@@ -152,6 +166,10 @@ public class HazelcastAggregationRepository extends ServiceSupport implements Ag
 
     public void setHazelcastInstance(HazelcastInstance hazelcastInstance) {
         this.hazelcastInstance = hazelcastInstance;
+    }
+
+    public void setLockWaitHeartbeatSec(long lockWaitHeartbeat) {
+        this.lockWaitHeartbeatSec = lockWaitHeartbeat;
     }
 
     public void setWaitForLockSec(long waitForLockSec) {
