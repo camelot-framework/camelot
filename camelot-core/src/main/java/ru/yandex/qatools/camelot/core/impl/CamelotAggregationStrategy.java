@@ -5,6 +5,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.spi.AggregationRepository;
+import ru.yandex.qatools.camelot.api.error.RepositoryDirtyWriteAttemptException;
 import ru.yandex.qatools.camelot.api.error.RepositoryFailureException;
 import ru.yandex.qatools.camelot.api.error.RepositoryLockWaitException;
 import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
@@ -53,14 +54,13 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
         final AggregationRepository repo = context.getAggregationRepo();
         try {
             processOrDie(message, key, repo);
-        } catch (RepositoryUnreachableException e) {
+        } catch (RepositoryUnreachableException | RepositoryDirtyWriteAttemptException e) {
             // resend with delay
-            logger.warn("Repository is unreachable, resending message "
+            logger.warn("Repository is unreachable/dirty write, resending message "
                             + "for plugin '{}' with key '{}', because {}",
                     context.getId(), key, e.getMessage());
             resendWithDelay(message);
         } catch (RepositoryLockWaitException e) {
-            // unlock and resend with delay
             logger.warn("Unable to lock the entry, forcing unlock and resending message "
                             + "for plugin '{}' and key '{}', because {}",
                     context.getId(), key, e.getClass().getCanonicalName(), e.getMessage());
@@ -80,7 +80,6 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
         } catch (Exception e) {
             logger.error("Failed to aggregate, SKIPPING MESSAGE for plugin '{}' with key '{}'",
                     context.getId(), key, e);
-            repo.confirm(camelContext, key);
         }
     }
 
