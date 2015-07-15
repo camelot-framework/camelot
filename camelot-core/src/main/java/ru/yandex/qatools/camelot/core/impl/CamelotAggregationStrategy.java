@@ -86,13 +86,8 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
     }
 
     private void safeUnlock(AggregationRepository repo, String key) {
-        try {
-            if (repo instanceof AggregationRepositoryWithLocks) {
-                ((AggregationRepositoryWithLocks) repo).unlock(key);
-            }
-        } catch (Exception e) {
-            logger.trace("Sonar trick", e);
-            logger.info("Failed to safe unlock repo for plugin '{}' with key '{}' ", context.getId(), key);
+        if (repo instanceof AggregationRepositoryWithLocks) {
+            ((AggregationRepositoryWithLocks) repo).unlockQuietly(key);
         }
     }
 
