@@ -206,6 +206,13 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+        <!-- time based UUID-->
+        <dependency>
+            <groupId>com.fasterxml.uuid</groupId>
+            <artifactId>java-uuid-generator</artifactId>
+            <version>3.1.4</version>
+        </dependency>
+
         <!-- Active MQ -->
         <dependency>
             <groupId>org.apache.activemq</groupId>

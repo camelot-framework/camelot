@@ -1,5 +1,8 @@
 package ru.yandex.qatools.camelot.hazelcast;
 
+import com.fasterxml.uuid.EthernetAddress;
+import com.fasterxml.uuid.Generators;
+import com.fasterxml.uuid.impl.TimeBasedGenerator;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.quorum.QuorumException;
@@ -19,9 +22,9 @@ import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.core.AggregationRepositoryWithLocks;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
@@ -36,7 +39,11 @@ public class HazelcastAggregationRepository
                    OptimisticLockingAggregationRepository,
                    AggregationRepositoryWithLocks {
 
-    public static final String LAST_UPDATE_TS = "LAST_UPDATE_TS";
+    private static final TimeBasedGenerator UUID_GENERATOR
+            = Generators.timeBasedGenerator(EthernetAddress.fromInterface());
+
+    private static final String LAST_UPDATE_UUID_HEADER = "LAST_UPDATE_UID";
+
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private HazelcastInstance hazelcastInstance;
@@ -47,31 +54,14 @@ public class HazelcastAggregationRepository
     private long waitForLockSec = MINUTES.toSeconds(5);
 
     @Override
-    public Exchange add(final CamelContext camelContext, final String key, final Exchange exchange) {
-        return writeAttempt(camelContext, exchange, key, new Callable<Exchange>() {
-            @Override
-            public Exchange call() throws Exception {
-                DefaultExchangeHolder holder = DefaultExchangeHolder.marshal(exchange);
-                if (map.tryPut(key, holder, waitForLockSec, SECONDS)) {
-                    map.unlock(key);
-                    return toExchange(camelContext, holder);
-                }
-                throw new RepositoryLockWaitException(format(
-                        "Failed to acquire the lock for the key '%s' within timeout of %ds",
-                        key, waitForLockSec));
-            }
-        });
-    }
-
-    @Override
     public Exchange get(CamelContext camelContext, String key) {
         try {
-            debug("Getting from context. map.get('{}')...", key);
+            debug("Getting exchange for key '{}'", key);
             if (tryLock(key)) {
                 return toExchange(camelContext, map.get(key));
             }
         } catch (QuorumException e) {
-            throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
+            throw new RepositoryUnreachableException(e);
         } catch (InterruptedException e) {
             throw new RepositoryFailureException(format(
                     "Failed to lock exchange for key '%s'", key), e);
@@ -88,14 +78,24 @@ public class HazelcastAggregationRepository
     }
 
     @Override
+    public Exchange add(final CamelContext camelContext, final String key, final Exchange exchange) {
+        return writeAttempt(camelContext, exchange, key, new Callable<Exchange>() {
+            @Override
+            public Exchange call() throws Exception {
+                DefaultExchangeHolder holder = DefaultExchangeHolder.marshal(exchange);
+                map.put(key, holder);
+                return toExchange(camelContext, holder);
+            }
+        });
+    }
+
+    @Override
     public void remove(CamelContext camelContext, final String key, final Exchange exchange) {
         writeAttempt(camelContext, exchange, key, new Callable<Exchange>() {
             @Override
             public Exchange call() throws Exception {
-                if (map.tryRemove(key, waitForLockSec, SECONDS)) {
-                    return exchange;
-                }
-                throw new RepositoryLockWaitException("Failed to remove the exchange within timeout of " + waitForLockSec + "s");
+                map.remove(key);
+                return exchange;
             }
         });
     }
@@ -108,12 +108,12 @@ public class HazelcastAggregationRepository
     @Override
     public void lock(String key) {
         try {
-            debug("Locking key map.tryLock('{}')...", key);
+            debug("Locking key '{}'", key);
             if (tryLock(key)) {
                 return;
             }
         } catch (QuorumException e) {
-            throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
+            throw new RepositoryUnreachableException(e);
         } catch (InterruptedException e) {
             throw new RepositoryFailureException(format(
                     "Failed to lock exchange for key '%s'", key), e);
@@ -126,8 +126,8 @@ public class HazelcastAggregationRepository
     @Override
     public void unlock(String key) {
         try {
-            debug("Forcing the unlock of key map.forceUnlock('{}')...", key);
-            map.forceUnlock(key);
+            debug("Unlocking the key '{}'", key);
+            map.unlock(key);
         } catch (Exception e) {
             error("Failed to unlock the key '{}'", e, key);
         }
@@ -153,43 +153,56 @@ public class HazelcastAggregationRepository
         /* Nothing to do */
     }
 
-    private Exchange writeAttempt(CamelContext camelContext, Exchange exchange, String key, Callable<Exchange> perform) {
+    private Exchange writeAttempt(CamelContext camelContext, Exchange exchange, String key,
+                                  Callable<Exchange> perform) {
+        boolean lockSuccess = true;
         try {
-            debug("Performing write attempt...", key);
-            final Exchange oldExchange = toExchange(camelContext, map.get(key));
-            if (compareLastUpdateTimes(exchange, oldExchange)) {
-                exchange.getIn().setHeader(LAST_UPDATE_TS, currentTimeMillis());
-                return perform.call();
+            debug("Performing write attempt for key '{}'", key);
+            if (lockSuccess = tryLock(key)) {
+                debug("Successfully locked the key '{}'", key);
+                if (exchangeNotUpdated(exchange, toExchange(camelContext, map.get(key)))) {
+                    setLastUpdateUuidHeader(exchange);
+                    return perform.call();
+                }
             }
         } catch (QuorumException e) {
-            throw new RepositoryUnreachableException("Hazelcast is out of Quorum!", e);
-        } catch (RepositoryLockWaitException e) {
-            throw e;
+            throw new RepositoryUnreachableException(e);
         } catch (Exception e) {
             error("Failed to update map for key '{}'", e, key);
-            throw new RepositoryFailureException("Failed to get exchange for key '" + key + "'", e);
+            throw new RepositoryFailureException(format(
+                    "Failed to get exchange for key '%s'", key), e);
+        } finally {
+            unlock(key);
         }
-        throw new RepositoryDirtyWriteAttemptException("Failed to perform update for key '" + key + "'!");
+
+        if (!lockSuccess) {
+            throw new RepositoryLockWaitException(format(
+                    "Failed to lock exchange for the key '%s' within timeout of %ds",
+                    key, waitForLockSec));
+        }
+
+        throw new RepositoryDirtyWriteAttemptException(format(
+                "Failed to perform update for key '%s': entry was updated in the meantime!",
+                key));
     }
 
-    private long getLastUpdateTs(Exchange oldValue) {
-        final Object value = (oldValue != null && oldValue.getIn() != null) ?
-                oldValue.getIn().getHeader(LAST_UPDATE_TS) : null;
-        return (value != null) ? (long) value : 0;
+    private boolean exchangeNotUpdated(Exchange exchange, Exchange oldExchange) {
+        return Objects.equals(getLastUpdateUuid(exchange), getLastUpdateUuid(oldExchange));
     }
 
-    private boolean compareLastUpdateTimes(Exchange exchange, Exchange oldExchange) {
-        final long old = getLastUpdateTs(oldExchange);
-        final long current = getLastUpdateTs(exchange);
-        return old < current || (old == 0 && current == 0);
+    private Object getLastUpdateUuid(Exchange exchange) {
+        return exchange != null ? exchange.getProperty(LAST_UPDATE_UUID_HEADER) : null;
     }
 
+    private void setLastUpdateUuidHeader(Exchange exchange) {
+        exchange.setProperty(LAST_UPDATE_UUID_HEADER, UUID_GENERATOR.generate());
+    }
 
     private boolean tryLock(String key) throws InterruptedException {
         long startedTime = currentTimeMillis();
         boolean timeout = false;
         while (!map.tryLock(key, lockWaitHeartbeatSec, SECONDS) && !timeout) {
-            debug("Lock is still not available, waiting for key {}...", key);
+            debug("Lock is still not available, waiting for key '{}'", key);
             timeout = isTimePassedSince(SECONDS.toMillis(waitForLockSec), startedTime);
         }
         return !timeout;
@@ -233,11 +246,11 @@ public class HazelcastAggregationRepository
     }
 
     private void forceUnlockKey(String key) {
-        debug("Forcing unlock map.forceUnlock('{}')", key);
+        debug("Forcing unlock for key '{}'", key);
         try {
             map.forceUnlock(key);
         } catch (Exception e) {
-            error("Failed to force unlock the exchange for key '{}'", e, key);
+            error("Failed to force unlock the key '{}'", e, key);
         }
     }
 
@@ -246,6 +259,7 @@ public class HazelcastAggregationRepository
     }
 
     private void error(final String message, Exception e, String key) {
-        logger.error("[{}] " + message + ": \n{}", repository, key, formatStackTrace(e), e);
+        logger.error("[{}] " + message + ": \n{}",
+                repository, key, formatStackTrace(e), e);
     }
 }

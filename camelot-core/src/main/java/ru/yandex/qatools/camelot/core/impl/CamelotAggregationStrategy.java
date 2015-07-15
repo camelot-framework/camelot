@@ -10,6 +10,7 @@ import ru.yandex.qatools.camelot.api.error.RepositoryFailureException;
 import ru.yandex.qatools.camelot.api.error.RepositoryLockWaitException;
 import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.config.PluginContext;
+import ru.yandex.qatools.camelot.core.AggregationRepositoryWithLocks;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -57,13 +58,13 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
         } catch (RepositoryUnreachableException | RepositoryDirtyWriteAttemptException e) {
             // resend with delay
             logger.warn("Repository is unreachable/dirty write, resending message "
-                            + "for plugin '{}' with key '{}', because {}",
+                            + "for plugin '{}' with key '{}', because of: {}",
                     context.getId(), key, e.getMessage());
             resendWithDelay(message);
         } catch (RepositoryLockWaitException e) {
             logger.warn("Unable to lock the entry, forcing unlock and resending message "
-                            + "for plugin '{}' and key '{}', because {}",
-                    context.getId(), key, e.getClass().getCanonicalName(), e.getMessage());
+                            + "for plugin '{}' and key '{}', because of: {}",
+                    context.getId(), key, e.getMessage());
             repo.confirm(camelContext, key);
             resendWithDelay(message);
         } catch (RepositoryFailureException e) {
@@ -76,10 +77,47 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             logger.error("Failed to aggregate, SKIPPING MESSAGE for plugin '{}' with key '{}': \n {}",
                     context.getId(), key, formatStackTrace(e.getTargetException()),
                     e.getTargetException());
-            repo.confirm(camelContext, key);
         } catch (Exception e) {
             logger.error("Failed to aggregate, SKIPPING MESSAGE for plugin '{}' with key '{}'",
                     context.getId(), key, e);
+        } finally {
+            safeUnlock(repo, key);
+        }
+    }
+
+    private void safeUnlock(AggregationRepository repo, String key) {
+        try {
+            if (repo instanceof AggregationRepositoryWithLocks) {
+                ((AggregationRepositoryWithLocks) repo).unlock(key);
+            }
+        } catch (Exception e) {
+            logger.trace("Sonar trick", e);
+            logger.info("Failed to safe unlock repo for plugin '{}' with key '{}' ", context.getId(), key);
+        }
+    }
+
+    private void processOrDie(Exchange message, String key, AggregationRepository repo)
+            throws RepositoryFailureException, RepositoryUnreachableException,
+            NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        final Exchange state = repo.get(camelContext, key);
+        final Exchange result = createCorrelatedCopy(super.aggregate(state, message), false);
+        copyEmptyProperties(state, result);
+        if (isCompleted(result)) {
+            message.setIn(result.getIn());
+            repo.remove(camelContext, key, result);
+        } else {
+            message.getIn().setBody(null);
+            repo.add(camelContext, key, result);
+        }
+    }
+
+    private void copyEmptyProperties(Exchange state, Exchange result) {
+        if (state != null) {
+            for (String prop : state.getProperties().keySet()) {
+                if (result.getProperty(prop) == null) {
+                    result.setProperty(prop, state.getProperty(prop));
+                }
+            }
         }
     }
 
@@ -89,20 +127,6 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             retryProducer.setDefaultEndpointUri(context.getEndpoints().getDelayedInputUri());
         }
         retryProducer.send(message);
-    }
-
-    private void processOrDie(Exchange message, String key, AggregationRepository repo)
-            throws RepositoryFailureException, RepositoryUnreachableException,
-                   NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        final Exchange state = repo.get(camelContext, key);
-        final Exchange result = createCorrelatedCopy(super.aggregate(state, message), false);
-        if (isCompleted(result)) {
-            message.setIn(result.getIn());
-            repo.remove(camelContext, key, result);
-        } else {
-            message.getIn().setBody(null);
-            repo.add(camelContext, key, result);
-        }
     }
 
     @Override
