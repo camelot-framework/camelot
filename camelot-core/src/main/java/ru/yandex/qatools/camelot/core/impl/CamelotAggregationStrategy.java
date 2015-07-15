@@ -121,7 +121,8 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             retryProducer = camelContext.createProducerTemplate();
             retryProducer.setDefaultEndpointUri(context.getEndpoints().getDelayedInputUri());
         }
-        retryProducer.send(message);
+        retryProducer.send(message.copy());
+        message.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
     }
 
     @Override
