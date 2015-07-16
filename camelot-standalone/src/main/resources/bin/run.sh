@@ -26,6 +26,9 @@ javaExe="$JAVA_HOME/bin/$javaCommand"
 args="$JAVA_ARGS $CAMELOT_ARGS -jar camelot.jar $WD/conf/jetty.xml jetty.home=$WD"
 commandLine="$javaExe $args"
 
+mkdir -p $WD/work/repo
+mkdir -p $WD/log
+
 # Makes the file $1 writable by the group $serviceGroup.
 function makeFileWritable {
 local filename="$1"
@@ -61,7 +64,7 @@ function startServiceProcess {
    makeFileWritable $serviceLogFile || return 1
    cmd="nohup $commandLine >>$serviceLogFile 2>&1 & echo \$! >$pidFile"
    # Don't forget to add -H so the HOME environment variable will be set correctly.
-   sudo -u $serviceUser -H $SHELL -c "$cmd" || return 1
+   su $serviceUser -s $SHELL -c "$cmd" || return 1
    sleep 2
    pid="$(<$pidFile)"
    if checkProcessIsRunning $pid; then :; else

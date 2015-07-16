@@ -15,6 +15,11 @@ public interface AggregationRepositoryWithLocks {
     /**
      * Unlock the key
      */
+    void unlockQuietly(String key);
+
+    /**
+     * Unlock the key
+     */
     void unlock(String key);
 
     /**

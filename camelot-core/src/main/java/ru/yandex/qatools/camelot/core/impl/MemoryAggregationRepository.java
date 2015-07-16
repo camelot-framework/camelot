@@ -103,6 +103,16 @@ public class MemoryAggregationRepository extends org.apache.camel.processor.aggr
     }
 
     @Override
+    public void unlockQuietly(String key) {
+        try {
+            getLock(key).unlock();
+        } catch (Exception e) {
+            LOGGER.trace("Sonar trick", e);
+            LOGGER.info("Failed to quiet unlock repo key '{}' ", key);
+        }
+    }
+
+    @Override
     public void lock(String key) {
         try {
             getLock(key).lock();

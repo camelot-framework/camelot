@@ -124,6 +124,17 @@ public class HazelcastAggregationRepository
     }
 
     @Override
+    public void unlockQuietly(String key) {
+        try {
+            map.unlock(key);
+        } catch (Exception e) {
+            logger.trace("Sonar trick", e);
+            logger.info("Failed to quiet unlock repo key '{}' ", key);
+        }
+    }
+
+
+    @Override
     public void unlock(String key) {
         try {
             debug("Unlocking the key '{}'", key);

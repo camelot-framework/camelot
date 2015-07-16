@@ -18,7 +18,7 @@ public class CamelotUrlClassloader extends URLClassLoader {
             "ru.yandex.qatools.camelot.api.", "ru.yandex.qatools.fsm.",
             "com.sun.", "org.glassfish", "java.", "javax.", "org.eclipse.jetty.", "org.codehaus", "org.apache.camel",
             "org.apache.activemq", "org.atmosphere", "net.sf.cglib", "ru.yandex.qatools.camelot.core", "ch.lambdaj",
-            "com.hazelcast", "org.springframework", "com.fasterxml.jackson"
+            "com.hazelcast", "org.springframework", "com.fasterxml.jackson", "org.apache.log4j.", "org.slf4j."
     };
 
     public CamelotUrlClassloader(URL[] urls, ClassLoader parent) {
