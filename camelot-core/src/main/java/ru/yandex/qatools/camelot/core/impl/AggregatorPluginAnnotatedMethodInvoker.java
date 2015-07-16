@@ -25,15 +25,15 @@ import static ru.yandex.qatools.camelot.util.SerializeUtil.serializeToBytes;
  */
 public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMethodInvoker {
     final CamelContext camelContext;
-    final boolean requiresLock;
+    final boolean readOnly;
     private Object pluginInstance;
 
     public AggregatorPluginAnnotatedMethodInvoker(CamelContext camelContext, Plugin plugin,
-                                                  Class<? extends Annotation> anClass, boolean requiresLock)
+                                                  Class<? extends Annotation> anClass, boolean readOnly)
             throws ReflectiveOperationException {
         super(plugin, anClass);
         this.camelContext = camelContext;
-        this.requiresLock = requiresLock;
+        this.readOnly = readOnly;
     }
 
     public void setPluginInstance(Object pluginInstance) {
@@ -51,7 +51,7 @@ public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMetho
             Exchange exchange = null;
             try {
                 logger.debug(format("Trying to invoke aggregator's method '%s' for key '%s' of plugin %s...", method.getName(), key, plugin.getId()));
-                if (repo instanceof AggregationRepositoryWithLocks && !requiresLock) {
+                if (repo instanceof AggregationRepositoryWithLocks && readOnly) {
                     exchange = ((AggregationRepositoryWithLocks) repo).getWithoutLock(camelContext, key);
                 } else {
                     exchange = repo.get(camelContext, key);
@@ -72,6 +72,7 @@ public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMetho
                     if (method.getParameterTypes().length > 1) {
                         mArgs = addAll(mArgs, args);
                     }
+                    logger.debug(format("Invoking '%s' for key '%s' of plugin %s...", method.getName(), key, plugin.getId()));
                     method.invoke(aggregator, mArgs);
                     logger.debug(format("Invocation of '%s' for key '%s' of plugin %s done successfully", method.getName(), key, plugin.getId()));
                     exchange.getIn().setBody(serializeToBytes(body));
@@ -86,11 +87,17 @@ public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMetho
                 logger.error(format("Failed to process the plugin's '%s' method '%s' invocation: %s! \n %s",
                         plugin.getId(), method.getName(), e.getMessage(), formatStackTrace(e)), e);
             } finally {
-                if (requiresLock) {
-                    if (exchange != null && exchange.getIn() != null) {
-                        repo.add(camelContext, key, exchange);
-                    } else {
-                        repo.remove(camelContext, key, exchange);
+                if (!readOnly) {
+                    try {
+                        if (exchange != null && exchange.getIn() != null) {
+                            repo.add(camelContext, key, exchange);
+                        } else {
+                            repo.remove(camelContext, key, exchange);
+                        }
+                    } finally {
+                        if (repo instanceof AggregationRepositoryWithLocks) {
+                            ((AggregationRepositoryWithLocks) repo).unlockQuietly(key);
+                        }
                     }
                 }
             }

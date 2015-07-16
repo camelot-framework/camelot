@@ -79,7 +79,7 @@ public class AggregatorPluginAnnotatedMethodInvokerTest {
 
 
         AggregatorPluginAnnotatedMethodInvoker invoker = new AggregatorPluginAnnotatedMethodInvoker(
-                context, plugin, OnClientMessage.class, true
+                context, plugin, OnClientMessage.class, false
         );
         invoker.process(proc);
 

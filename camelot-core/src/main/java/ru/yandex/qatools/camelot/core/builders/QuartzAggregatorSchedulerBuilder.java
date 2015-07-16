@@ -118,7 +118,7 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
                     final Boolean perState = (Boolean) getAnnotationValue(timerInfo, PER_STATE);
                     if (perState) {
                         invoker = new AggregatorPluginAnnotatedMethodInvoker(
-                                camelContext, plugin, OnTimer.class, !readOnly
+                                camelContext, plugin, OnTimer.class, readOnly
                         ).process();
                     } else {
                         invoker = new PluginAnnotatedMethodInvoker(plugin, OnTimer.class).process();
