@@ -57,7 +57,7 @@ class TestSchedulerBuilder implements SchedulerBuilder {
             final Method m = getMethodFromClassHierarchy(pluginClass, method);
             final OnTimer onTimer = m.getAnnotation(OnTimer.class);
             AggregatorPluginAnnotatedMethodInvoker invoker =
-                    new AggregatorPluginAnnotatedMethodInvoker(camelContext, plugin, OnTimer.class, !onTimer.readOnly());
+                    new AggregatorPluginAnnotatedMethodInvoker(camelContext, plugin, OnTimer.class, onTimer.readOnly());
             invoker.process();
             invoker.setPluginInstance(pluginMock);
             invoker.invoke(m);
