@@ -1,9 +1,6 @@
 package ru.yandex.qatools.camelot.core.web;
 
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
 import de.neuland.jade4j.Jade4J;
 import de.neuland.jade4j.parser.Parser;
 import de.neuland.jade4j.parser.node.Node;
@@ -132,12 +129,6 @@ public class ViewHelper {
             template.setTemplateLoader(loader);
             template.setRootNode(root);
             return Jade4J.render(template, attrs);
-        } else if (Wildcard.match(fileName, "*.mustache")) {
-            MustacheFactory mf = new DefaultMustacheFactory();
-            Mustache mustache = mf.compile(new InputStreamReader(resource), fileName);
-            final StringWriter stringWriter = new StringWriter();
-            mustache.execute(stringWriter, attrs);
-            return stringWriter.toString();
         } else if (Wildcard.match(fileName, "*.html")) {
             StringWriter writer = new StringWriter();
             IOUtils.copy(resource, writer, "UTF-8");

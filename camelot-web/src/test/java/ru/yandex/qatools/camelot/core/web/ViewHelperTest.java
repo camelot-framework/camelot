@@ -9,7 +9,6 @@ import org.springframework.test.context.ContextConfiguration;
 import ru.yandex.qatools.camelot.config.PluginContext;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 /**
@@ -22,12 +21,6 @@ public class ViewHelperTest {
 
     @Autowired
     ViewHelper viewHelper;
-
-    @Test
-    public void testLifecycle() {
-        assertEquals("lifecycle", viewHelper.renderPluginDashboard(getContext("lifecycle")));
-        assertTrue(viewHelper.renderPluginWidgetContent(getContext("lifecycle")).contains("No such"));
-    }
 
     @Test
     public void testAllSkipped() {
