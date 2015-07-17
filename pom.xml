@@ -41,7 +41,7 @@
         <slf4j.version>1.7.12</slf4j.version>
         <atmosphere.version>2.3.1</atmosphere.version>
         <spring.version>4.1.6.RELEASE</spring.version>
-        <wro4j.version>1.7.7</wro4j.version>
+        <wro4j.version>1.7.8</wro4j.version>
         <yatomata.version>1.6</yatomata.version>
         <javax.rs-api.version>2.0.1</javax.rs-api.version>
         <aspectj.version>1.8.5</aspectj.version>
@@ -269,10 +269,6 @@
                     <exclusion>
                         <artifactId>spring-web</artifactId>
                         <groupId>org.springframework</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>guava</artifactId>
-                        <groupId>com.google.guava</groupId>
                     </exclusion>
                     <exclusion>
                         <artifactId>jruby-core</artifactId>
