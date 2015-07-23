@@ -91,8 +91,6 @@ public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMetho
                     try {
                         if (exchange != null && exchange.getIn() != null) {
                             repo.add(camelContext, key, exchange);
-                        } else {
-                            repo.remove(camelContext, key, exchange);
                         }
                     } finally {
                         if (repo instanceof AggregationRepositoryWithLocks) {
