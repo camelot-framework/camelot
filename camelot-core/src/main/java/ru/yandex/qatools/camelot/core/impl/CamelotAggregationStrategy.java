@@ -24,6 +24,8 @@ import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
  */
 public class CamelotAggregationStrategy extends FSMAggregationStrategy implements Processor {
 
+    private static final String MESSAGE_RESENT_HEADER = "MESSAGE_RESENT";
+
     private final PluginContext context;
     private volatile ProducerTemplate retryProducer;
 
@@ -39,6 +41,11 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
 
     @Override
     public void process(Exchange message) {
+        final boolean resent = Boolean.parseBoolean((String) message.getIn().getHeader(MESSAGE_RESENT_HEADER));
+        if (resent) {
+            logger.info("Handling previously resent message with id '{}'", message.getExchangeId());
+        }
+
         final String key = (String) message.getIn().getHeader(CORRELATION_KEY);
         if (isEmpty(key)) {
             logger.error("Empty keys are not allowed! SKIPPING MESSAGE for plugin '{}'",
@@ -121,7 +128,10 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             retryProducer = camelContext.createProducerTemplate();
             retryProducer.setDefaultEndpointUri(context.getEndpoints().getDelayedInputUri());
         }
-        retryProducer.send(message.copy());
+        Exchange copy = message.copy();
+        copy.getIn().setHeader(MESSAGE_RESENT_HEADER, true);
+        retryProducer.send(copy);
+        logger.info("Successfully resent message with id '{}'" + message.getExchangeId());
         message.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
     }
 
