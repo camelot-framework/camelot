@@ -24,7 +24,7 @@ import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
  */
 public class CamelotAggregationStrategy extends FSMAggregationStrategy implements Processor {
 
-    private static final String MESSAGE_RESENT_HEADER = "MESSAGE_RESENT";
+    private static final String MESSAGE_RESENT_ID_HEADER = "MESSAGE_RESENT_ID";
 
     private final PluginContext context;
     private volatile ProducerTemplate retryProducer;
@@ -41,10 +41,10 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
 
     @Override
     public void process(Exchange message) {
-        final boolean resent = Boolean.parseBoolean((String) message.getIn().getHeader(MESSAGE_RESENT_HEADER));
-        if (resent) {
+        final String resentId = (String) message.getIn().getHeader(MESSAGE_RESENT_ID_HEADER);
+        if (resentId != null) {
             logger.info("Handling previously resent message for plugin '{}' with id '{}'",
-                    context.getId(), message.getExchangeId());
+                    context.getId(), resentId);
         }
 
         final String key = (String) message.getIn().getHeader(CORRELATION_KEY);
@@ -130,7 +130,7 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             retryProducer.setDefaultEndpointUri(context.getEndpoints().getDelayedInputUri());
         }
         Exchange copy = message.copy();
-        copy.getIn().setHeader(MESSAGE_RESENT_HEADER, true);
+        copy.getIn().setHeader(MESSAGE_RESENT_ID_HEADER, copy.getExchangeId());
         retryProducer.send(copy);
         logger.info("Successfully resent message for plugin '{}' with id '{}'",
                 context.getId(), copy.getExchangeId());
