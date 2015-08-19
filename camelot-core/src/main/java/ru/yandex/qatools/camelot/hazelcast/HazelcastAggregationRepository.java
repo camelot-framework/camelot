@@ -129,7 +129,7 @@ public class HazelcastAggregationRepository
             map.unlock(key);
         } catch (Exception e) {
             logger.trace("Sonar trick", e);
-            logger.info("Failed to quiet unlock repo key '{}' ", key);
+            debug("Failed to quiet unlock repo key '{}' ", key);
         }
     }
 
