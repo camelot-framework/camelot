@@ -213,7 +213,6 @@ public class HazelcastAggregationRepository
         long startedTime = currentTimeMillis();
         boolean timeout = false;
         while (!map.tryLock(key, lockWaitHeartbeatSec, SECONDS) && !timeout) {
-            debug("Lock is still not available, waiting for key '{}'", key);
             timeout = isTimePassedSince(SECONDS.toMillis(waitForLockSec), startedTime);
         }
         return !timeout;
