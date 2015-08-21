@@ -42,8 +42,6 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
     @Override
     public void process(Exchange message) {
         final Exchange originalMessage = message.copy();
-        // Do not propagate this message by default
-        message.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
         final String resentId = (String) message.getIn().getHeader(MESSAGE_RESENT_ID_HEADER);
         if (resentId != null) {
             logger.info("Handling previously resent message for plugin '{}' with id '{}'",
@@ -103,16 +101,20 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
     }
 
     private void processOrDie(Exchange message, String key, AggregationRepository repo) throws Exception {
-        final Exchange state = repo.get(camelContext, key);
-        final Exchange result = createCorrelatedCopy(super.aggregate(state, message), false);
-        copyEmptyProperties(state, result);
-        if (isCompleted(result)) {
-            // Do not stop this route (completed FSM state must be propagated)
-            message.setProperty(Exchange.ROUTE_STOP, Boolean.FALSE);
-            message.setIn(result.getIn());
-            repo.remove(camelContext, key, result);
-        } else {
-            repo.add(camelContext, key, result);
+        try {
+            final Exchange state = repo.get(camelContext, key);
+            final Exchange result = createCorrelatedCopy(super.aggregate(state, message), false);
+            copyEmptyProperties(state, result);
+            if (isCompleted(result)) {
+                message.setIn(result.getIn());
+                repo.remove(camelContext, key, result);
+            } else {
+                message.getIn().setBody(null);
+                repo.add(camelContext, key, result);
+            }
+        } catch (Exception e) {
+            message.getIn().setBody(null);
+            throw e;
         }
     }
 
