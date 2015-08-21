@@ -65,17 +65,17 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
         final AggregationRepository repo = context.getAggregationRepo();
         try {
             processOrDie(message, key, repo);
-        } catch (RepositoryUnreachableException | RepositoryDirtyWriteAttemptException e) {
-            // resend with delay
-            logger.warn("Repository is unreachable/dirty write, resending message "
-                            + "for plugin '{}' with key '{}', because of: {}",
-                    context.getId(), key, e.getMessage());
-            resendWithDelay(originalMessage);
         } catch (RepositoryLockWaitException e) {
             logger.warn("Unable to lock the entry, forcing unlock and resending message "
                             + "for plugin '{}' and key '{}', because of: {}",
                     context.getId(), key, e.getMessage());
             repo.confirm(camelContext, key);
+            resendWithDelay(originalMessage);
+        } catch (RepositoryUnreachableException | RepositoryDirtyWriteAttemptException e) {
+            // resend with delay
+            logger.warn("Repository is unreachable/dirty write, resending message "
+                            + "for plugin '{}' with key '{}', because of: {}",
+                    context.getId(), key, e.getMessage());
             resendWithDelay(originalMessage);
         } catch (RepositoryFailureException e) {
             // skip message
@@ -91,13 +91,7 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             logger.error("Failed to aggregate, SKIPPING MESSAGE for plugin '{}' with key '{}'",
                     context.getId(), key, e);
         } finally {
-            safeUnlock(repo, key);
-        }
-    }
-
-    private void safeUnlock(AggregationRepository repo, String key) {
-        if (repo instanceof AggregationRepositoryWithLocks) {
-            ((AggregationRepositoryWithLocks) repo).unlockQuietly(key);
+            unlockQuietly(repo, key);
         }
     }
 
@@ -138,6 +132,12 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
         retryProducer.send(message);
         logger.info("Successfully resent message for plugin '{}' with id '{}'",
                 context.getId(), message.getExchangeId());
+    }
+
+    private void unlockQuietly(AggregationRepository repo, String key) {
+        if (repo instanceof AggregationRepositoryWithLocks) {
+            ((AggregationRepositoryWithLocks) repo).unlockQuietly(key);
+        }
     }
 
     @Override
