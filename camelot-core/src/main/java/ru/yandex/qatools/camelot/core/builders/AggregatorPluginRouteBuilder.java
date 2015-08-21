@@ -40,6 +40,7 @@ public class AggregatorPluginRouteBuilder extends GenericPluginRouteBuilder impl
 
         from(endpoints.getDelayedInputUri())
                 .delay(plugin.getContext().getAppConfig().getLong("camelot.delayedRoute.delay.ms"))
+                .log(DEBUG, pluginId + " delayed ${exchangeId} ${in.header.bodyClass}, correlationKey: ${in.header.correlationKey}")
                 .to(endpoints.getConsumerUri());
 
         // init default first inputRoute endpoint
@@ -54,7 +55,7 @@ public class AggregatorPluginRouteBuilder extends GenericPluginRouteBuilder impl
         final RouteDefinition definition = inputRoute
                 .setHeader(PLUGIN_ID, constant(pluginId))
                 .setHeader(CORRELATION_KEY, aggKey)
-                .log(DEBUG, pluginId + " input ${in.header.bodyClass}, correlationKey: ${in.header.correlationKey}")
+                .log(DEBUG, pluginId + " input ${exchangeId} ${in.header.bodyClass}, correlationKey: ${in.header.correlationKey}")
                 .process(strategy);
 
         definition

@@ -41,6 +41,7 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
 
     @Override
     public void process(Exchange message) {
+        final Exchange originalMessage = message.copy();
         final String resentId = (String) message.getIn().getHeader(MESSAGE_RESENT_ID_HEADER);
         if (resentId != null) {
             logger.info("Handling previously resent message for plugin '{}' with id '{}'",
@@ -57,7 +58,7 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
         if (context.isShuttingDown()) {
             logger.warn("Context is shutting down, resending message for plugin '{}' with key '{}'",
                     context.getId(), key);
-            resendWithDelay(message);
+            resendWithDelay(originalMessage);
         }
 
         final AggregationRepository repo = context.getAggregationRepo();
@@ -68,13 +69,13 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             logger.warn("Repository is unreachable/dirty write, resending message "
                             + "for plugin '{}' with key '{}', because of: {}",
                     context.getId(), key, e.getMessage());
-            resendWithDelay(message);
+            resendWithDelay(originalMessage);
         } catch (RepositoryLockWaitException e) {
             logger.warn("Unable to lock the entry, forcing unlock and resending message "
                             + "for plugin '{}' and key '{}', because of: {}",
                     context.getId(), key, e.getMessage());
             repo.confirm(camelContext, key);
-            resendWithDelay(message);
+            resendWithDelay(originalMessage);
         } catch (RepositoryFailureException e) {
             // skip message
             logger.error("Repository failure occurred, SKIPPING MESSAGE for plugin '{}' with key '{}'",
@@ -129,11 +130,10 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             retryProducer = camelContext.createProducerTemplate();
             retryProducer.setDefaultEndpointUri(context.getEndpoints().getDelayedInputUri());
         }
-        Exchange copy = message.copy();
-        copy.getIn().setHeader(MESSAGE_RESENT_ID_HEADER, copy.getExchangeId());
-        retryProducer.send(copy);
+        message.getIn().setHeader(MESSAGE_RESENT_ID_HEADER, message.getExchangeId());
+        retryProducer.send(message);
         logger.info("Successfully resent message for plugin '{}' with id '{}'",
-                context.getId(), copy.getExchangeId());
+                context.getId(), message.getExchangeId());
         message.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
     }
 
