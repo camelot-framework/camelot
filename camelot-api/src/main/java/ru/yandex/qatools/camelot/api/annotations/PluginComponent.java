@@ -15,5 +15,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PluginComponent {
 
-    public Class impl() default Object.class;
+    Class impl() default Object.class;
 }

@@ -21,6 +21,7 @@ import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public class CamelotAggregationStrategy extends FSMAggregationStrategy implements Processor {
 

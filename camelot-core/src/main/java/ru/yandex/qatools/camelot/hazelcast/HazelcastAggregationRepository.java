@@ -33,6 +33,10 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static ru.yandex.qatools.camelot.util.DateUtil.isTimePassedSince;
 import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 
+/**
+ * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
+ */
 public class HazelcastAggregationRepository
         extends ServiceSupport
         implements AggregationRepository,
