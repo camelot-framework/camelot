@@ -62,6 +62,7 @@ public class HazelcastAggregationRepository
         try {
             debug("Getting exchange for key '{}'", key);
             if (tryLock(key)) {
+                debug("Successfully locked the key '{}', (read)", key);
                 return toExchange(camelContext, map.get(key));
             }
         } catch (QuorumException e) {
@@ -143,6 +144,7 @@ public class HazelcastAggregationRepository
         try {
             debug("Unlocking the key '{}'", key);
             map.unlock(key);
+            debug("Successfully unlocked the key '{}'", key);
         } catch (Exception e) {
             error("Failed to unlock the key '{}'", e, key);
         }
@@ -174,7 +176,7 @@ public class HazelcastAggregationRepository
         try {
             debug("Performing write attempt for key '{}'", key);
             if (lockSuccess = tryLock(key)) {
-                debug("Successfully locked the key '{}'", key);
+                debug("Successfully locked the key '{}' (write)", key);
                 if (exchangeNotUpdated(exchange, toExchange(camelContext, map.get(key)))) {
                     setLastUpdateUuidHeader(exchange);
                     return perform.call();
