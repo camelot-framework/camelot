@@ -67,7 +67,6 @@ public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMetho
             logger.warn("Failed to process the plugin's '{}' method '{}' invocation: {}!",
                     plugin.getId(), method.getName(), e.getMessage());
         } catch (InvocationTargetException e) {
-            logger.trace("Sonar cheat", e);
             logger.error("Failed to process the plugin's '{}' method '{}' invocation!",
                     plugin.getId(), method.getName(), e.getTargetException());
         } catch (Exception e) {

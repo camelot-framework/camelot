@@ -82,8 +82,6 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             logger.error("Repository failure occurred, SKIPPING MESSAGE for plugin '{}' with key '{}'",
                     context.getId(), key, e);
         } catch (InvocationTargetException e) {
-            // sonar trick
-            logger.trace("Sonar trick", e);
             logger.error("Failed to aggregate, SKIPPING MESSAGE for plugin '{}' with key '{}': \n {}",
                     context.getId(), key, formatStackTrace(e.getTargetException()),
                     e.getTargetException());
