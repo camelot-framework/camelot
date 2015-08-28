@@ -31,8 +31,11 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static ru.yandex.qatools.camelot.util.DateUtil.isTimePassedSince;
-import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 
+/**
+ * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
+ */
 public class HazelcastAggregationRepository
         extends ServiceSupport
         implements AggregationRepository,
@@ -58,6 +61,7 @@ public class HazelcastAggregationRepository
         try {
             debug("Getting exchange for key '{}'", key);
             if (tryLock(key)) {
+                debug("Successfully locked the key '{}', (read)", key);
                 return toExchange(camelContext, map.get(key));
             }
         } catch (QuorumException e) {
@@ -129,7 +133,7 @@ public class HazelcastAggregationRepository
             map.unlock(key);
         } catch (Exception e) {
             logger.trace("Sonar trick", e);
-            debug("Failed to quiet unlock repo key '{}' ", key);
+            debug("Failed to quiet unlock repo key '{}'", key, e);
         }
     }
 
@@ -139,8 +143,11 @@ public class HazelcastAggregationRepository
         try {
             debug("Unlocking the key '{}'", key);
             map.unlock(key);
+            debug("Successfully unlocked the key '{}'", key);
+        } catch (IllegalMonitorStateException e) {
+            warn("Failed to unlock the key '{}'", key, e);
         } catch (Exception e) {
-            error("Failed to unlock the key '{}'", e, key);
+            error("Failed to unlock the key '{}'", key, e);
         }
     }
 
@@ -170,7 +177,7 @@ public class HazelcastAggregationRepository
         try {
             debug("Performing write attempt for key '{}'", key);
             if (lockSuccess = tryLock(key)) {
-                debug("Successfully locked the key '{}'", key);
+                debug("Successfully locked the key '{}' (write)", key);
                 if (exchangeNotUpdated(exchange, toExchange(camelContext, map.get(key)))) {
                     setLastUpdateUuidHeader(exchange);
                     return perform.call();
@@ -179,9 +186,8 @@ public class HazelcastAggregationRepository
         } catch (QuorumException e) {
             throw new RepositoryUnreachableException(e);
         } catch (Exception e) {
-            error("Failed to update map for key '{}'", e, key);
-            throw new RepositoryFailureException(format(
-                    "Failed to get exchange for key '%s'", key), e);
+            error("Failed to update map for key '{}'", key, e);
+            throw new RepositoryFailureException(format("Failed to get exchange for key '%s'", key), e);
         } finally {
             unlock(key);
         }
@@ -260,16 +266,23 @@ public class HazelcastAggregationRepository
         try {
             map.forceUnlock(key);
         } catch (Exception e) {
-            error("Failed to force unlock the key '{}'", e, key);
+            error("Failed to force unlock the key '{}'", key, e);
         }
     }
 
-    private void debug(final String message, String key) {
+    private void debug(String message, String key) {
         logger.debug("[{}] " + message, repository, key);
     }
 
-    private void error(final String message, Exception e, String key) {
-        logger.error("[{}] " + message + ": \n{}",
-                repository, key, formatStackTrace(e), e);
+    private void debug(String message, String key, Exception e) {
+        logger.debug("[{}] " + message + " because of: {}", repository, key, e.toString());
+    }
+
+    private void warn(String message, String key, Exception e) {
+        logger.warn("[{}] " + message + " because of: {}", repository, key, e.toString());
+    }
+
+    private void error(String message, String key, Exception e) {
+        logger.error("[{}] " + message, repository, key, e);
     }
 }

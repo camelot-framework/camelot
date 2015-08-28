@@ -108,7 +108,7 @@ public class MemoryAggregationRepository extends org.apache.camel.processor.aggr
             getLock(key).unlock();
         } catch (Exception e) {
             LOGGER.trace("Sonar trick", e);
-            LOGGER.info("Failed to quiet unlock repo key '{}' ", key);
+            LOGGER.debug("Failed to quiet unlock repo key '{}' ", key);
         }
     }
 
