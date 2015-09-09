@@ -26,6 +26,6 @@
     <import resource="classpath*:camelot-loaders-context.xml"/>
     <import resource="classpath*:camelot-camel-context.xml"/>
     <import resource="classpath*:camelot-processing-context.xml"/>
-    <import resource="classpath*:camelot-hz-context.xml"/>
+    <import resource="classpath*:camelot-repo-context.xml"/>
 
 </beans>
