@@ -127,7 +127,7 @@ public class QuartzInitializerImpl implements QuartzInitializer {
             if (lockAndStartScheduler()) {
                 break;
             }
-            logger.debug("Checking if master Quartz if dead...");
+            logger.debug("Checking if master Quartz is dead...");
             if (isTimePassedSince(heartBeatTimeout, getLastHeartbeat())) {
                 logger.warn("Last master Quartz heartbeat timeout reached! Unlocking the Quartz lock!");
                 unlock();
@@ -166,7 +166,7 @@ public class QuartzInitializerImpl implements QuartzInitializer {
                 return true;
             }
         } catch (Exception e) {
-            stop();
+            standby();
             logger.warn("Unable to start scheduler", e);
         }
         return false;
