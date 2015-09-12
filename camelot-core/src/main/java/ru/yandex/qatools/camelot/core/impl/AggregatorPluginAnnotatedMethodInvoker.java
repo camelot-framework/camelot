@@ -7,7 +7,6 @@ import ru.yandex.qatools.camelot.api.error.RepositoryDirtyWriteAttemptException;
 import ru.yandex.qatools.camelot.api.error.RepositoryLockWaitException;
 import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.core.AggregationRepositoryWithLocalKeys;
 import ru.yandex.qatools.camelot.core.AggregationRepositoryWithLocks;
 
 import java.io.Serializable;
@@ -45,8 +44,7 @@ public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMetho
     @Override
     public void invoke(Method method, Object... args) {
         final AggregationRepository repo = plugin.getContext().getAggregationRepo();
-        final Set<String> keys = (repo instanceof AggregationRepositoryWithLocalKeys)
-                ? ((AggregationRepositoryWithLocalKeys) repo).localKeys() : repo.getKeys();
+        final Set<String> keys = repo.getKeys();
 
         logger.debug("Invoking method {} of plugin {}, repo class {}",
                 method.getName(), plugin.getId(), repo.getClass().getName());
