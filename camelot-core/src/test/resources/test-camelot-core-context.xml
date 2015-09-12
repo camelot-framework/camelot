@@ -33,7 +33,7 @@
     <bean id="configurationProperties" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>camelot.properties</value>
+                <value>camelot-default.properties</value>
                 <value>test-config.properties</value>
             </list>
         </property>
