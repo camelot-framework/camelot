@@ -22,10 +22,10 @@
     <context:annotation-config/>
     <context:component-scan base-package="ru.yandex.qatools.camelot.web,ru.yandex.qatools.camelot.core"/>
 
-    <import resource="classpath*:camelot-amq-context.xml"/>
-    <import resource="classpath*:camelot-loaders-context.xml"/>
-    <import resource="classpath*:camelot-camel-context.xml"/>
-    <import resource="classpath*:camelot-processing-context.xml"/>
-    <import resource="classpath*:camelot-repo-context.xml"/>
+    <import resource="classpath:camelot-amq-context.xml"/>
+    <import resource="classpath:camelot-loaders-context.xml"/>
+    <import resource="classpath:camelot-camel-context.xml"/>
+    <import resource="classpath:camelot-processing-context.xml"/>
+    <import resource="classpath:camelot-repo-context.xml"/>
 
 </beans>

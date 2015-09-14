@@ -15,6 +15,6 @@
 
     <amq:connectionFactory id="jmsFactory" brokerURL="vm://${activemq.embedded.bind}"/>
 
-    <import resource="classpath*:/camelot-core-context.xml"/>
-    <import resource="classpath*:/camelot-test-empty-context.xml"/>
+    <import resource="classpath:/camelot-core-context.xml"/>
+    <import resource="classpath:/camelot-test-empty-context.xml"/>
 </beans>
