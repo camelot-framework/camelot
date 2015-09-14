@@ -4,6 +4,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <import resource="classpath*:camelot-core-context.xml"/>
+    <import resource="classpath:camelot-core-context.xml"/>
 
 </beans>
