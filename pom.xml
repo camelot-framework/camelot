@@ -21,6 +21,7 @@
         <module>camelot-test-maven-plugin</module>
         <module>camelot-plugin</module>
         <module>camelot-extensions</module>
+        <module>camelot-front</module>
         <module>camelot-standalone</module>
     </modules>
 

@@ -41,6 +41,7 @@
     <bean id="configurationProperties" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
+                <value>classpath*:camelot-default.properties</value>
                 <value>classpath*:camelot-web.properties</value>
                 <value>classpath*:camelot.properties</value>
                 <value>file:${newConfigFile}</value>

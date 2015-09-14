@@ -1,29 +1,15 @@
 #!/bin/bash
-DEBUG_OPTS="$DEBUG_OPTS -XX:+HeapDumpOnOutOfMemoryError"
-GC_OPTS="-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled"
-MEMORY_OPTS="-XX:MaxPermSize=512m -Xms512m -Xmx4096m"
-WD=$(cd $(dirname "$0")/.. && pwd -P)
 
 serviceUser=`id -un`
 serviceGroup=`id -gn`
 userHome=`eval echo ~$serviceUser`
 
-JAVA_ARGS="-server -Xbootclasspath/a:$WD/conf -Xbootclasspath/a:$WD/ $GC_OPTS $MEMORY_OPTS $DEBUG_OPTS -Dlog4j.configuration=file:$WD/conf/log4j.properties"
-CAMELOT_ARGS="-Dcamelot.wd=$WD -Dplugins.local.repository=$userHome/.m2/repository"
-
-scriptDir=$WD/bin
-scriptFile=$scriptDir/run.sh
-serviceNameLo="camelot"
-serviceName="Camelot"
-
 applDir="$scriptDir"
 serviceUserHome="$applDir"
-serviceLogFile="$WD/log/camelot.log"
 maxShutdownTime=15
 pidFile="$WD/work/$serviceNameLo.pid"
 javaCommand="java"
 javaExe="$JAVA_HOME/bin/$javaCommand"
-args="$JAVA_ARGS $CAMELOT_ARGS -jar camelot.jar $WD/conf/jetty.xml jetty.home=$WD"
 commandLine="$javaExe $args"
 
 mkdir -p $WD/work/repo
@@ -64,11 +50,11 @@ function startServiceProcess {
    makeFileWritable $serviceLogFile || return 1
    cmd="nohup $commandLine >>$serviceLogFile 2>&1 & echo \$! >$pidFile"
    # Don't forget to add -H so the HOME environment variable will be set correctly.
-   su $serviceUser -s $SHELL -c "$cmd" || return 1
+   $SHELL -c "$cmd" || return 1
    sleep 2
    pid="$(<$pidFile)"
    if checkProcessIsRunning $pid; then :; else
-      echo -ne "\n$serviceName start failed, see logfile."
+      echo -ne "\n$serviceName start failed, see logfile $serviceLogFile."
       return 1
    fi
    return 0; }
@@ -103,7 +89,7 @@ function startService {
    echo -n "Starting $serviceName... "
    startServiceProcess
    if [ $? -ne 0 ]; then RETVAL=1; echo "failed"; return 1; fi
-   echo "started (pid: $pid)"
+   echo "started (pid: $pid). See log file $serviceLogFile"
    RETVAL=0
    return 0; }
 

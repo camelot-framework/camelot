@@ -41,7 +41,7 @@ import static ru.yandex.qatools.camelot.util.ServiceUtil.*;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public abstract class GenericPluginsEngine implements PluginsService, ReloadableService, RoutingService {
-    public static final String PROPS_PATH = "classpath*:/camelot.properties";
+    public static final String PROPS_PATH = "classpath*:/camelot-default.properties";
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private PluginContextInjector contextInjector;

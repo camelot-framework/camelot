@@ -59,7 +59,7 @@ import static ru.qatools.clay.utils.archive.ArchiveUtil.unpackJar;
 public class RunMojo extends AbstractMojo {
 
     public static final String PLUGIN_PROPERTIES = "/plugin.properties";
-    public static final String CAMELOT_PROPERTIES = "/camelot.properties";
+    public static final String CAMELOT_PROPERTIES = "/camelot-default.properties";
     public static final String VERSION_PROPERTY_NAME = "version";
     public static final String CAMELOT_WEB = "camelot-web";
     public static final String CAMELOT_EXTENSIONS = "camelot-extensions";
@@ -348,11 +348,11 @@ public class RunMojo extends AbstractMojo {
     }
 
     /**
-     * Copy camelot.properties file from camelot jar
+     * Copy camelot-default.properties file from camelot jar
      */
     public void copyOriginalPropertiesFile() throws IOException {
         try {
-            File originalConfigFile = new File(outputDir + "/WEB-INF/classes/camelot.properties");
+            File originalConfigFile = new File(outputDir + "/WEB-INF/classes/camelot-default.properties");
             File camelotCoreJar = new File(format("%s/WEB-INF/lib/camelot-core-%s.jar", outputDir, camelotVersion));
             unpackJar(camelotCoreJar, originalConfigFile, new PathJarEntryFilter(CAMELOT_PROPERTIES));
         } catch (IOException | SecurityException e) {
@@ -430,7 +430,7 @@ public class RunMojo extends AbstractMojo {
      * @throws TemplateException if an exception occurs during template processing
      */
     public File createNewPropertiesFile() throws IOException, TemplateException {
-        File newConfigFile = new File(outputDir + "/WEB-INF/classes/new.camelot.properties");
+        File newConfigFile = new File(outputDir + "/WEB-INF/classes/new.camelot-default.properties");
         processTemplate(cfg, PROPERTIES_FTL, new FileWriter(newConfigFile), map(
                 "localRepo", localRepo.getBasedir(),
                 "remoteRepos", StringUtils.join(convertRemotesToUrls(remotes), ","),
