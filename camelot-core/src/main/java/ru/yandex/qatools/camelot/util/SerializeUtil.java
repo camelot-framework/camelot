@@ -1,23 +1,18 @@
 package ru.yandex.qatools.camelot.util;
 
-import de.ruedigermoeller.serialization.FSTConfiguration;
-import de.ruedigermoeller.serialization.FSTObjectInput;
-import de.ruedigermoeller.serialization.FSTObjectOutput;
+import org.apache.commons.io.input.ClassLoaderObjectInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static de.ruedigermoeller.serialization.FSTConfiguration.createDefaultConfiguration;
 import static java.lang.Thread.currentThread;
 
 public class SerializeUtil {
     private static final Logger logger = LoggerFactory.getLogger(SerializeUtil.class);
-    private static final Map<ClassLoader, FSTConfiguration> configByClassLoader = new ConcurrentHashMap<>();
 
     /**
      * Serialize the object to bytes
@@ -38,21 +33,13 @@ public class SerializeUtil {
             return null;
         }
         try {
-            FSTConfiguration config = configByClassLoader.get(classLoader);
-            if (config == null) {
-                configByClassLoader.put(classLoader, config = createDefaultConfiguration());
-                config.setClassLoader(classLoader);
-            }
-            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            FSTObjectOutput out = config.getObjectOutput(outStream);
-            out.writeObject(object, object.getClass());
-            out.flush();
-            return outStream.toByteArray();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            new ObjectOutputStream(bos).writeObject(object);
+            return bos.toByteArray();
         } catch (Exception e) {
             logger.error("Failed to serialize object to bytes", e);
             return null;
         }
-
     }
 
     /**
@@ -65,15 +52,10 @@ public class SerializeUtil {
     /**
      * Deserialize the input bytes into object
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Serializable> T deserializeFromBytes(byte[] input, ClassLoader classLoader, Class<T> expectedClass) throws Exception {
         ByteArrayInputStream bis = new ByteArrayInputStream(input);
-        FSTConfiguration config = configByClassLoader.get(classLoader);
-        if (config == null) {
-            configByClassLoader.put(classLoader, config = createDefaultConfiguration());
-            config.setClassLoader(classLoader);
-        }
-        FSTObjectInput in = config.getObjectInput(bis);
-        return (T) in.readObject(expectedClass);
+        return (T) new ClassLoaderObjectInputStream(classLoader, bis).readObject();
     }
 
     /**
