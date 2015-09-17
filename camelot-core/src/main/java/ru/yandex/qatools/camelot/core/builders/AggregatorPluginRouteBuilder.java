@@ -12,8 +12,8 @@ import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
 import ru.yandex.qatools.camelot.core.impl.CamelotAggregationStrategy;
 
+import static java.lang.String.format;
 import static org.apache.camel.LoggingLevel.DEBUG;
-import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.builder.ExpressionBuilder.beanExpression;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.CORRELATION_KEY;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.PLUGIN_ID;
@@ -38,9 +38,9 @@ public class AggregatorPluginRouteBuilder extends GenericPluginRouteBuilder impl
         CamelotAggregationStrategy strategy = getStrategyBuilder().build();
         AggregatorConfig aggregatorConfig = getStrategyBuilder().getConfig();
 
-        from(endpoints.getDelayedInputUri())
+        addInterimProc(from(endpoints.getDelayedInputUri())
                 .delay(plugin.getContext().getAppConfig().getLong("camelot.delayedRoute.delay.ms"))
-                .log(DEBUG, pluginId + " delayed ${exchangeId} ${in.header.bodyClass}, correlationKey: ${in.header.correlationKey}")
+                .log(DEBUG, pluginId + " delayed ${exchangeId} ${in.header.bodyClass}, correlationKey: ${in.header.correlationKey}"))
                 .to(endpoints.getConsumerUri());
 
         // init default first inputRoute endpoint
@@ -52,16 +52,21 @@ public class AggregatorPluginRouteBuilder extends GenericPluginRouteBuilder impl
 
         final Expression aggKey = aggKeyExpression(aggregatorConfig);
         // main aggregation inputRoute
-        final RouteDefinition definition = inputRoute
+        final RouteDefinition definition = addInterimProc(inputRoute
                 .setHeader(PLUGIN_ID, constant(pluginId))
                 .setHeader(CORRELATION_KEY, aggKey)
-                .log(DEBUG, pluginId + " input ${exchangeId} ${in.header.bodyClass}, correlationKey: ${in.header.correlationKey}")
-                .process(strategy);
+                .log(DEBUG, format("===> INPUT FOR %s ${exchangeId} ${in.header.bodyClass}, correlationKey: ${in.header.correlationKey}", pluginId))
+                .process(strategy));
+
 
         definition
                 .choice()
-                .when(body().isNull()).log(TRACE, pluginId + " output is NULL, skipping next routes").stop()
-                .otherwise().to(endpoints.getOutputUri())
+                .when(body().isNull())
+                    .log(DEBUG, pluginId + " output is NULL, skipping next routes")
+                    .stop()
+                .otherwise()
+                    .log(DEBUG, format("===> ROUTE %s ===> %s", endpoints.getInputUri(), endpoints.getProducerUri()))
+                    .to(endpoints.getProducerUri())
                 .endChoice()
                 .routeId(endpoints.getInputRouteId());
 

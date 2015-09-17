@@ -6,6 +6,7 @@ import org.apache.camel.model.RouteDefinition;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.core.impl.CamelotProcessor;
 
+import static java.lang.String.format;
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.PLUGIN_ID;
 
@@ -33,12 +34,17 @@ public class ProcessorPluginRouteBuilder extends GenericPluginRouteBuilder imple
 
 
         // main processing route
-        route
+        addInterimProc(route
                 .setHeader(PLUGIN_ID, constant(pluginId))
-                .log(DEBUG, pluginId + " input ${in.header.messageClass}, correlationKey: ${in.header.correlationKey}")
-                .process(getProcessor()).choice()
-                .when(body().isNull()).log(DEBUG, pluginId + " output is NULL, skipping next routes").stop()
-                .otherwise().to(endpoints.getOutputUri())
+                .log(DEBUG,  format("===> INPUT FOR %s ${exchangeId} ${in.header.bodyClass}, correlationKey: ${in.header.correlationKey}", pluginId))
+                .process(getProcessor()))
+                .choice()
+                .when(body().isNull())
+                    .log(DEBUG, pluginId + " output is NULL, skipping next routes")
+                    .stop()
+                .otherwise()
+                    .log(DEBUG, format("===> ROUTE %s ===> %s", endpoints.getInputUri(), endpoints.getProducerUri()))
+                    .to(endpoints.getProducerUri())
                 .routeId(endpoints.getInputRouteId());
 
     }

@@ -32,7 +32,7 @@
         <java.version>1.7</java.version>
 
         <activemq.version>5.12.0</activemq.version>
-        <camel.version>2.15.1</camel.version>
+        <camel.version>2.15.3</camel.version>
         <clay.version>2.5</clay.version>
         <hazelcast.version>3.5</hazelcast.version>
         <jackson.version>2.4.4</jackson.version>

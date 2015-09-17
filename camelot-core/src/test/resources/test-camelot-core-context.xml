@@ -47,7 +47,8 @@
     </bean>
 
     <bean id="testAggregator" class="ru.yandex.qatools.camelot.core.impl.FSMAggregationStrategy">
-        <constructor-arg value="ru.yandex.qatools.camelot.core.impl.TestStateMachine"/>
+        <constructor-arg name="fsmClass" value="ru.yandex.qatools.camelot.core.impl.TestStateMachine"/>
+        <constructor-arg name="serializer" ref="messagesSerializer"/>
     </bean>
 
     <camelContext id="camelotCamelContext" xmlns="http://camel.apache.org/schema/spring">

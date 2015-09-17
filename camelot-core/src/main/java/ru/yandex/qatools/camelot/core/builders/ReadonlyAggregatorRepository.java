@@ -11,9 +11,6 @@ import ru.yandex.qatools.camelot.core.AggregationRepositoryWithLocks;
 import java.io.Serializable;
 import java.util.Set;
 
-import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
-import static ru.yandex.qatools.camelot.util.SerializeUtil.deserializeFromBytes;
-
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
@@ -43,14 +40,8 @@ public class ReadonlyAggregatorRepository<T extends Serializable> implements Agg
         }
 
         if (exchange != null) {
-            final Object body = exchange.getIn().getBody();
-            if (body instanceof byte[]) try {
-                final Class<T> bodyClass = (Class<T>) realClassLoader.loadClass((String) exchange.getIn().getHeader(BODY_CLASS));
-                return deserializeFromBytes((byte[]) body, realClassLoader, bodyClass);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to read the exchange from resource", e);
-            }
-            return (T) body;
+            return (T) plugin.getContext().getMessagesSerializer().deserialize(
+                    exchange.getIn().getBody(), realClassLoader);
         }
         return null;
     }

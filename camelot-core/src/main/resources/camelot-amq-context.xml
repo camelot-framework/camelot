@@ -26,12 +26,14 @@
     <bean id="jmsConfig" class="org.apache.camel.component.jms.JmsConfiguration">
         <property name="connectionFactory" ref="pooledConnectionFactory"/>
         <property name="transacted" value="false"/>
-        <property name="testConnectionOnStartup" value="true"/>
+        <property name="testConnectionOnStartup" value="${activemq.connect.on.startup}"/>
     </bean>
 
     <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
         <property name="configuration" ref="jmsConfig"/>
-        <property name="testConnectionOnStartup" value="true"/>
+        <property name="testConnectionOnStartup" value="${activemq.connect.on.startup}"/>
     </bean>
 
+    <bean id="uriBuilder" class="ru.yandex.qatools.camelot.core.activemq.ActivemqPluginUriBuilder"/>
+    <bean id="messagesSerializer" class="ru.yandex.qatools.camelot.core.activemq.ActivemqMessagesSerializer"/>
 </beans>

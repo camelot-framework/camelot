@@ -3,23 +3,22 @@ package ru.yandex.qatools.camelot.core.builders;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Expression;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.model.RouteDefinition;
 import ru.yandex.qatools.camelot.api.PluginEndpoints;
 import ru.yandex.qatools.camelot.beans.RouteConfig;
 import ru.yandex.qatools.camelot.config.Plugin;
+import ru.yandex.qatools.camelot.core.InterimProcessor;
 import ru.yandex.qatools.camelot.core.SplitStrategy;
 import ru.yandex.qatools.camelot.core.impl.InstanceOfFilter;
 import ru.yandex.qatools.camelot.core.impl.PluginMessageFilter;
 import ru.yandex.qatools.camelot.core.impl.RouteConfigReader;
 
+import static java.lang.String.format;
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.builder.ExpressionBuilder.beanExpression;
-import static ru.yandex.qatools.camelot.Constants.BROADCAST_CONFIG;
-import static ru.yandex.qatools.camelot.Constants.CLIENT_NOTIFY_URI;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.PLUGIN_ID;
-import static ru.yandex.qatools.camelot.util.ServiceUtil.gracefullyRemoveEndpoints;
-import static ru.yandex.qatools.camelot.util.ServiceUtil.gracefullyRemoveRoute;
-import static ru.yandex.qatools.camelot.util.ServiceUtil.gracefullyStartRoute;
+import static ru.yandex.qatools.camelot.util.ServiceUtil.*;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -32,6 +31,7 @@ public abstract class GenericPluginRouteBuilder extends RouteBuilder implements 
     protected final ClassLoader classLoader;
     protected final Plugin plugin;
     protected final RouteConfig routeConfig;
+    protected final InterimProcessor interimProc;
 
     final PluginEndpoints endpoints;
 
@@ -42,27 +42,29 @@ public abstract class GenericPluginRouteBuilder extends RouteBuilder implements 
         this.plugin = plugin;
         this.endpoints = plugin.getContext().getEndpoints();
         this.routeConfig = new RouteConfigReader(plugin.getContext()).read();
+        this.interimProc = plugin.getContext().getInterimProcessor();
     }
 
     @Override
     public void configure() throws Exception {
         // Initialize the global output producers
-        from(endpoints.getProducerUri()).setHeader(PLUGIN_ID, constant(pluginId)).
-                log(DEBUG, "OUTPUT FROM " + pluginId + HEADER_BODY_CLASS).
+        addInterimProc(from(endpoints.getProducerUri()).setHeader(PLUGIN_ID, constant(pluginId)).
+                log(DEBUG, format("===> ROUTE %s ===> %s", endpoints.getProducerUri(), endpoints.getOutputUri()))).
                 to(endpoints.getOutputUri()).
                 routeId(endpoints.getProducerRouteId());
 
         // Initialize the global input producers
-        from(endpoints.getConsumerUri()).
-                log(DEBUG, "INPUT TO " + pluginId + HEADER_BODY_CLASS).
-                setHeader(PLUGIN_ID, constant(pluginId)).
+        addInterimProc(from(endpoints.getConsumerUri()).
+                log(DEBUG, format("===> ROUTE %s ===> %s", endpoints.getConsumerUri(), endpoints.getInputUri())).
+                setHeader(PLUGIN_ID, constant(pluginId))).
                 to(endpoints.getInputUri()).
                 routeId(endpoints.getConsumerRouteId());
 
         // Initialize client notify topic
-        from(endpoints.getClientSendUri()).setHeader(PLUGIN_ID, constant(pluginId)).
-                to(CLIENT_NOTIFY_URI + BROADCAST_CONFIG).
-                routeId(endpoints.getClientSendRouteId());
+        addInterimProc(from(endpoints.getFrontendSendUri()).setHeader(PLUGIN_ID, constant(pluginId)).
+                log(DEBUG, format("CLIENT NOTIFY FOR %s TO %s", pluginId + HEADER_BODY_CLASS, endpoints.getBroadcastFrontendUri()))).
+                to(endpoints.getBroadcastFrontendUri()).
+                routeId(endpoints.getFrontendSendRouteId());
     }
 
 
@@ -90,7 +92,7 @@ public abstract class GenericPluginRouteBuilder extends RouteBuilder implements 
     protected RouteDefinition appendSplitterRoutes(RouteDefinition route) throws Exception {
         // Splitter (optional)
         if (routeConfig.getSplitStrategy() != null) {
-            route.split(splitExpression()).
+            addInterimProc(route.split(splitExpression())).
                     parallelProcessing().
                     to(endpoints.getSplitUri()).
                     routeId(endpoints.getSplitRouteId());
@@ -102,17 +104,17 @@ public abstract class GenericPluginRouteBuilder extends RouteBuilder implements 
     protected RouteDefinition appendFilterRoutes(RouteDefinition route) {
         // Filtered (optional)
         if (routeConfig.getFilterInstanceOf() != null) {
-            route.filter()
-                    .method(new InstanceOfFilter(classLoader, routeConfig.getFilterInstanceOf()),
-                            InstanceOfFilter.FILTER_METHOD_NAME)
+            addInterimProc(route.filter()
+                    .method(new InstanceOfFilter(classLoader, plugin.getContext().getMessagesSerializer(), routeConfig.getFilterInstanceOf()),
+                            InstanceOfFilter.FILTER_METHOD_NAME))
                     .to(endpoints.getFilteredUri())
                     .routeId(endpoints.getFilteredRouteId());
             return from(endpoints.getFilteredUri());
         } else if (routeConfig.getCustomFilter() != null) {
-            route.filter()
+            addInterimProc(route.filter()
                     .method(
                             new PluginMessageFilter(plugin, routeConfig.getCustomFilter()),
-                            PluginMessageFilter.FILTER_METHOD_NAME)
+                            PluginMessageFilter.FILTER_METHOD_NAME))
                     .to(endpoints.getFilteredUri())
                     .routeId(endpoints.getFilteredRouteId());
             return from(endpoints.getFilteredUri());
@@ -129,7 +131,7 @@ public abstract class GenericPluginRouteBuilder extends RouteBuilder implements 
                 endpoints.getInputRouteId(),
                 endpoints.getOutputRouteId(),
                 endpoints.getConsumerRouteId(),
-                endpoints.getClientSendRouteId(),
+                endpoints.getFrontendSendRouteId(),
                 endpoints.getSplitRouteId(),
                 endpoints.getFilteredRouteId()
         };
@@ -144,4 +146,10 @@ public abstract class GenericPluginRouteBuilder extends RouteBuilder implements 
         gracefullyRemoveEndpoints(camelContext, id);
     }
 
+    protected <T extends ProcessorDefinition> T addInterimProc(T route) {
+        if (interimProc != null) {
+            route.process(interimProc);
+        }
+        return route;
+    }
 }

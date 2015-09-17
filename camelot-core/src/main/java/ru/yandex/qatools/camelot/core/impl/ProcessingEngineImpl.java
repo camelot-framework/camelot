@@ -25,10 +25,8 @@ import java.util.*;
 
 import static java.lang.String.format;
 import static org.apache.camel.LoggingLevel.DEBUG;
-import static ru.yandex.qatools.camelot.Constants.TMP_INPUT_BUFFER_URI;
 import static ru.yandex.qatools.camelot.util.NameUtil.routeId;
 import static ru.yandex.qatools.camelot.util.ServiceUtil.gracefullyRemoveRoute;
-import static ru.yandex.qatools.camelot.util.ServiceUtil.initTmpInputBufferProducer;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -103,10 +101,6 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
                 plugin.getContext().getMainInput().stop();
                 plugin.getContext().getInput().stop();
                 plugin.getContext().getOutput().stop();
-                // first we'll redefine the endpoints to the temporary queue
-                plugin.getContext().setMainInput(initTmpInputBufferProducer(camelContext, plugin.getContext().getEndpoints().getMainInputUri(), TMP_INPUT_BUFFER_URI));
-                plugin.getContext().setInput(initTmpInputBufferProducer(camelContext, plugin.getContext().getEndpoints().getInputUri(), TMP_INPUT_BUFFER_URI));
-                plugin.getContext().setOutput(initTmpInputBufferProducer(camelContext, plugin.getContext().getEndpoints().getOutputUri(), TMP_INPUT_BUFFER_URI));
                 unInitPlugin(plugin);
             } catch (Exception e) {
                 logger.error("Failed to stop route for plugin " + plugin.getId(), e);
@@ -204,13 +198,11 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
                     final String fromUri = fromId == null ? inputUri
                             : pluginsMap.get(fromId).getContext().getEndpoints().getOutputUri();
                     String[] consumers = calcConsumers(fromId, consumersMap.get(fromId));
-                    from(fromUri)
+                    addInterimRoute(from(fromUri)
                             .multicast()
                             .executorServiceRef(CAMELOT_MULTICAST_PROFILE)
                             .parallelProcessing()
-                            .log(DEBUG, format(
-                                    "Event from %s to [%s]: ${in.header.bodyClass}",
-                                    fromUri, StringUtils.join(consumers, ",")))
+                            .log(DEBUG, format("===> ROUTE %s ===> [%s]", fromUri, StringUtils.join(consumers, ","))))
                             .to(consumers)
                             .routeId(routeId(fromUri, consumers));
                 }
@@ -219,11 +211,12 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
                     final Plugin plugin = pluginsMap.get(fromId);
                     if (!consumersMap.keySet().contains(fromId) && pluginCanConsume(plugin)) {
                         final PluginEndpoints endpoints = plugin.getContext().getEndpoints();
-                        from(endpoints.getOutputUri())
+                        addInterimRoute(from(endpoints.getOutputUri())
                                 .routeId(endpoints.getOutputRouteId())
                                 .multicast()
                                 .executorServiceRef(CAMELOT_MULTICAST_PROFILE)
                                 .parallelProcessing()
+                                .log(DEBUG, format("===> ROUTE %s ===> %s", endpoints.getOutputUri(), outputUri)))
                                 .to((isListenersEnabled()) ?
                                         new String[]{outputUri, endpoints.getEndpointListenerUri()} :
                                         new String[]{outputUri});
@@ -240,7 +233,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
         final Collection consumersSet = CollectionUtils.collect(consumers, new Transformer() {
             @Override
             public Object transform(Object pluginId) {
-                return getPluginsMap().get(pluginId).getContext().getEndpoints().getInputUri();
+                return getPluginsMap().get(pluginId).getContext().getEndpoints().getConsumerUri();
             }
         });
         if (fromId != null && isListenersEnabled()) {
@@ -338,5 +331,4 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
         return getBuildersFactory().newAggregatorPluginRouteBuilder(
                 camelContext, plugin);
     }
-
 }

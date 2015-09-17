@@ -3,6 +3,7 @@ package ru.yandex.qatools.camelot.core.impl;
 import org.apache.camel.CamelContext;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.ProcessorDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -16,6 +17,8 @@ import ru.yandex.qatools.camelot.config.PluginContext;
 import ru.yandex.qatools.camelot.config.PluginsConfig;
 import ru.yandex.qatools.camelot.config.PluginsSource;
 import ru.yandex.qatools.camelot.core.*;
+import ru.yandex.qatools.camelot.core.activemq.ActivemqMessagesSerializer;
+import ru.yandex.qatools.camelot.core.activemq.ActivemqPluginUriBuilder;
 import ru.yandex.qatools.camelot.core.builders.AggregationRepositoryBuilder;
 import ru.yandex.qatools.camelot.core.builders.BuildersFactory;
 import ru.yandex.qatools.camelot.core.builders.BuildersFactoryImpl;
@@ -43,25 +46,26 @@ import static ru.yandex.qatools.camelot.util.ServiceUtil.*;
 public abstract class GenericPluginsEngine implements PluginsService, ReloadableService, RoutingService {
     public static final String PROPS_PATH = "classpath*:/camelot-default.properties";
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-
-    private PluginContextInjector contextInjector;
-    private BuildersFactory buildersFactory;
-
-    protected List<PluginsConfig> pluginsConfigs;
     protected final CamelContext camelContext;
     protected final PluginLoader pluginLoader;
     protected final Resource[] configResources;
     protected final String inputUri;
     protected final String outputUri;
+    protected List<PluginsConfig> pluginsConfigs;
     protected PluginsInterop interop;
     protected PluginTree pluginTree;
     protected Map<String, Plugin> pluginsMap;
     protected Map<String, Plugin> pluginsByClassMap;
+    private PluginContextInjector contextInjector;
+    private BuildersFactory buildersFactory;
     private volatile boolean loading = false;
     private ResourceBuilder resourceBuilder;
     private AppConfig appConfig;
     private String engineName;
     private EventProducer mainInput;
+    private PluginUriBuilder uriBuilder;
+    private MessagesSerializer messagesSerializer;
+    private InterimProcessor interimProcessor = null;
 
     public GenericPluginsEngine(Resource[] configResources, PluginLoader pluginLoader, CamelContext camelContext,
                                 String inputUri, String outputUri) {
@@ -71,6 +75,8 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
         this.inputUri = inputUri;
         this.outputUri = outputUri;
         this.engineName = getClass().getSimpleName();
+        this.uriBuilder = new ActivemqPluginUriBuilder();
+        this.messagesSerializer = new ActivemqMessagesSerializer();
         setBuildersFactory(new BuildersFactoryImpl());
         setContextInjector(new PluginContextInjectorImpl());
         setAppConfig(new AppConfigSystemProperties());
@@ -87,7 +93,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
         this.interop = new PluginsInteropService(this);
 
         try {
-            this.mainInput = initEventProducer(camelContext, inputUri);
+            this.mainInput = initEventProducer(camelContext, inputUri, messagesSerializer);
             initializePlugins();
             initWebResources();
         } catch (Exception e) {
@@ -265,6 +271,16 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     }
 
     @Override
+    public PluginUriBuilder getUriBuilder() {
+        return uriBuilder;
+    }
+
+    @Override
+    public void setUriBuilder(PluginUriBuilder uriBuilder) {
+        this.uriBuilder = uriBuilder;
+    }
+
+    @Override
     public ResourceBuilder getResourceBuilder() {
         return resourceBuilder;
     }
@@ -317,6 +333,26 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     @Override
     public EventProducer getMainInput() {
         return mainInput;
+    }
+
+    @Override
+    public MessagesSerializer getMessagesSerializer() {
+        return messagesSerializer;
+    }
+
+    @Override
+    public void setMessagesSerializer(MessagesSerializer messagesSerializer) {
+        this.messagesSerializer = messagesSerializer;
+    }
+
+    public InterimProcessor getInterimProcessor() {
+        return interimProcessor;
+    }
+
+    public void setInterimProcessor(InterimProcessor interimProcessor) {
+        this.interimProcessor =
+                (interimProcessor == null || interimProcessor.getClass().equals(DefaultInterimProcessor.class))
+                        ? null : interimProcessor;
     }
 
     /**
@@ -444,20 +480,29 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
             @Override
             public void configure() throws Exception {
                 if (isListenersEnabled() && pluginCanConsume(plugin)) {
-                    from(plugin.getContext().getEndpoints().getEndpointListenerUri())
+                    addInterimRoute(
+                            from(plugin.getContext().getEndpoints().getEndpointListenerUri())
                             .log(LoggingLevel.DEBUG, "Plugin " + plugin.getId() + " endpoint listener input " +
                                     "${in.headers." + BODY_CLASS + "}")
-                            .bean(plugin.getContext().getListener(), "notifyOnMessage")
+                            .bean(plugin.getContext().getListener(), "notifyOnMessage"))
                             .stop()
                             .routeId(plugin.getContext().getEndpoints().getEndpointListenerRouteId());
                 } else {
-                    from(plugin.getContext().getEndpoints().getEndpointListenerUri())
+                    addInterimRoute(from(plugin.getContext().getEndpoints().getEndpointListenerUri()))
                             .stop();
                 }
             }
         });
 
     }
+
+    protected  <T extends ProcessorDefinition> T addInterimRoute(T route) {
+        if (getInterimProcessor() != null) {
+            route.process(getInterimProcessor());
+        }
+        return route;
+    }
+
 
     /**
      * Release the plugin configuration
@@ -502,21 +547,25 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
         if (isEmpty(plugin.getId())) {
             plugin.setId(defaultPluginId(plugin));
         }
+        if (isEmpty(plugin.getBaseInputUri())) {
+            plugin.setBaseInputUri(uriBuilder.basePluginInputUri());
+        }
         logger.info("Initializing plugin " + plugin.getId());
-        final PluginEndpoints endpoints = new PluginEndpointsImpl(inputUri, plugin, getEngineName());
+        final PluginEndpoints endpoints = new PluginEndpointsImpl(inputUri, plugin, getEngineName(), uriBuilder);
         final AggregationRepositoryBuilder repositoryBuilder = getBuildersFactory().newRepositoryBuilder(camelContext);
         context.setSource(source);
         context.setEndpoints(endpoints);
         context.setId(plugin.getId());
         context.setClassLoader(classLoader);
         context.setInterop(interop);
-        context.setOutput(initEventProducer(camelContext, endpoints.getProducerUri()));
+        context.setOutput(initEventProducer(camelContext, endpoints.getProducerUri(), messagesSerializer));
         context.setMainInput(mainInput);
-        context.setClientSendersProvider(new ClientSendersProviderImpl(camelContext, endpoints.getClientSendUri()));
+        context.setClientSendersProvider(new ClientSendersProviderImpl(camelContext, endpoints.getFrontendSendUri(), messagesSerializer));
         context.setInjector(getContextInjector());
-
+        context.setMessagesSerializer(messagesSerializer);
+        context.setInterimProcessor(interimProcessor);
         if (pluginCanConsume(plugin)) {
-            context.setInput(initEventProducer(camelContext, endpoints.getConsumerUri()));
+            context.setInput(initEventProducer(camelContext, endpoints.getConsumerUri(), messagesSerializer));
             context.setStorage(repositoryBuilder.initStorage(plugin));
             context.setAggregationRepo(repositoryBuilder.initWritable(plugin));
             context.setRepository(repositoryBuilder.initReadonly(plugin));

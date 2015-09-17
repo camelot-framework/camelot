@@ -1,6 +1,5 @@
 package ru.yandex.qatools.camelot.util;
 
-import org.apache.commons.lang3.StringUtils;
 import ru.yandex.qatools.camelot.config.Parameter;
 import ru.yandex.qatools.camelot.config.Plugin;
 
@@ -10,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.join;
 import static ru.yandex.qatools.camelot.util.MapUtil.mapParams;
 
 /**
@@ -21,7 +21,7 @@ public class NameUtil {
      * Generate the routeId for the from -> to
      */
     public static String routeId(String fromUri, String... toUri) {
-        return fromUri + "->" + StringUtils.join(toUri, ",");
+        return fromUri + "->" + join(toUri, ",");
     }
 
     /**
@@ -43,34 +43,6 @@ public class NameUtil {
      */
     public static String pluginResourceBeanName(String pluginId) {
         return pluginId + "Resource";
-    }
-
-    /**
-     * Generates broadcast plugin uri
-     */
-    public static String broadcastUri(String pluginId, String suffix) {
-        return "activemq:topic:" + pluginId + suffix;
-    }
-
-    /**
-     * Generates local plugin uri with id and suffix
-     */
-    public static String localUri(String pluginId, String suffix) {
-        return "direct:plugin." + pluginId + suffix;
-    }
-
-    /**
-     * Generates the plugin input uri
-     */
-    public static String pluginInputUri(Plugin plugin) {
-        return plugin.getBaseInputUri() + "." + plugin.getId();
-    }
-
-    /**
-     * Generates the plugin output uri
-     */
-    public static String pluginOutputUri(Plugin plugin) {
-        return plugin.getBaseOutputUri() + "." + plugin.getId();
     }
 
     /**

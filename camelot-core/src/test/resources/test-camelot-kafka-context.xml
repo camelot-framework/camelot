@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+            http://www.springframework.org/schema/util
+            http://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <context:annotation-config/>
+    <context:component-scan base-package="ru.yandex.qatools.camelot.core"/>
+
+    <bean id="zookeeper" class="ru.yandex.qatools.camelot.core.service.EmbeddedZookeeper" init-method="start"
+          destroy-method="stop">
+        <constructor-arg name="port" value="#{T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort()}"/>
+    </bean>
+
+    <bean id="kafka" class="ru.yandex.qatools.camelot.core.service.EmbeddedKafkaCluster" init-method="start"
+          destroy-method="stop">
+        <constructor-arg name="zkHost" value="#{zookeeper.host}"/>
+        <constructor-arg name="zkPort" value="#{zookeeper.port}"/>
+        <constructor-arg name="port" value="#{T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort()}"/>
+    </bean>
+
+    <bean id="configurationProperties" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:camelot-default.properties</value>
+                <value>classpath:test-config.properties</value>
+                <value>classpath:kafka-test.properties</value>
+            </list>
+        </property>
+        <property name="properties">
+            <util:properties>
+                <prop key="camelot.input.uri">#{kafka.allUri('input')}</prop>
+            </util:properties>
+        </property>
+    </bean>
+
+    <import resource="classpath:camelot-loaders-context.xml"/>
+    <import resource="classpath:camelot-camel-context.xml"/>
+    <import resource="classpath:camelot-processing-context.xml"/>
+
+    <bean id="uriBuilder" class="ru.yandex.qatools.camelot.core.kafka.KafkaPluginUriBuilder">
+        <constructor-arg name="kafkaHosts" value="localhost:#{kafka.port}"/>
+        <constructor-arg name="zkHost" value="#{zookeeper.host}"/>
+        <constructor-arg name="zkPort" value="#{zookeeper.port}"/>
+    </bean>
+
+    <bean id="messagesSerializer" class="ru.yandex.qatools.camelot.core.kafka.KafkaMessagesSerializer"/>
+    <bean id="interimProcessor" class="ru.yandex.qatools.camelot.core.kafka.KafkaInterimProcessor"/>
+
+</beans>

@@ -11,6 +11,8 @@ package ru.yandex.qatools.camelot.config;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.camel.spi.AggregationRepository;
 import ru.yandex.qatools.camelot.api.*;
+import ru.yandex.qatools.camelot.core.InterimProcessor;
+import ru.yandex.qatools.camelot.core.MessagesSerializer;
 import ru.yandex.qatools.camelot.core.PluginContextInjector;
 import ru.yandex.qatools.camelot.core.builders.SchedulerBuilder;
 
@@ -96,6 +98,12 @@ public class PluginContext
     @XmlTransient
     @JsonIgnore
     protected SchedulerBuilder schedulerBuilder;
+    @XmlTransient
+    @JsonIgnore
+    protected MessagesSerializer messagesSerializer;
+    @XmlTransient
+    @JsonIgnore
+    protected InterimProcessor interimProcessor;
 
     /**
      * Gets the value of the id property.
@@ -570,5 +578,21 @@ public class PluginContext
 
     public void setClientNotifyUri(String clientNotifyUri) {
         this.clientNotifyUri = clientNotifyUri;
+    }
+
+    public MessagesSerializer getMessagesSerializer() {
+        return messagesSerializer;
+    }
+
+    public void setMessagesSerializer(MessagesSerializer messagesSerializer) {
+        this.messagesSerializer = messagesSerializer;
+    }
+
+    public InterimProcessor getInterimProcessor() {
+        return interimProcessor;
+    }
+
+    public void setInterimProcessor(InterimProcessor interimProcessor) {
+        this.interimProcessor = interimProcessor;
     }
 }

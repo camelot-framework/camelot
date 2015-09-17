@@ -25,7 +25,7 @@ import static ru.yandex.qatools.camelot.util.NameUtil.pluginResourceBeanName;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:camelot-web-context.xml", "classpath:test-web.spring-context.xml"})
 @DirtiesContext(classMode = AFTER_CLASS)
-public class ResourceTest extends BasicAggregatorsTest {
+public class ResourceTest extends ActivemqAggregatorsTest {
     @Autowired
     ApplicationContext applicationContext;
 

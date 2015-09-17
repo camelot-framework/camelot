@@ -7,18 +7,15 @@ import ru.yandex.qatools.camelot.api.error.RepositoryDirtyWriteAttemptException;
 import ru.yandex.qatools.camelot.api.error.RepositoryLockWaitException;
 import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.config.Plugin;
+import ru.yandex.qatools.camelot.config.PluginContext;
 import ru.yandex.qatools.camelot.core.AggregationRepositoryWithLocks;
 
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
 
 import static org.apache.commons.lang3.ArrayUtils.addAll;
-import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
-import static ru.yandex.qatools.camelot.util.SerializeUtil.deserializeFromBytes;
-import static ru.yandex.qatools.camelot.util.SerializeUtil.serializeToBytes;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -102,17 +99,15 @@ public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMetho
 
     @SuppressWarnings("unchecked")
     private void invokeForExchange(String key, Exchange exchange, Method method, Object[] args) throws Exception {
-        final ClassLoader classLoader = plugin.getContext().getClassLoader();
+        final PluginContext context = plugin.getContext();
+        final ClassLoader classLoader = context.getClassLoader();
         Object aggregator = (pluginInstance == null) ?
                             classLoader.loadClass(plugin.getAggregator()).newInstance() :
                             pluginInstance;
-        plugin.getContext().getInjector().inject(aggregator, plugin.getContext(), exchange);
+        context.getInjector().inject(aggregator, context, exchange);
+
+        context.getMessagesSerializer().preProcess(exchange, classLoader);
         Object body = exchange.getIn().getBody();
-        Class<? extends Serializable> bodyClass = (Class<? extends Serializable>)
-                classLoader.loadClass((String) exchange.getIn().getHeader(BODY_CLASS));
-        if (body instanceof byte[]) {
-            body = deserializeFromBytes((byte[]) body, classLoader, bodyClass);
-        }
         Object[] mArgs = new Object[]{body};
         if (method.getParameterTypes().length > 1) {
             mArgs = addAll(mArgs, args);
@@ -123,8 +118,7 @@ public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMetho
         method.invoke(aggregator, mArgs);
         logger.debug("Invocation of '{}' for key '{}' of plugin {} done successfully",
                 method.getName(), key, plugin.getId());
-
-        exchange.getIn().setBody(serializeToBytes(body));
+        context.getMessagesSerializer().postProcess(exchange, classLoader);
     }
 
     private void unlockQuietly(AggregationRepository repo, String key) {

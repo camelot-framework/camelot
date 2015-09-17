@@ -17,8 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static ru.yandex.qatools.camelot.Constants.CLIENT_NOTIFY_URI;
-import static ru.yandex.qatools.camelot.Constants.TMP_INPUT_BUFFER_URI;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static ru.yandex.qatools.camelot.util.ContextUtils.autowireFields;
 import static ru.yandex.qatools.camelot.util.NameUtil.routeId;
 import static ru.yandex.qatools.camelot.util.ServiceUtil.gracefullyRemoveEndpoints;
@@ -172,7 +171,7 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
      */
     protected String tmpBufferUri() {
         String res = getAppConfig().getProperty(CAMELOT_TMPBUFFER_URI_PROP);
-        return (res != null) ? res : TMP_INPUT_BUFFER_URI;
+        return (!isEmpty(res)) ? res : getUriBuilder().tmpInputBufferUri();
     }
 
     /**
@@ -180,7 +179,7 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
      */
     protected String clientNotifyUri() {
         String res = getAppConfig().getProperty(CAMELOT_NOTIFY_URI_PROP);
-        return (res != null) ? res : CLIENT_NOTIFY_URI;
+        return (!isEmpty(res)) ? res : getUriBuilder().frontendBroadcastUri();
     }
 
     /**
@@ -222,9 +221,9 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
         camelContext.addRoutes(new RouteBuilder() {
             @Override
             public void configure() throws Exception {
-                final IncomingMessagesQueueProcessor processor = new IncomingMessagesQueueProcessor(camelContext);
+                final IncomingMessagesQueueProcessor processor = new IncomingMessagesQueueProcessor(camelContext, getMessagesSerializer());
                 autowireFields(processor, applicationContext, camelContext);
-                from(tmpBufferUri()).process(processor).stop().routeId(routeId(tmpBufferUri(), getEngineName()));
+                addInterimRoute(from(tmpBufferUri()).process(processor)).stop().routeId(routeId(tmpBufferUri(), getEngineName()));
             }
         });
     }
@@ -236,9 +235,9 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
         camelContext.addRoutes(new RouteBuilder() {
             @Override
             public void configure() throws Exception {
-                final LocalPluginClientNotifier processor = new LocalPluginClientNotifier();
+                final LocalPluginClientNotifier processor = new LocalPluginClientNotifier(getMessagesSerializer());
                 autowireFields(processor, applicationContext, camelContext);
-                from(clientNotifyUri()).process(processor).stop().routeId(routeId(clientNotifyUri(), getEngineName()));
+                addInterimRoute(from(clientNotifyUri()).process(processor)).stop().routeId(routeId(clientNotifyUri(), getEngineName()));
             }
         });
     }

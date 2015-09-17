@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.camelot.api.EndpointListener;
 import ru.yandex.qatools.camelot.config.PluginContext;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
@@ -19,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import static java.lang.System.identityHashCode;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
-import static ru.yandex.qatools.camelot.util.SerializeUtil.deserializeFromBytes;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -89,12 +87,7 @@ public class EndpointListenerImpl implements EndpointListener {
         @SuppressWarnings("unchecked")
         public boolean onMessage(@Body final Object body, @Headers Map<String, Object> headers) throws Exception {
             synchronized (this) {
-                Object object = body;
-                if (body instanceof byte[]) {
-                    Class<? extends Serializable> bodyClass = (Class<? extends Serializable>)
-                            context.getClassLoader().loadClass((String) headers.get(BODY_CLASS));
-                    object = deserializeFromBytes((byte[]) object, context.getClassLoader(), bodyClass);
-                }
+                Object object = context.getMessagesSerializer().deserialize(body, context.getClassLoader());
                 final boolean procOK = processor.onMessage(object, headers);
                 if (procOK) {
                     this.notify();

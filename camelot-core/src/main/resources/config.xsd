@@ -37,8 +37,7 @@
         <xsd:attribute name="id" type="xsd:string"/>
         <xsd:attribute name="source" type="xsd:string"/>
         <xsd:attribute name="brokerConfig" type="xsd:string" default=""/>
-        <xsd:attribute name="baseInputUri" type="xsd:string" default="activemq:queue:plugin.input"/>
-        <xsd:attribute name="baseOutputUri" type="xsd:string" default="activemq:queue:plugin.output"/>
+        <xsd:attribute name="baseInputUri" type="xsd:string" default=""/>
     </xsd:complexType>
 
     <xsd:complexType name="Broker">
