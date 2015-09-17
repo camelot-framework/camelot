@@ -31,7 +31,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.7</java.version>
 
-        <activemq.version>5.11.1</activemq.version>
+        <activemq.version>5.12.0</activemq.version>
         <camel.version>2.15.1</camel.version>
         <clay.version>2.5</clay.version>
         <hazelcast.version>3.5</hazelcast.version>
