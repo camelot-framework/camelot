@@ -21,7 +21,7 @@ public class ActivemqMessagesSerializer extends BasicMessagesSerializer {
                         classLoader, expClass);
             }
         } catch (Exception e) {
-            logger.debug("Failed to deserialize message from bytes: " + e.getMessage(), e);
+            LOGGER.debug("Failed to deserialize message from bytes: " + e.getMessage(), e);
         }
         return body;
     }

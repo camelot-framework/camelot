@@ -49,7 +49,7 @@ public class FSMAggregationStrategy extends ClayProcessor implements Aggregation
 
         try {
             Thread.currentThread().setContextClassLoader(classLoader);
-            message = processAfterIn(message);
+            message = processAfterIn(message);//NOSONAR
 
             Object fsm = fsmClass.newInstance();
             injectFields(fsm, message);

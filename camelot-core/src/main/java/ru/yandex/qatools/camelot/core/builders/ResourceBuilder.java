@@ -13,9 +13,4 @@ public interface ResourceBuilder {
      */
     void build(CamelContext camelContext, Plugin plugin) throws Exception;
 
-    /**
-     * Remove the built objects from the context
-     */
-    void remove(CamelContext camelContext, Plugin plugin) throws Exception;
-
 }

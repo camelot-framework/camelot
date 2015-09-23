@@ -60,13 +60,6 @@ public class SpringPluginResourceBuilder implements ResourceBuilder, BeanFactory
         }
     }
 
-    /**
-     * Remove the resources from the context
-     */
-    @Override
-    public void remove(CamelContext camelContext, Plugin plugin) throws Exception {
-    }
-
     private void initResourcesConfig(Class baseClass, Plugin plugin) throws Exception {
         plugin.getContext().getCssPaths().addAll(findTemplatePaths(baseClass, "**/*", CSS_EXTS));
         plugin.getContext().getJsPaths().addAll(findTemplatePaths(baseClass, "**/*", JS_EXTS));

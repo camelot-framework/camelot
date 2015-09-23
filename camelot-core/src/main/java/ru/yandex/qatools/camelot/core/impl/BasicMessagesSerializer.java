@@ -14,7 +14,7 @@ import static ru.yandex.qatools.camelot.util.SerializeUtil.unwrapBodyClassName;
  * @author Ilya Sadykov
  */
 public abstract class BasicMessagesSerializer implements MessagesSerializer {
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @Override
     public Exchange preProcess(Exchange exchange, ClassLoader classLoader) {
@@ -41,7 +41,7 @@ public abstract class BasicMessagesSerializer implements MessagesSerializer {
             headers.put(BODY_CLASS, res.getClass().getName());
             return res;
         } catch (Exception e) {
-            logger.error("Failed to process body and headers after receiving body {}", body, e);
+            LOGGER.error("Failed to process body and headers after receiving body {}", body, e);
         }
         return body;
     }
@@ -61,7 +61,7 @@ public abstract class BasicMessagesSerializer implements MessagesSerializer {
             try {
                 return unwrapBodyClassName((byte[]) body);
             } catch (Exception e) {
-                logger.error("Failed to identify body class name of body {}", body, e);
+                LOGGER.error("Failed to identify body class name of body {}", body, e);
             }
         }
         return null;

@@ -15,9 +15,9 @@ import static ru.yandex.qatools.camelot.util.ServiceUtil.initEventSender;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public class ClientSendersProviderImpl implements ClientSendersProvider {
-    final private CamelContext camelContext;
-    final private String clientSendUri;
-    final private MessagesSerializer serializer;
+    private final CamelContext camelContext;
+    private final String clientSendUri;
+    private final MessagesSerializer serializer;
 
     final Map<String, ClientMessageSender> sendersCache = new ConcurrentHashMap<>();
 

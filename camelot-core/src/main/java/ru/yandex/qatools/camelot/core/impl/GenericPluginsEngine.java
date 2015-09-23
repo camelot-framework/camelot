@@ -137,14 +137,6 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     @Override
     public synchronized void stop() {
         try {
-            for (final Plugin plugin : getPluginsMap().values()) {
-                getResourceBuilder().remove(camelContext, plugin);
-            }
-        } catch (Exception e) {
-            logger.error("Failed to stop services!", e);
-        }
-
-        try {
             stopPlugins();
         } catch (Exception e) {
             logger.error("Failed to stop plugins!", e);

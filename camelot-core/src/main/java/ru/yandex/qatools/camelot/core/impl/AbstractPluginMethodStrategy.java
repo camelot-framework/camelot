@@ -58,10 +58,10 @@ public abstract class AbstractPluginMethodStrategy<A extends Annotation> {
             pluginContext.getMessagesSerializer().preProcess(exchange, pluginContext.getClassLoader());
             Object aggregator = pluginClass.newInstance();
             pluginContext.getInjector().inject(aggregator, pluginContext, exchange);
-            ;
+            event = exchange.getIn().getBody();
             final Map<Method, Object> res = new AnnotatedMethodDispatcher(
                     aggregator, getMeta(pluginClass)
-            ).dispatch(annClass, true, event = exchange.getIn().getBody());
+            ).dispatch(annClass, true, event);
             return res.values().iterator().next();
         } catch (InvocationTargetException e) {
             logger.trace("Sonar trick", e);
