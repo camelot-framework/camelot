@@ -4,12 +4,12 @@ import org.apache.camel.Exchange;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.yandex.qatools.camelot.core.MessagesSerializer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static java.lang.String.format;
-import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.FINISHED_EXCHANGE;
 import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 import static ru.yandex.qatools.camelot.util.ReflectUtil.invokeAnyMethod;
@@ -22,76 +22,60 @@ import static ru.yandex.qatools.camelot.util.ReflectUtil.invokeAnyMethod;
 public class FSMAggregationStrategy extends ClayProcessor implements AggregationStrategy {
 
     final protected Logger logger = LoggerFactory.getLogger(getClass());
+    private final Class fsmClass;
     private Object fsmEngineBuilder;
     private Method buildWithoutStateMethod;
     private Method buildWithStateMethod;
-    private final Class fsmClass;
 
-    public FSMAggregationStrategy(Class fsmClass) throws NoSuchMethodException {
-        super(fsmClass.getClassLoader());
+    public FSMAggregationStrategy(Class fsmClass, MessagesSerializer serializer) throws NoSuchMethodException {
+        super(fsmClass.getClassLoader(), serializer);
         initEngineBuilder(new CamelotFSMBuilder(fsmClass));
         this.fsmClass = fsmClass;
     }
 
-    public FSMAggregationStrategy(ClassLoader classLoader, Class fsmClass, Object fsmEngineBuilder)
+    public FSMAggregationStrategy(ClassLoader classLoader, Class fsmClass, Object fsmEngineBuilder, MessagesSerializer serializer)
             throws NoSuchMethodException {
-        super(classLoader);
+        super(classLoader, serializer);
         initEngineBuilder(fsmEngineBuilder);
         this.fsmClass = fsmClass;
     }
 
     @Override
     public Exchange aggregate(Exchange state, Exchange message) {
-        Object result = state == null ? null : state.getIn().getBody();
+        Object result = state == null ? null : processAfterIn(state).getIn().getBody();
         final ClassLoader originalCL = Thread.currentThread().getContextClassLoader();
 
         Object fsmEngine;
 
         try {
             Thread.currentThread().setContextClassLoader(classLoader);
+            message = processAfterIn(message);//NOSONAR
 
             Object fsm = fsmClass.newInstance();
             injectFields(fsm, message);
 
-            String eventBodyClass = (String) message.getIn().getHeader(BODY_CLASS);
-            String stateBodyClass = state != null ? (String) state.getIn().getHeader(BODY_CLASS)
-                                                  : null;
-            logger.debug(format("%s's input, stateBodyClass=%s, eventBodyClass=%s",
-                    fsmClass, stateBodyClass, eventBodyClass));
-
             if (result != null) {
-                result = processAfterIn(result, stateBodyClass);
                 fsmEngine = buildWithStateMethod.invoke(fsmEngineBuilder, result, fsm);
             } else {
                 fsmEngine = buildWithoutStateMethod.invoke(fsmEngineBuilder, fsm);
             }
 
-            if (eventBodyClass == null) {
-                logger.warn(fsmClass + " got message without bodyClass header, skipping aggregation!");
-            } else {
-                Object event = processAfterIn(message.getIn().getBody(), eventBodyClass);
+            Object event = message.getIn().getBody();
 
-                try {
-                    result = invokeAnyMethod(fsmEngine, "fire", new Class[]{Object.class}, event);
-                } catch (InvocationTargetException e) {
-                    logger.trace("Sonar trick", e);
-                    logger.error(format("Failed to process message %s with FSM %s! \n %s",
-                            event, fsm, formatStackTrace(e.getTargetException())),
-                            e.getTargetException());
-                } catch (Exception e) {
-                    logger.error(format("Failed to process message %s with FSM %s! \n %s",
-                            event, fsm, formatStackTrace(e)), e);
-                }
-                if (result != null) {
-                    final String newBodyClass = result.getClass().getName();
-                    logger.debug(format("%s's output is not null, bodyClass=%s",
-                            fsmClass, newBodyClass));
-                    message.getIn().setHeader(BODY_CLASS, newBodyClass);
-                }
-                result = processBeforeOut(result);
-                message.getIn().setHeader(FINISHED_EXCHANGE,
-                                          invokeAnyMethod(fsmEngine, "isCompleted"));
+            try {
+                result = invokeAnyMethod(fsmEngine, "fire", new Class[]{Object.class}, event);
+            } catch (InvocationTargetException e) {
+                logger.trace("Sonar trick", e);
+                logger.error(format("Failed to process message %s with FSM %s! \n %s",
+                                event, fsm, formatStackTrace(e.getTargetException())),
+                        e.getTargetException());
+            } catch (Exception e) {
+                logger.error(format("Failed to process message %s with FSM %s! \n %s",
+                        event, fsm, formatStackTrace(e)), e);
             }
+
+            message.getIn().setHeader(FINISHED_EXCHANGE, invokeAnyMethod(fsmEngine, "isCompleted"));
+
         } catch (Exception e) {
             logger.error(String.format("%s: \n %s", fsmEngineBuilder, formatStackTrace(e)), e);
         } finally {
@@ -104,7 +88,7 @@ public class FSMAggregationStrategy extends ClayProcessor implements Aggregation
         if (result != null) {
             message.getIn().setBody(result);
         }
-        return message;
+        return processBeforeOut(message);
     }
 
     private void initEngineBuilder(Object fsmEngineBuilder) throws NoSuchMethodException {

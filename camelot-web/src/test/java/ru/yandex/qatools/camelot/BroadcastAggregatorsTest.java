@@ -24,7 +24,7 @@ import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestS
 @ContextConfiguration(locations = {"classpath:camelot-web-context.xml", "classpath:test-web.spring-context.xml"})
 @DirtiesContext(classMode = AFTER_CLASS)
 @MockEndpoints("*")
-public class BroadcastAggregatorsTest extends BasicAggregatorsTest {
+public class BroadcastAggregatorsTest extends ActivemqAggregatorsTest {
 
     @Autowired
     protected MockedBroadcastService mockedBroadcastService;

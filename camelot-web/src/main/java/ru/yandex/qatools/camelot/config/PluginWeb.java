@@ -22,7 +22,6 @@ public class PluginWeb extends Plugin {
         this.id = other.id;
         this.aggregator = other.aggregator;
         this.baseInputUri = other.baseInputUri;
-        this.baseOutputUri = other.baseOutputUri;
         this.brokerConfig = other.brokerConfig;
         this.processor = other.processor;
         this.resource = other.resource;

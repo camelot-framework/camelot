@@ -9,13 +9,9 @@ import org.springframework.core.io.Resource;
 import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.api.ClientMessageSender;
 import ru.yandex.qatools.camelot.api.EventProducer;
-import ru.yandex.qatools.camelot.api.PluginEndpoints;
-import ru.yandex.qatools.camelot.api.annotations.Input;
-import ru.yandex.qatools.camelot.api.annotations.MainInput;
-import ru.yandex.qatools.camelot.api.annotations.Output;
-import ru.yandex.qatools.camelot.beans.IncomingMessage;
 import ru.yandex.qatools.camelot.core.AnnotatedFieldListener;
 import ru.yandex.qatools.camelot.core.AnnotatedMethodListener;
+import ru.yandex.qatools.camelot.core.MessagesSerializer;
 import ru.yandex.qatools.camelot.core.impl.AppConfigSystemProperties;
 import ru.yandex.qatools.camelot.core.impl.BasicEventProducer;
 
@@ -28,12 +24,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.String.format;
-import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
+import static java.lang.ClassLoader.getSystemClassLoader;
+import static java.lang.Thread.currentThread;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.TOPIC;
 import static ru.yandex.qatools.camelot.util.IOUtils.readResource;
 import static ru.yandex.qatools.camelot.util.ReflectUtil.*;
-import static ru.yandex.qatools.camelot.util.SerializeUtil.serializeToBytes;
 import static ru.yandex.qatools.camelot.util.TypesUtil.isAssignableFrom;
 
 /**
@@ -47,7 +42,7 @@ public class ServiceUtil {
      * Search for the annotated field within the procClass
      * and initialize the Camel producer for the uri
      */
-    public static EventProducer initEventProducer(CamelContext camelContext, final String uri)
+    public static EventProducer initEventProducer(CamelContext camelContext, final String uri, final MessagesSerializer serializer)
             throws Exception {
         final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
         producerTemplate.setDefaultEndpointUri(uri);
@@ -55,8 +50,11 @@ public class ServiceUtil {
             @Override
             public void produce(Object event, Map<String, Object> headers) {
                 try {
-                    headers.put(BODY_CLASS, event.getClass().getName());
-                    producerTemplate.sendBodyAndHeaders(serializeToBytes(event), headers);
+                    final ClassLoader eventCL = event.getClass().getClassLoader();
+                    final ClassLoader contextCL = currentThread().getContextClassLoader();
+                    final ClassLoader cl = (eventCL != null) ? eventCL : ((contextCL != null) ? contextCL : getSystemClassLoader());
+                    producerTemplate.sendBodyAndHeaders(
+                            serializer.processBodyAndHeadersBeforeSend(event, headers, cl), headers);
                 } catch (Exception e) {
                     logger.error("Failed to produce message to the uri " + uri, e);
                 }
@@ -68,8 +66,8 @@ public class ServiceUtil {
      * Initializes the client sender to the topic with uri
      */
     public static ClientMessageSender initEventSender(
-            CamelContext camelContext, String uri, final String topic) throws Exception {
-        final EventProducer producer = initEventProducer(camelContext, uri);
+            CamelContext camelContext, String uri, final String topic, final MessagesSerializer serializer) throws Exception {
+        final EventProducer producer = initEventProducer(camelContext, uri, serializer);
         return new ClientMessageSender() {
             @Override
             public void send(Object message) {
@@ -196,49 +194,6 @@ public class ServiceUtil {
                 return value;
             }
         });
-    }
-
-    /**
-     * Inject the producers for each field within resource
-     */
-    public static void injectTmpInputBufferProducers(final PluginEndpoints endpoints, final Object res, final Class resClass, final CamelContext camelContext, String tmpInputBufferUri) throws Exception {
-        injectTmpInputBufferProducer(res, resClass, MainInput.class, camelContext, endpoints.getMainInputUri(), tmpInputBufferUri);
-        injectTmpInputBufferProducer(res, resClass, Input.class, camelContext, endpoints.getInputUri(), tmpInputBufferUri);
-        injectTmpInputBufferProducer(res, resClass, Output.class, camelContext, endpoints.getOutputUri(), tmpInputBufferUri);
-    }
-
-    /**
-     * Inject the producer field with uri
-     */
-    public static <U extends Annotation> void injectTmpInputBufferProducer(final Object res, final Class resClass, Class<U> annClass,
-                                                                           final CamelContext camelContext, final String uri, final String tmpInputBufferUri) throws Exception {
-        forEachAnnotatedField(resClass, annClass, new AnnotatedFieldListener<Object, U>() {
-            @Override
-            public Object found(Field field, Annotation annotation) throws Exception {
-                return setFieldValue(field, res, initTmpInputBufferProducer(camelContext, uri, tmpInputBufferUri));
-            }
-        });
-    }
-
-    /**
-     * Init the tmp input producer
-     */
-    public static EventProducer initTmpInputBufferProducer(CamelContext camelContext,
-                                                           final String uri, final String bufferUri) {
-        final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
-        producerTemplate.setDefaultEndpointUri(bufferUri);
-        return new BasicEventProducer(producerTemplate) {
-            @Override
-            public void produce(Object event, Map<String, Object> headers) {
-                try {
-                    producerTemplate.sendBodyAndHeaders(
-                            new IncomingMessage(uri, serializeToBytes(event)), headers
-                    );
-                } catch (Exception e) {
-                    logger.error(format("Failed to produce message to the tmp buffer %s for uri %s ", bufferUri, uri), e);
-                }
-            }
-        };
     }
 
     /**

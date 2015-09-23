@@ -17,17 +17,17 @@ import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public class CamelotProcessor extends PluggableProcessor {
-    final private PluginContext context;
-    final private Class procClass;
+    final protected PluginContext context;
+    final protected Class procClass;
 
     public CamelotProcessor(ClassLoader classLoader, Class procClass, PluginContext context) {
-        super(classLoader, procClass);
+        super(classLoader, procClass, context.getMessagesSerializer());
         this.context = context;
         this.procClass = procClass;
     }
 
     public CamelotProcessor(ClassLoader classLoader, Class procClass, Object processor, PluginContext context) {
-        super(classLoader, procClass, processor);
+        super(classLoader, procClass, processor, context.getMessagesSerializer());
         this.context = context;
         this.procClass = procClass;
     }

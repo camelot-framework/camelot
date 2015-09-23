@@ -1,16 +1,14 @@
 package ru.yandex.qatools.camelot.core.impl;
 
 import org.apache.camel.Body;
-import org.apache.camel.Header;
+import org.apache.camel.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.yandex.qatools.camelot.api.Constants;
 import ru.yandex.qatools.camelot.api.CustomFilter;
 import ru.yandex.qatools.camelot.config.Plugin;
+import ru.yandex.qatools.camelot.core.MessagesSerializer;
 
-import java.io.Serializable;
-
-import static ru.yandex.qatools.camelot.util.SerializeUtil.deserializeFromBytes;
+import java.util.Map;
 
 
 /**
@@ -18,19 +16,17 @@ import static ru.yandex.qatools.camelot.util.SerializeUtil.deserializeFromBytes;
  */
 public class PluginMessageFilter {
     public static final String FILTER_METHOD_NAME = "filter";
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
     final Plugin plugin;
     final Class customFilterClass;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public PluginMessageFilter(Plugin plugin, Class<? extends CustomFilter> customFilterClass) {
         this.plugin = plugin;
         this.customFilterClass = customFilterClass;
     }
 
-    public boolean filter(@Body Object input, @Header(Constants.Headers.BODY_CLASS) String bodyClass) {
-        final Object body = process(input, bodyClass);
+    public boolean filter(@Body Object input, @Headers Map<String, Object> headers) {
+        final Object body = process(input, headers);
         try {
             CustomFilter filter = (CustomFilter) customFilterClass.newInstance();
             plugin.getContext().getInjector().inject(filter, plugin.getContext());
@@ -42,15 +38,9 @@ public class PluginMessageFilter {
     }
 
     @SuppressWarnings("unchecked")
-    private Object process(Object body, String bodyClass) {
-        if (body instanceof byte[]) {
-            try {
-                final ClassLoader classLoader = plugin.getContext().getClassLoader();
-                body = deserializeFromBytes((byte[]) body, classLoader, (Class<? extends Serializable>) classLoader.loadClass(bodyClass));
-            } catch (Exception e) {
-                logger.debug("Failed to deserialize event object", e);
-            }
-        }
-        return body;
+    private Object process(Object body, Map<String, Object> headers) {
+        final ClassLoader classLoader = plugin.getContext().getClassLoader();
+        final MessagesSerializer serializer = plugin.getContext().getMessagesSerializer();
+        return serializer.processBodyAndHeadersAfterReceive(body, headers, classLoader);
     }
 }

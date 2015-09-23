@@ -5,8 +5,6 @@ import org.apache.camel.Processor;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.core.impl.CamelotProcessor;
 
-import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
-
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
@@ -23,7 +21,7 @@ class TestCamelotProcessor extends CamelotProcessor {
     @Override
     public void process(Exchange message) {
         Object event = message.getIn().getBody();
-        event = processAfterIn(event, (String) message.getIn().getHeader(BODY_CLASS));
+        event = context.getMessagesSerializer().deserialize(event, context.getClassLoader());
         try {
             dispatchMessage(procMock, event, message.getIn().getHeaders());
             original.process(message);

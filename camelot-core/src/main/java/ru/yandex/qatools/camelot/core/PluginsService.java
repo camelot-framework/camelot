@@ -86,6 +86,10 @@ public interface PluginsService {
      */
     void setResourceBuilder(ResourceBuilder resourceBuilder);
 
+    PluginUriBuilder getUriBuilder();
+
+    void setUriBuilder(PluginUriBuilder uriBuilder);
+
     /**
      * Returns the resource builder
      */
@@ -121,6 +125,10 @@ public interface PluginsService {
      * Returns the main event producer
      */
     EventProducer getMainInput();
+
+    MessagesSerializer getMessagesSerializer();
+
+    void setMessagesSerializer(MessagesSerializer messagesSerializer);
 
     /**
      * Returns true if plugin has aggregator or processor

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugins-config xmlns="urn:config.camelot.qatools.yandex.ru">
+    <source>
+        <artifact>test</artifact>
+        <plugin id="send-to-output">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.SendToOutputAggregator</aggregator>
+        </plugin>
+        <plugin id="bind-to-output" source="send-to-output">
+            <aggregator>ru.yandex.qatools.camelot.core.plugins.BindToOutputAggregator</aggregator>
+        </plugin>
+    </source>
+</plugins-config>

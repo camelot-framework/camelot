@@ -3,6 +3,8 @@ package ru.yandex.qatools.camelot.core.builders;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.component.jms.JmsBinding;
+import org.apache.camel.component.jms.JmsMessage;
 import org.apache.camel.processor.aggregate.MemoryAggregationRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,9 +15,12 @@ import ru.yandex.qatools.camelot.api.annotations.Repository;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
 import ru.yandex.qatools.camelot.core.impl.PluginContextInjectorImpl;
+import ru.yandex.qatools.camelot.core.activemq.ActivemqMessagesSerializer;
 
+import java.util.HashMap;
+
+import static java.lang.ClassLoader.getSystemClassLoader;
 import static org.mockito.Mockito.*;
-import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -26,6 +31,7 @@ public class QuartzAggregatorSchedulerBuilderTest {
     private CamelContext camelContext;
     private Scheduler scheduler;
     private Plugin plugin;
+    private ActivemqMessagesSerializer serializer;
 
     public static class TestClass {
         @Repository
@@ -52,6 +58,7 @@ public class QuartzAggregatorSchedulerBuilderTest {
 
     @Before
     public void init() {
+        serializer = new ActivemqMessagesSerializer();
         camelContext = mock(CamelContext.class);
         Exchange exchange1 = exchange("test1");
         Exchange exchange2 = exchange("test2");
@@ -64,6 +71,7 @@ public class QuartzAggregatorSchedulerBuilderTest {
         plugin.getContext().setPluginClass(TestClass.class.getName());
         plugin.getContext().setInjector(new PluginContextInjectorImpl());
         plugin.getContext().setRepository(mock(AggregatorRepository.class));
+        plugin.getContext().setMessagesSerializer(serializer);
 
         final MemoryAggregationRepository repo = new MemoryAggregationRepository();
         plugin.getContext().setAggregationRepo(repo);
@@ -73,10 +81,10 @@ public class QuartzAggregatorSchedulerBuilderTest {
 
     private Exchange exchange(String body) {
         Exchange result = mock(Exchange.class);
-        Message message = mock(Message.class);
+        Message message = spy(new JmsMessage(mock(javax.jms.Message.class), mock(JmsBinding.class)));
         when(message.getBody()).thenReturn(body);
+        message.setBody(serializer.processBodyAndHeadersBeforeSend(body, new HashMap<String, Object>(), getSystemClassLoader()));
         when(result.getIn()).thenReturn(message);
-        when(message.getHeader(BODY_CLASS)).thenReturn(String.class.getName());
         return result;
     }
 

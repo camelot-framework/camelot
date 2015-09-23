@@ -14,7 +14,6 @@ public interface BuildersFactory {
      */
     AggregatorRoutesBuilder newAggregatorPluginRouteBuilder(CamelContext camelContext,
                                                             Plugin plugin) throws Exception;
-
     /**
      * Initializes the new processor plugin route builder
      */
@@ -24,7 +23,6 @@ public interface BuildersFactory {
      * Initializes the repository builder
      */
     AggregationRepositoryBuilder newRepositoryBuilder(CamelContext camelContext) throws Exception;
-
 
     /**
      * Initializes the quartz initializer

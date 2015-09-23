@@ -17,6 +17,8 @@ import ru.yandex.qatools.camelot.core.plugins.WithoutIdAggregator;
 
 import static java.lang.Thread.sleep;
 import static java.util.Calendar.HOUR_OF_DAY;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.*;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
@@ -26,7 +28,6 @@ import static ru.yandex.qatools.camelot.core.util.TestEventsUtils.copyOf;
 import static ru.yandex.qatools.camelot.util.DateUtil.calThen;
 import static ru.yandex.qatools.camelot.util.DateUtil.hourAgo;
 import static ru.yandex.qatools.camelot.util.SerializeUtil.checkAndGetBytesInput;
-import static org.hamcrest.Matchers.*;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -38,7 +39,7 @@ import static org.hamcrest.Matchers.*;
 })
 @DirtiesContext(classMode = AFTER_CLASS)
 @MockEndpoints("*")
-public class AggregatorsTest extends BasicAggregatorsTest {
+public class AggregatorsTest extends ActivemqAggregatorsTest {
 
     @Autowired
     ProcessingEngine processingEngine;
@@ -56,8 +57,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        CounterState first = checkAndGetBytesInput(CounterState.class,
-                                exchange.getIn().getBody(), classLoader);
+                        CounterState first = getInput((Exchange) exchange, CounterState.class);
                         return first != null && first.count == 1;
                     }
                 });
@@ -73,10 +73,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        CounterState first = checkAndGetBytesInput(
-                                CounterState.class,
-                                exchange.getIn().getBody(),
-                                classLoader);
+                        CounterState first = AggregatorsTest.this.getInput(exchange, CounterState.class);
                         return first != null
                                 && first.count == 1
                                 && first.label.equals("test");
@@ -103,8 +100,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        Object first = checkAndGetBytesInput(CounterState.class,
-                                exchange.getIn().getBody(), classLoader);
+                        Object first = getInput((Exchange) exchange, CounterState.class);
                         return first != null && ((CounterState) first).count == 2;
                     }
                 });
@@ -129,8 +125,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        TestPassedState first = checkAndGetBytesInput(TestPassedState.class,
-                                exchange.getIn().getBody(), classLoader);
+                        TestPassedState first = getInput(exchange, TestPassedState.class);
                         return first != null;
                     }
                 });
@@ -172,8 +167,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        CounterState first = checkAndGetBytesInput(CounterState.class,
-                                exchange.getIn().getBody(), classLoader);
+                        CounterState first = getInput(exchange, CounterState.class);
                         return first != null && first.count == 1;
                     }
                 });
@@ -200,8 +194,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                     label + " exchange must exist!", new Predicate() {
                         @Override
                         public boolean matches(Exchange exchange) {
-                            CounterState obj = checkAndGetBytesInput(CounterState.class,
-                                    exchange.getIn().getBody(), classLoader);
+                            CounterState obj = getInput(exchange, CounterState.class);
                             return obj != null && obj.count > 1 && obj.label.equals(label);
                         }
                     });
@@ -229,8 +222,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        CounterState first = checkAndGetBytesInput(CounterState.class,
-                                exchange.getIn().getBody(), classLoader);
+                        CounterState first = getInput(exchange, CounterState.class);
                         return first != null && first.count == 2;
                     }
                 });
@@ -251,9 +243,11 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         endpointLifecycleOutput.assertIsSatisfied(2000);
         TestEvent first = checkAndGetBytesInput(TestFailed.class,
                 endpointLifecycleOutput.getExchanges().get(0).getIn().getBody(),
+                processingEngine.getMessagesSerializer(),
                 classLoader);
         TestEvent second = checkAndGetBytesInput(TestFailed.class,
                 endpointLifecycleOutput.getExchanges().get(1).getIn().getBody(),
+                processingEngine.getMessagesSerializer(),
                 classLoader);
 
 
@@ -275,8 +269,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        String first = checkAndGetBytesInput(String.class,
-                                exchange.getIn().getBody(), classLoader);
+                        String first = getInput(exchange, String.class);
                         return first != null && TestBroken.class.getName().equals(first);
                     }
                 });
@@ -284,21 +277,20 @@ public class AggregatorsTest extends BasicAggregatorsTest {
 
     @Test
     public void testAggregatorWithTimer() throws Exception {
-        endpointWithTimer.reset();
-        endpointWithTimer.expectedMessageCount(1);
+        endpointWithTimerOutput.reset();
+        endpointWithTimerOutput.expectedMessageCount(1);
         String uuid1 = uuid();
         sendTestEvent("with-timer", createTestStarted(), uuid1);
         sendTestEvent("with-timer", createTestStarted(), uuid1);
         sleep(3000); // wait for 3 seconds
         sendTestEvent("with-timer", new StopAggregatorWithTimer(), uuid1);
-        endpointWithTimer.assertIsSatisfied(2000);
-        expectExchangeExists(endpointWithTimer,
+        endpointWithTimerOutput.assertIsSatisfied(2000);
+        expectExchangeExists(endpointWithTimerOutput,
                 "Output must contain 1 <= count1 <= 10, 1 <= count2 <= 5",
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        CounterState first = checkAndGetBytesInput(CounterState.class,
-                                exchange.getIn().getBody(), classLoader);
+                        CounterState first = getInput(exchange, CounterState.class);
                         assertNotNull("First must not be null", first);
                         assertThat(first.count2, greaterThanOrEqualTo(1));
                         assertThat(first.count2, lessThanOrEqualTo(10));
@@ -311,39 +303,37 @@ public class AggregatorsTest extends BasicAggregatorsTest {
 
     @Test
     public void testByCustomHeaderAggregator() throws Exception {
-        endpointByCustomHeader.reset();
-        endpointByCustomHeader.expectedMessageCount(2);
+        endpointByCustomHeaderOutput.reset();
+        endpointByCustomHeaderOutput.expectedMessageCount(2);
         endpointByCustomHeaderInput.expectedHeaderReceived(BODY_CLASS,
                 TestFailed.class.getName());
-        endpointDependent.reset();
-        endpointDependent.expectedMinimumMessageCount(4);
+        endpointDependentOutput.reset();
+        endpointDependentOutput.expectedMinimumMessageCount(4);
 
         sendTestEvent("by-custom-header", createTestStarted(), "customHeader", "1");
         sendTestEvent("by-custom-header", createTestFailed(), "customHeader", "2");
         sendTestEvent("by-custom-header", new StopByCustomHeader(), "customHeader", "1");
         sendTestEvent("by-custom-header", new StopByCustomHeader(), "customHeader", "2");
-        endpointByCustomHeader.assertIsSatisfied(2000);
-        endpointDependent.assertIsSatisfied(2000);
-        expectExchangeExists(endpointByCustomHeader,
+        endpointByCustomHeaderOutput.assertIsSatisfied(2000);
+        endpointDependentOutput.assertIsSatisfied(2000);
+        expectExchangeExists(endpointByCustomHeaderOutput,
                 "Output must contain test started",
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        CounterState first = checkAndGetBytesInput(CounterState.class,
-                                exchange.getIn().getBody(), classLoader);
+                        CounterState first = getInput(exchange, CounterState.class);
                         return first != null
                                 && first.count == 0
                                 && first.label.equals("1")
                                 && first.label2.equals(first.label);
                     }
                 });
-        expectExchangeExists(endpointByCustomHeader,
+        expectExchangeExists(endpointByCustomHeaderOutput,
                 "Output must be test failed",
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        CounterState first = checkAndGetBytesInput(CounterState.class,
-                                exchange.getIn().getBody(), classLoader);
+                        CounterState first = getInput(exchange, CounterState.class);
                         return first != null
                                 && first.count == 1
                                 && first.label.equals("2")
@@ -353,7 +343,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
 
         Storage storage = processingEngine.getPlugin(ByCustomHeaderAggregator.class)
                                           .getContext()
-                                          .getStorage();
+                .getStorage();
         assertEquals(1, storage.get("count"));
         assertEquals("test", storage.get("string"));
         assertEquals(1.5, storage.get("double"));
@@ -376,11 +366,10 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        TestFailed msg = checkAndGetBytesInput(TestFailed.class,
-                                exchange.getIn().getBody(), classLoader);
+                        TestFailed msg = getInput(exchange, TestFailed.class);
                         logger.info("Checking if " + msg + " is instance of TestFailed...");
                         return msg != null && msg.getMethodname()
-                                                 .equals(testFailed.getMethodname());
+                                .equals(testFailed.getMethodname());
                     }
                 });
         expectExchangeExists(endpointFallenRaisedOutput,
@@ -388,8 +377,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        String msg = checkAndGetBytesInput(String.class,
-                                exchange.getIn().getBody(), classLoader);
+                        String msg = getInput(exchange, String.class);
                         logger.info("Checking if " + msg + " is instance of String...");
                         return msg != null && msg.equals(testFailed.getMethodname());
                     }
@@ -411,8 +399,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        CollectEventsState state = checkAndGetBytesInput(CollectEventsState.class,
-                                exchange.getIn().getBody(), classLoader);
+                        CollectEventsState state = getInput(exchange, CollectEventsState.class);
                         return state != null && state.collected.size() == 1;
                     }
                 });
@@ -433,8 +420,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        CollectEventsState state = checkAndGetBytesInput(CollectEventsState.class,
-                                exchange.getIn().getBody(), classLoader);
+                        CollectEventsState state = getInput(exchange, CollectEventsState.class);
                         return state != null && state.collected.size() == 1;
                     }
                 });
@@ -454,12 +440,11 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        TestPassedState state = checkAndGetBytesInput(TestPassedState.class,
-                                exchange.getIn().getBody(), classLoader);
+                        TestPassedState state = getInput(exchange, TestPassedState.class);
                         return state != null
                                 && state.getEvent()
-                                        .getClassname()
-                                        .equals(failed.getClassname());
+                                .getClassname()
+                                .equals(failed.getClassname());
                     }
                 });
     }
@@ -470,7 +455,7 @@ public class AggregatorsTest extends BasicAggregatorsTest {
         endpointBindToOutput.reset();
 
         endpointSendToOutput.expectedMessageCount(2);
-        endpointBindToOutput.expectedMessageCount(0);
+        endpointBindToOutput.expectedMessageCount(2);
 
         sendEvent("send-to-output", new StopEvent());
 
@@ -480,12 +465,12 @@ public class AggregatorsTest extends BasicAggregatorsTest {
                 new Predicate() {
                     @Override
                     public boolean matches(Exchange exchange) {
-                        return checkAndGetBytesInput(StopEvent.class,
-                                exchange.getIn().getBody(), classLoader) != null;
+                        return getInput(exchange, StopEvent.class) != null;
                     }
                 });
 
         sleep(2000);
         endpointBindToOutput.assertIsSatisfied();
     }
+
 }

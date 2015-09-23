@@ -10,34 +10,26 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import ru.yandex.qatools.camelot.api.annotations.InjectHeader;
 import ru.yandex.qatools.camelot.api.annotations.InjectHeaders;
+import ru.yandex.qatools.camelot.core.MessagesSerializer;
 import ru.yandex.qatools.camelot.util.ContextUtils;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 
 import static ru.yandex.qatools.camelot.util.ReflectUtil.*;
-import static ru.yandex.qatools.camelot.util.SerializeUtil.deserializeFromBytes;
-import static ru.yandex.qatools.camelot.util.SerializeUtil.serializeToBytes;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public abstract class ClayProcessor implements CamelContextAware, ApplicationContextAware {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-    boolean serializeMessages = false;
+    protected final MessagesSerializer serializer;
     protected ClassLoader classLoader;
     protected ApplicationContext applicationContext;
     protected CamelContext camelContext;
 
-    protected ClayProcessor(ClassLoader classLoader) {
+    protected ClayProcessor(ClassLoader classLoader, MessagesSerializer serializer) {
         this.classLoader = classLoader;
-    }
-
-    /**
-     * Set the classloader which is used to serialize/deserialize & load objects from input exchange
-     */
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
+        this.serializer = serializer;
     }
 
     /**
@@ -47,14 +39,16 @@ public abstract class ClayProcessor implements CamelContextAware, ApplicationCon
         return classLoader;
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+    /**
+     * Set the classloader which is used to serialize/fromBytes & load objects from input exchange
+     */
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 
     @Override
-    public void setCamelContext(CamelContext camelContext) {
-        this.camelContext = camelContext;
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -62,28 +56,17 @@ public abstract class ClayProcessor implements CamelContextAware, ApplicationCon
         return camelContext;
     }
 
-    public boolean isSerializeMessages() {
-        return serializeMessages;
+    @Override
+    public void setCamelContext(CamelContext camelContext) {
+        this.camelContext = camelContext;
     }
 
-    public void setSerializeMessages(boolean serializeMessages) {
-        this.serializeMessages = serializeMessages;
+    protected Exchange processAfterIn(Exchange exchange) {
+        return (serializer != null) ? serializer.preProcess(exchange, classLoader) : exchange;
     }
 
-    @SuppressWarnings("unchecked")
-    protected Object processAfterIn(Object event, String bodyClass) {
-        if (event instanceof byte[] && serializeMessages) {
-            try {
-                event = deserializeFromBytes((byte[]) event, classLoader, (Class<? extends Serializable>) classLoader.loadClass(bodyClass));
-            } catch (Exception e) {
-                logger.debug("Failed to deserialize message from bytes: " + e.getMessage(), e);
-            }
-        }
-        return event;
-    }
-
-    protected Object processBeforeOut(Object result) {
-        return (serializeMessages) ? serializeToBytes(result, classLoader) : result;
+    protected Exchange processBeforeOut(Exchange exchange) {
+        return (serializer != null) ? serializer.postProcess(exchange, classLoader) : exchange;
     }
 
     protected void injectFields(Object procInstance, Exchange exchange) {

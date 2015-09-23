@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import ru.yandex.qatools.camelot.BasicAggregatorsTest;
+import ru.yandex.qatools.camelot.ActivemqAggregatorsTest;
 import ru.yandex.qatools.camelot.core.beans.TestSkipped;
 import ru.yandex.qatools.camelot.core.plugins.AllSkippedAggregator;
 
@@ -27,7 +27,7 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 @DirtiesContext(classMode = AFTER_CLASS)
 @MockEndpoints("*")
 @SuppressWarnings("unchecked")
-public class DelayedRouteTest extends BasicAggregatorsTest {
+public class DelayedRouteTest extends ActivemqAggregatorsTest {
 
 
     @Test

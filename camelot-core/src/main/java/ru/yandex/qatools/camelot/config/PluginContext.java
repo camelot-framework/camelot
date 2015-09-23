@@ -11,6 +11,8 @@ package ru.yandex.qatools.camelot.config;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.camel.spi.AggregationRepository;
 import ru.yandex.qatools.camelot.api.*;
+import ru.yandex.qatools.camelot.core.InterimProcessor;
+import ru.yandex.qatools.camelot.core.MessagesSerializer;
 import ru.yandex.qatools.camelot.core.PluginContextInjector;
 import ru.yandex.qatools.camelot.core.builders.SchedulerBuilder;
 
@@ -49,53 +51,42 @@ public class PluginContext
     protected String tmpBufferUri;
     protected String clientNotifyUri;
     protected volatile boolean isShuttingDown = false;
-    @XmlTransient
     @JsonIgnore
-    protected AggregatorRepository repository;
-    @XmlTransient
+    protected transient AggregatorRepository repository;
     @JsonIgnore
-    protected Storage storage;
-    @XmlTransient
+    protected transient Storage storage;
     @JsonIgnore
-    protected ru.yandex.qatools.camelot.api.EventProducer input;
-    @XmlTransient
+    protected transient ru.yandex.qatools.camelot.api.EventProducer input;
     @JsonIgnore
-    protected ru.yandex.qatools.camelot.api.EventProducer output;
-    @XmlTransient
+    protected transient ru.yandex.qatools.camelot.api.EventProducer output;
     @JsonIgnore
-    protected ru.yandex.qatools.camelot.api.EventProducer mainInput;
-    @XmlTransient
+    protected transient ru.yandex.qatools.camelot.api.EventProducer mainInput;
     @JsonIgnore
-    protected ClassLoader classLoader;
-    @XmlTransient
+    protected transient ClassLoader classLoader;
     @JsonIgnore
-    protected ClientSendersProvider clientSendersProvider;
-    @XmlTransient
+    protected transient ClientSendersProvider clientSendersProvider;
     @JsonIgnore
-    protected PluginEndpoints endpoints;
+    protected transient PluginEndpoints endpoints;
     @XmlElement(required = true)
     protected String pluginClass;
-    @XmlTransient
     @JsonIgnore
-    protected PluginsInterop interop;
-    @XmlTransient
+    protected transient PluginsInterop interop;
     @JsonIgnore
-    protected PluginsSource source;
-    @XmlTransient
+    protected transient PluginsSource source;
     @JsonIgnore
-    protected EndpointListener listener;
-    @XmlTransient
+    protected transient EndpointListener listener;
     @JsonIgnore
-    protected PluginContextInjector injector;
-    @XmlTransient
+    protected transient PluginContextInjector injector;
     @JsonIgnore
-    protected AggregationRepository aggregationRepo;
-    @XmlTransient
+    protected transient AggregationRepository aggregationRepo;
     @JsonIgnore
-    protected AppConfig appConfig;
-    @XmlTransient
+    protected transient AppConfig appConfig;
     @JsonIgnore
-    protected SchedulerBuilder schedulerBuilder;
+    protected transient SchedulerBuilder schedulerBuilder;
+    @JsonIgnore
+    protected transient MessagesSerializer messagesSerializer;
+    @JsonIgnore
+    protected transient InterimProcessor interimProcessor;
 
     /**
      * Gets the value of the id property.
@@ -570,5 +561,21 @@ public class PluginContext
 
     public void setClientNotifyUri(String clientNotifyUri) {
         this.clientNotifyUri = clientNotifyUri;
+    }
+
+    public MessagesSerializer getMessagesSerializer() {
+        return messagesSerializer;
+    }
+
+    public void setMessagesSerializer(MessagesSerializer messagesSerializer) {
+        this.messagesSerializer = messagesSerializer;
+    }
+
+    public InterimProcessor getInterimProcessor() {
+        return interimProcessor;
+    }
+
+    public void setInterimProcessor(InterimProcessor interimProcessor) {
+        this.interimProcessor = interimProcessor;
     }
 }

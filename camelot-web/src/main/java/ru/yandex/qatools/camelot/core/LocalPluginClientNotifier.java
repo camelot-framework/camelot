@@ -21,12 +21,12 @@ import static ru.yandex.qatools.camelot.util.SerializeUtil.deserializeFromBytes;
 public class LocalPluginClientNotifier extends PluggableProcessor {
     protected Notifier processorImpl;
 
-    public LocalPluginClientNotifier() {
-        super(Notifier.class);
+    public LocalPluginClientNotifier(MessagesSerializer serializer) {
+        super(Notifier.class, serializer);
     }
 
-    public LocalPluginClientNotifier(Notifier processorImpl) {
-        super(Notifier.class, processorImpl);
+    public LocalPluginClientNotifier(Notifier processorImpl, MessagesSerializer serializer) {
+        super(Notifier.class, processorImpl, serializer);
         this.processorImpl = processorImpl;
     }
 

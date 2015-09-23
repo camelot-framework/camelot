@@ -16,6 +16,7 @@ import ru.yandex.qatools.camelot.spring.ClassLoaderBeanDefinition;
 import javax.ws.rs.Path;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static java.lang.Thread.currentThread;
@@ -24,7 +25,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
 import static ru.yandex.qatools.camelot.util.NameUtil.pluginResourceBeanName;
 import static ru.yandex.qatools.camelot.util.ReflectUtil.*;
-import static ru.yandex.qatools.camelot.util.ServiceUtil.injectTmpInputBufferProducers;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -60,21 +60,6 @@ public class SpringPluginResourceBuilder implements ResourceBuilder, BeanFactory
         }
     }
 
-    /**
-     * Remove the resources from the context
-     */
-    @Override
-    public void remove(CamelContext camelContext, Plugin plugin) throws Exception {
-        final String pluginId = plugin.getId();
-        final ClassLoader classLoader = plugin.getContext().getClassLoader();
-        if (plugin.getResource() != null) {
-            final Class resClass = classLoader.loadClass(plugin.getResource());
-            final String beanName = pluginResourceBeanName(pluginId);
-            injectTmpInputBufferProducers(plugin.getContext().getEndpoints(), beanFactory.getBean(beanName), resClass,
-                    camelContext, plugin.getContext().getTmpBufferUri());
-        }
-    }
-
     private void initResourcesConfig(Class baseClass, Plugin plugin) throws Exception {
         plugin.getContext().getCssPaths().addAll(findTemplatePaths(baseClass, "**/*", CSS_EXTS));
         plugin.getContext().getJsPaths().addAll(findTemplatePaths(baseClass, "**/*", JS_EXTS));
@@ -89,7 +74,8 @@ public class SpringPluginResourceBuilder implements ResourceBuilder, BeanFactory
         final String basePath = packageName.replaceAll("\\.", File.separator) + File.separator;
         for (String ext : extensions) {
             try {
-                for (String res : resolveResourcesAsStringsFromPattern("classpath:" + basePath + fileBaseName + ext, baseClass)) {
+                final Collection<String> resources = resolveResourcesAsStringsFromPattern("classpath:" + basePath + fileBaseName + ext, baseClass);
+                for (String res : resources) {
                     paths.add(res.substring(res.indexOf(basePath)));
                 }
             } catch (Exception e) {

@@ -34,10 +34,9 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
             CamelContext camelContext,
             ClassLoader classLoader, Object fsmEngineBuilder, PluginContext context)
             throws NoSuchMethodException, ClassNotFoundException {
-        super(classLoader, classLoader.loadClass(context.getPluginClass()), fsmEngineBuilder);
+        super(classLoader, classLoader.loadClass(context.getPluginClass()), fsmEngineBuilder, context.getMessagesSerializer());
         this.setCamelContext(camelContext);
         this.context = context;
-        this.setSerializeMessages(true);
     }
 
     @Override

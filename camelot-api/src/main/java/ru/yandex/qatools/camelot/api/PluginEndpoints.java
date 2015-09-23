@@ -86,14 +86,19 @@ public interface PluginEndpoints {
     String getConsumerRouteId();
 
     /**
-     * Plugin's uri to produce the client messages (for the frontend)
+     * Plugin's uri to produce the frontend messages (to websockets)
      */
-    String getClientSendUri();
+    String getFrontendSendUri();
 
     /**
-     * Plugin's route id to produce the client messages (for the frontend)
+     * Global uri to broadcast message to all frontend clients
      */
-    String getClientSendRouteId();
+    String getBroadcastFrontendUri();
+
+    /**
+     * Plugin's route id to produce the frontend messages (to websockets)
+     */
+    String getFrontendSendRouteId();
 
     /**
      * Plugin's uri for endpoint listeners

@@ -10,8 +10,10 @@
     <bean id="resourceBuilder" class="ru.yandex.qatools.camelot.core.builders.SpringPluginResourceBuilder"/>
     <bean id="appConfig" class="ru.yandex.qatools.camelot.core.impl.AppConfigSpringProperties"/>
     <bean id="pluginInitializer" class="ru.yandex.qatools.camelot.core.impl.PluginInitializerImpl"/>
+    <bean id="interimProcessor" class="ru.yandex.qatools.camelot.core.impl.DefaultInterimProcessor"/>
 
-    <bean id="processingEngine" class="ru.yandex.qatools.camelot.core.impl.ProcessingEngineImpl" init-method="init">
+    <bean id="processingEngine" class="ru.yandex.qatools.camelot.core.impl.ProcessingEngineImpl" init-method="init"
+          depends-on="messagesSerializer">
         <constructor-arg name="configResources" value="${plugins.config.path}"/>
         <constructor-arg name="camelContext" ref="camelotCamelContext"/>
         <constructor-arg name="pluginLoader" ref="${camelot.pluginLoader}"/>
@@ -23,6 +25,9 @@
         <property name="resourceBuilder" ref="resourceBuilder"/>
         <property name="appConfig" ref="appConfig"/>
         <property name="pluginInitializer" ref="pluginInitializer"/>
+        <property name="uriBuilder" ref="uriBuilder"/>
+        <property name="messagesSerializer" ref="messagesSerializer"/>
+        <property name="interimProcessor" ref="interimProcessor"/>
     </bean>
 
     <!-- ThreadPool profiles -->

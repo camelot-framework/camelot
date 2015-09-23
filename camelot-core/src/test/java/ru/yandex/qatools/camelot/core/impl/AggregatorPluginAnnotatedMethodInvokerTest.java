@@ -3,18 +3,23 @@ package ru.yandex.qatools.camelot.core.impl;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.component.jms.JmsBinding;
+import org.apache.camel.component.jms.JmsMessage;
 import org.apache.camel.spi.AggregationRepository;
 import org.junit.Test;
 import ru.yandex.qatools.camelot.api.annotations.OnClientMessage;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
 import ru.yandex.qatools.camelot.core.FoundMethodProcessor;
+import ru.yandex.qatools.camelot.core.activemq.ActivemqMessagesSerializer;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
 
+import static java.lang.ClassLoader.getSystemClassLoader;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.*;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
@@ -61,14 +66,16 @@ public class AggregatorPluginAnnotatedMethodInvokerTest {
         pluginContext.setClassLoader(getClass().getClassLoader());
         pluginContext.setInjector(new PluginContextInjectorImpl());
         pluginContext.setPluginClass(TestAggregatorImpl.class.getName());
+        final ActivemqMessagesSerializer serializer = new ActivemqMessagesSerializer();
+        pluginContext.setMessagesSerializer(serializer);
         plugin.setAggregator(TestAggregatorImpl.class.getName());
         plugin.setContext(pluginContext);
         AggregationRepository repo = mock(AggregationRepository.class);
         FoundMethodProcessor proc = mock(FoundMethodProcessor.class);
         TestState state = new TestState();
         Exchange exchange = mock(Exchange.class);
-        Message message = mock(Message.class);
-        when(message.getBody()).thenReturn(state);
+        Message message = spy(new JmsMessage(mock(javax.jms.Message.class), mock(JmsBinding.class)));
+        message.setBody(serializer.processBodyAndHeadersBeforeSend(state, new HashMap<String, Object>(), getSystemClassLoader()));
         when(message.getHeader(BODY_CLASS)).thenReturn(TestState.class.getName());
         when(exchange.getIn()).thenReturn(message);
         when(repo.getKeys()).thenReturn(new HashSet<>(asList("key1", "key2")));
@@ -87,9 +94,9 @@ public class AggregatorPluginAnnotatedMethodInvokerTest {
 
         verify(proc).appliesTo(eq(TestAggregatorImpl.class.getMethod("onBroadcast", TestState.class)), any(Annotation.class));
         verify(proc).appliesTo(eq(TestAggregatorImpl.class.getMethod("onBroadcast2", TestState.class, String.class)), any(Annotation.class));
-        verify(aggMock, times(2)).onBroadcast(state);
-        verify(aggMock, times(2)).onBroadcast2(state, "test");
-        verify(message, times(4)).setBody(any());
+        verify(aggMock, times(2)).onBroadcast(any(TestState.class));
+        verify(aggMock, times(2)).onBroadcast2(any(TestState.class), eq("test"));
+        verify(message, atLeast(5)).setBody(any());
         verify(repo, times(2)).get(context, "key1");
         verify(repo, times(2)).get(context, "key2");
         verify(repo, times(2)).getKeys();

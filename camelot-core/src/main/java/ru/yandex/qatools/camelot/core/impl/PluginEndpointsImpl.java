@@ -2,6 +2,7 @@ package ru.yandex.qatools.camelot.core.impl;
 
 import ru.yandex.qatools.camelot.api.PluginEndpoints;
 import ru.yandex.qatools.camelot.config.Plugin;
+import ru.yandex.qatools.camelot.core.PluginUriBuilder;
 
 import static ru.yandex.qatools.camelot.Constants.*;
 import static ru.yandex.qatools.camelot.util.NameUtil.*;
@@ -10,6 +11,7 @@ import static ru.yandex.qatools.camelot.util.NameUtil.*;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public class PluginEndpointsImpl implements PluginEndpoints {
+    protected final Plugin plugin;
     final String inputUri;
     final String delayedInputUri;
     final String outputUri;
@@ -18,6 +20,7 @@ public class PluginEndpointsImpl implements PluginEndpoints {
     final String producerUri;
     final String consumerUri;
     final String clientSendUri;
+    final String broadcastFrontendUri;
     final String mainInputUri;
     final String endpointListenerUri;
     final String inputRouteId;
@@ -31,22 +34,22 @@ public class PluginEndpointsImpl implements PluginEndpoints {
     final String mainInputRouteId;
     final String endpointListenerRouteId;
     final String engineName;
-    protected final Plugin plugin;
 
-    public PluginEndpointsImpl(String mainInputUri, Plugin plugin, String engineName) {
+    public PluginEndpointsImpl(String mainInputUri, Plugin plugin, String engineName, PluginUriBuilder uriBuilder) {
         final String brokerConfig = pluginBrokerConfig(plugin);
         this.engineName = engineName;
         this.plugin = plugin;
         this.mainInputUri = mainInputUri;
-        this.inputUri = pluginInputUri(plugin) + brokerConfig;
-        this.delayedInputUri = pluginInputUri(plugin) + DELAYED_POSTFIX + brokerConfig;
-        this.outputUri = pluginOutputUri(plugin) + brokerConfig;
-        this.splitUri = localUri(plugin.getId(), SPLIT_POSTFIX);
-        this.filteredUri = localUri(plugin.getId(), FILTERED_POSTFIX);
-        this.consumerUri = localUri(plugin.getId(), CONSUMER_POSTFIX);
-        this.producerUri = localUri(plugin.getId(), PRODUCER_POSTFIX);
-        this.clientSendUri = localUri(plugin.getId(), CLIENT_SEND_POSTFIX);
-        this.endpointListenerUri = broadcastUri(plugin.getId(), RES_LISTENER_POSTFIX) + BROADCAST_CONFIG;
+        this.inputUri = uriBuilder.pluginInputUri(plugin, "", brokerConfig);
+        this.delayedInputUri = uriBuilder.pluginInputUri(plugin, DELAYED_SUFFIX, brokerConfig);
+        this.outputUri = uriBuilder.localUri(plugin.getId(), OUTPUT_SUFFIX);
+        this.splitUri = uriBuilder.localUri(plugin.getId(), SPLIT_SUFFIX);
+        this.filteredUri = uriBuilder.localUri(plugin.getId(), FILTERED_SUFFIX);
+        this.consumerUri = uriBuilder.localUri(plugin.getId(), CONSUMER_SUFFIX);
+        this.producerUri = uriBuilder.localUri(plugin.getId(), PRODUCER_SUFFIX);
+        this.clientSendUri = uriBuilder.localUri(plugin.getId(), CLIENT_SEND_SUFFIX);
+        this.endpointListenerUri = uriBuilder.broadcastUri(plugin.getId(), RES_LISTENER_SUFFIX);
+        this.broadcastFrontendUri = uriBuilder.frontendBroadcastUri();
 
         this.mainInputRouteId = mainInputUri + engineName;
         this.inputRouteId = pluginInputRouteId(inputUri, engineName);
@@ -96,8 +99,13 @@ public class PluginEndpointsImpl implements PluginEndpoints {
     }
 
     @Override
-    public String getClientSendUri() {
+    public String getFrontendSendUri() {
         return clientSendUri;
+    }
+
+    @Override
+    public String getBroadcastFrontendUri() {
+        return broadcastFrontendUri;
     }
 
     @Override
@@ -151,7 +159,7 @@ public class PluginEndpointsImpl implements PluginEndpoints {
     }
 
     @Override
-    public String getClientSendRouteId() {
+    public String getFrontendSendRouteId() {
         return clientSendRouteId;
     }
 
