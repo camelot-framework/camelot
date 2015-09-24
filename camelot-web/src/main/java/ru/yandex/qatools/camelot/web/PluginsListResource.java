@@ -3,8 +3,8 @@ package ru.yandex.qatools.camelot.web;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.core.impl.PluginTree;
-import ru.yandex.qatools.camelot.core.WebfrontEngine;
+import ru.yandex.qatools.camelot.config.PluginTree;
+import ru.yandex.qatools.camelot.web.core.WebfrontEngine;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;

@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import static org.apache.commons.io.FileUtils.deleteQuietly;
-import static ru.yandex.qatools.camelot.util.FileUtil.createTempDirectory;
+import static ru.yandex.qatools.camelot.core.util.FileUtil.createTempDirectory;
 
 public class EmbeddedZookeeper {
     private int port = -1;
@@ -63,8 +63,8 @@ public class EmbeddedZookeeper {
         deleteQuietly(logDir);
     }
 
-    public String getHost() {
-        return host;
+    public String getHosts() {
+        return host + ":" + getPort();
     }
 
     public int getPort() {

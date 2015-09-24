@@ -4,8 +4,9 @@ import org.apache.camel.CamelContext;
 import org.quartz.Scheduler;
 import org.springframework.context.ApplicationContext;
 import ru.yandex.qatools.camelot.api.AppConfig;
+import ru.yandex.qatools.camelot.common.builders.*;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.core.builders.*;
+import ru.yandex.qatools.camelot.common.builders.BuildersFactoryImpl;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class TestBuildersFactory extends BuildersFactoryImpl {
 
     @Override
     public AggregatorRoutesBuilder newAggregatorPluginRouteBuilder(CamelContext camelContext,
-                                                                   Plugin plugin) throws Exception {
+                                                                   Plugin plugin) throws Exception { //NOSONAR
         final Class<?> classToMock = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass());
         Object mock = pluginMock(plugin);
         mocksStorage.put(plugin.getId(), mock);
@@ -39,7 +40,8 @@ public class TestBuildersFactory extends BuildersFactoryImpl {
     }
 
     @Override
-    public ProcessorRoutesBuilder newProcessorPluginRouteBuilder(CamelContext camelContext, Plugin plugin) throws Exception {
+    public ProcessorRoutesBuilder newProcessorPluginRouteBuilder(CamelContext camelContext,
+                                                                 Plugin plugin) throws Exception { //NOSONAR
         final Class<?> classToMock = plugin.getContext().getClassLoader().loadClass(plugin.getProcessor());
         final Object mock = pluginMock(plugin);
         mocksStorage.put(plugin.getId(), mock);
@@ -54,7 +56,7 @@ public class TestBuildersFactory extends BuildersFactoryImpl {
     }
 
     @Override
-    public QuartzInitializer newQuartzInitializer(Scheduler scheduler, AppConfig config) throws Exception {
+    public QuartzInitializer newQuartzInitializer(Scheduler scheduler, AppConfig config) throws Exception { //NOSONAR
         final QuartzInitializer initializer = originalBuildersFactory.newQuartzInitializer(scheduler,
                 applicationContext.getBean(AppConfig.class));
         quartzInitializers.add(initializer);

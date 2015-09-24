@@ -3,7 +3,7 @@ package ru.yandex.qatools.camelot.util;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
-import static ru.yandex.qatools.camelot.util.PluginContextTemplateUtil.replaceCss;
+import static ru.yandex.qatools.camelot.core.util.PluginContextTemplateUtil.replaceCss;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)

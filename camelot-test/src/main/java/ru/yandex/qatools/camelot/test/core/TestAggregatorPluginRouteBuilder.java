@@ -1,8 +1,8 @@
 package ru.yandex.qatools.camelot.test.core;
 
 import org.apache.camel.CamelContext;
-import ru.yandex.qatools.camelot.core.builders.AggregationStrategyBuilder;
-import ru.yandex.qatools.camelot.core.builders.AggregatorRoutesBuilder;
+import ru.yandex.qatools.camelot.common.builders.AggregationStrategyBuilder;
+import ru.yandex.qatools.camelot.common.builders.AggregatorRoutesBuilder;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -12,19 +12,20 @@ class TestAggregatorPluginRouteBuilder implements AggregatorRoutesBuilder {
     final Object fsmMock;
     final AggregatorRoutesBuilder original;
 
-    public TestAggregatorPluginRouteBuilder(Class fsmClass, Object fsmMock, AggregatorRoutesBuilder original) throws Exception {
+    public TestAggregatorPluginRouteBuilder(Class fsmClass, Object fsmMock,
+                                            AggregatorRoutesBuilder original) throws Exception { //NOSONAR
         this.fsmMock = fsmMock;
         this.original = original;
         original.setStrategyBuilder(new TestAggregationStrategyBuilder(fsmClass, fsmMock, original.getStrategyBuilder()));
     }
 
     @Override
-    public void removeRoutes() throws Exception {
+    public void removeRoutes() throws Exception { //NOSONAR
         original.removeRoutes();
     }
 
     @Override
-    public void startRoutes() throws Exception {
+    public void startRoutes() throws Exception { //NOSONAR
         original.startRoutes();
     }
 
@@ -34,7 +35,7 @@ class TestAggregatorPluginRouteBuilder implements AggregatorRoutesBuilder {
     }
 
     @Override
-    public void addRoutesToCamelContext(CamelContext context) throws Exception {
+    public void addRoutesToCamelContext(CamelContext context) throws Exception { //NOSONAR
         original.addRoutesToCamelContext(context);
     }
 

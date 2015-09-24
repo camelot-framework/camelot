@@ -52,9 +52,6 @@ public class CamelotTestRunnerTest {
     @ClientSenderMock(value = TestAggregator.class, topic = "someInterface")
     ClientMessageSender senderInterfaceTopic;
 
-    @Resource(TestProcessor.class)
-    TestResource testResource;
-
     @Test
     public void testRoute() throws Exception {
         helper.send("test1", UUID, "uuid1");
@@ -72,11 +69,6 @@ public class CamelotTestRunnerTest {
         assertThat(state, should(having(
                 on(TestState.class).getMessage(), equalTo(CHECK_VALUE))
         ).whileWaitingUntil(timeoutHasExpired(TIMEOUT)));
-    }
-
-    @Test
-    public void testRouteWithinResource() throws Exception {
-        assertThat("Failed to check routes: must return true", testResource.checkRoutes());
     }
 
     @Test

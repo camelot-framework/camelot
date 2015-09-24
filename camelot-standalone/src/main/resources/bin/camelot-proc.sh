@@ -12,6 +12,7 @@ scriptFile=$scriptDir/run.sh
 serviceNameLo="camelot-proc"
 serviceName="CamelotProc"
 serviceLogFile="$WD/log/camelot-proc.log"
-args="$JAVA_ARGS $CAMELOT_ARGS -jar $WD/runner/runner.jar"
 
-. $WD/bin/init.sh
+. $WD/bin/classpath
+args="$JAVA_ARGS $CAMELOT_ARGS -cp '$CLASSPATH' org.apache.camel.spring.Main"
+. $WD/bin/runner

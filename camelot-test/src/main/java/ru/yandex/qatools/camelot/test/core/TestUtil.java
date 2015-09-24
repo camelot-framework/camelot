@@ -19,7 +19,7 @@ import static ru.yandex.qatools.fsm.utils.ReflectUtils.getMethodsInClassHierarch
  */
 class TestUtil {
 
-    public static Object pluginMock(Plugin plugin) throws Exception {
+    public static Object pluginMock(Plugin plugin) throws Exception { //NOSONAR
         final Class<?> classToMock = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass());
         final Object mock = mock(classToMock);
         preparePluginMock(plugin, mock);
@@ -27,7 +27,7 @@ class TestUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static void preparePluginMock(Plugin plugin, final Object mock) throws Exception {
+    public static void preparePluginMock(Plugin plugin, final Object mock) throws Exception { //NOSONAR
         final Class<?> classToMock = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass());
         final Object realFsmObject =
                 plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass()).newInstance();

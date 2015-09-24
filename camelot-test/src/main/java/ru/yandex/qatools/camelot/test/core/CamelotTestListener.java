@@ -9,18 +9,18 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import ru.yandex.qatools.camelot.api.*;
+import ru.yandex.qatools.camelot.common.AnnotatedFieldListener;
+import ru.yandex.qatools.camelot.common.ProcessingEngine;
+import ru.yandex.qatools.camelot.common.builders.QuartzInitializer;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
-import ru.yandex.qatools.camelot.core.AnnotatedFieldListener;
-import ru.yandex.qatools.camelot.core.ProcessingEngine;
-import ru.yandex.qatools.camelot.core.builders.QuartzInitializer;
 import ru.yandex.qatools.camelot.test.*;
 import ru.yandex.qatools.camelot.test.service.MockedClientSenderInitializer;
 import ru.yandex.qatools.camelot.test.service.TestHelperImpl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.Properties;
 
 import static java.lang.String.format;
@@ -28,13 +28,15 @@ import static org.apache.camel.util.CamelContextHelper.getEndpointInjection;
 import static org.apache.camel.util.ObjectHelper.isEmpty;
 import static org.mockito.Mockito.reset;
 import static org.slf4j.LoggerFactory.getLogger;
+import static ru.yandex.qatools.camelot.core.util.IOUtils.readResource;
+import static ru.yandex.qatools.camelot.core.util.ReflectUtil.resolveResourcesFromPattern;
 import static ru.yandex.qatools.camelot.test.CamelotTestRunner.APP_CONTEXT;
 import static ru.yandex.qatools.camelot.test.CamelotTestRunner.REAL_TEST_CLASS_ATTR;
 import static ru.yandex.qatools.camelot.test.core.TestUtil.preparePluginMock;
 import static ru.yandex.qatools.camelot.util.ContextUtils.autowireFields;
 import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
-import static ru.yandex.qatools.camelot.util.IOUtils.readResource;
-import static ru.yandex.qatools.camelot.util.ReflectUtil.*;
+import static ru.yandex.qatools.camelot.util.ReflectUtil.getAnnotation;
+import static ru.yandex.qatools.camelot.util.ReflectUtil.getAnnotationValue;
 import static ru.yandex.qatools.camelot.util.ServiceUtil.injectAnnotatedField;
 
 /**
@@ -46,7 +48,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
     final Logger logger = getLogger(getClass());
 
     @Override
-    public void beforeTestMethod(TestContext testContext) throws Exception {
+    public void beforeTestMethod(TestContext testContext) throws Exception { //NOSONAR
         injectTestContext(testContext);
         final ProcessingEngine engine = getProcessingEngine(testContext, true);
         if (engine != null) {
@@ -63,12 +65,12 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
     }
 
     @Override
-    public void afterTestMethod(TestContext testContext) throws Exception {
+    public void afterTestMethod(TestContext testContext) throws Exception { //NOSONAR
         clearContext(testContext);
     }
 
     @Override
-    public void afterTestClass(TestContext testContext) throws Exception {
+    public void afterTestClass(TestContext testContext) throws Exception { //NOSONAR
         final ProcessingEngine engine = getProcessingEngine(testContext, false);
         if (engine != null) {
             // reset context injector
@@ -85,7 +87,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
     }
 
     @Override
-    public void beforeTestClass(TestContext testContext) throws Exception {
+    public void beforeTestClass(TestContext testContext) throws Exception { //NOSONAR
         final Class testClass = getTestClass(testContext);
 
         final ProcessingEngine engine = getProcessingEngine(testContext, true);
@@ -97,7 +99,8 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
                     String[] locations = (String[]) getAnnotationValue(testClass, UseProperties.class, "value");
                     final Properties properties = new Properties();
                     for (String location : locations) {
-                        for (org.springframework.core.io.Resource path : resolveResourcesFromPattern(location, testClass)) {
+                        final Collection<org.springframework.core.io.Resource> resources = resolveResourcesFromPattern(location, testClass);
+                        for (org.springframework.core.io.Resource path : resources) {
                             properties.load(readResource(path.getURL()));
                         }
                     }
@@ -142,7 +145,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
         }
     }
 
-    private void clearContext(TestContext testContext) throws Exception {
+    private void clearContext(TestContext testContext) throws Exception { //NOSONAR
         final ProcessingEngine engine = getProcessingEngine(testContext, false);
         final MockedClientSenderInitializer clientInitializer = getClientSenderInitializer(testContext, false);
 
@@ -234,7 +237,8 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
         }
     }
 
-    private void injectTestContextToInstance(final Class clazz, final Object instance, final ApplicationContext applicationContext) throws Exception {
+    private void injectTestContextToInstance(final Class clazz, final Object instance,
+                                             final ApplicationContext applicationContext) throws Exception { //NOSONAR
         final ProcessingEngine engine = applicationContext.getBean(ProcessingEngine.class);
         final CamelContext camelContext = engine.getCamelContext();
         if (!(engine.getBuildersFactory() instanceof TestBuildersFactory)) {
@@ -346,21 +350,6 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
                 }
             }
         });
-        injectAnnotatedField(clazz, instance, PluginOutputListener.class, new AnnotatedFieldListener<EndpointListener, PluginOutputListener>() {
-            @Override
-            public EndpointListener found(Field field, PluginOutputListener annotation) throws Exception {
-                final String pluginId = calcPluginId(field, engine, PluginOutputListener.class);
-                final PluginContext pluginContext = engine.getPluginContext(pluginId);
-                if (pluginContext == null) {
-                    throw new RuntimeException("Plugin context not found: " + pluginId);
-                }
-                try {
-                    return pluginContext.getListener();
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to inject listener state for plugin " + pluginId, e);
-                }
-            }
-        });
         autowireFields(instance, applicationContext, camelContext);
     }
 
@@ -372,7 +361,8 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
         return format("mock:%s", uri).replaceAll("^([^?]+)(\\?.+)?$", "$1");
     }
 
-    private String calcPluginId(Field field, ProcessingEngine engine, Class<? extends Annotation> aClass) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    private String calcPluginId(Field field, ProcessingEngine engine, Class<? extends Annotation> aClass)
+            throws ReflectiveOperationException {
         try {
             String pluginId = (String) getAnnotationValue(field, aClass, "id");
             if (isEmpty(pluginId)) {

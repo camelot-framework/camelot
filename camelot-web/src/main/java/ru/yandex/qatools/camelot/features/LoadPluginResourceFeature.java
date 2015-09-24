@@ -1,11 +1,9 @@
 package ru.yandex.qatools.camelot.features;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.core.WebfrontEngine;
+import ru.yandex.qatools.camelot.web.core.WebfrontEngine;
 
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;

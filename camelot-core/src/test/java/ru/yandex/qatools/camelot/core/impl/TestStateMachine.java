@@ -74,7 +74,7 @@ public class TestStateMachine {
     }
 
     @NewState
-    public TState initState(Class<? extends TState> stateClass, TEvent event) throws Exception {
+    public TState initState(Class<? extends TState> stateClass, TEvent event) throws Exception { //NOSONAR
         TState res = stateClass.newInstance();
         res.event = event;
         return res;

@@ -30,7 +30,7 @@
     <servlet>
         <description>AtmosphereServlet</description>
         <servlet-name>AtmosphereServlet</servlet-name>
-        <servlet-class>ru.yandex.qatools.camelot.core.web.AtmosphereServlet</servlet-class>
+        <servlet-class>ru.yandex.qatools.camelot.web.core.AtmosphereServlet</servlet-class>
         <init-param>
             <param-name>org.atmosphere.cpr.packages</param-name>
             <param-value>org.atmosphere.samples.chat.jersey.web</param-value>
@@ -50,14 +50,14 @@
     <!-- Wro4j config -->
     <filter>
         <filter-name>WebResourceOptimizer</filter-name>
-        <filter-class>ru.yandex.qatools.camelot.core.web.wro.WroFilter</filter-class>
+        <filter-class>ru.yandex.qatools.camelot.web.wro.WroFilter</filter-class>
         <init-param>
             <param-name>configuration</param-name>
             <param-value>DEPLOYMENT</param-value>
         </init-param>
         <init-param>
             <param-name>managerFactoryClassName</param-name>
-            <param-value>ru.yandex.qatools.camelot.core.web.wro.ConfigurableWroManagerFactory</param-value>
+            <param-value>ru.yandex.qatools.ru.yandex.qatools.camelot.web.wro.ConfigurableWroManagerFactory</param-value>
         </init-param>
         <init-param>
             <param-name>uriLocators</param-name>

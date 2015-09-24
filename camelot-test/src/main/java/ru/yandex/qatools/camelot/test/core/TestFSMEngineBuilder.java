@@ -1,6 +1,6 @@
 package ru.yandex.qatools.camelot.test.core;
 
-import ru.yandex.qatools.camelot.core.impl.CamelotFSMBuilder;
+import ru.yandex.qatools.camelot.common.CamelotFSMBuilder;
 import ru.yandex.qatools.fsm.FSMException;
 import ru.yandex.qatools.fsm.Yatomata;
 

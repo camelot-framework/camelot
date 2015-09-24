@@ -12,7 +12,7 @@ import static java.lang.String.format;
 import static java.lang.System.getProperty;
 import static java.util.Arrays.copyOf;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static ru.yandex.qatools.camelot.util.IOUtils.readResource;
+import static ru.yandex.qatools.camelot.core.util.IOUtils.readResource;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)

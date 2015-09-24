@@ -4,8 +4,8 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.yandex.qatools.camelot.common.ProcessingEngine;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.core.ProcessingEngine;
 import ru.yandex.qatools.camelot.test.TestHelper;
 
 import java.util.Map;

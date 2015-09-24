@@ -12,10 +12,11 @@ import org.quartz.Scheduler;
 import ru.yandex.qatools.camelot.api.AggregatorRepository;
 import ru.yandex.qatools.camelot.api.annotations.OnTimer;
 import ru.yandex.qatools.camelot.api.annotations.Repository;
+import ru.yandex.qatools.camelot.common.builders.QuartzAggregatorSchedulerBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
-import ru.yandex.qatools.camelot.core.impl.PluginContextInjectorImpl;
-import ru.yandex.qatools.camelot.core.activemq.ActivemqMessagesSerializer;
+import ru.yandex.qatools.camelot.common.PluginContextInjectorImpl;
+import ru.yandex.qatools.camelot.activemq.ActivemqMessagesSerializer;
 
 import java.util.HashMap;
 

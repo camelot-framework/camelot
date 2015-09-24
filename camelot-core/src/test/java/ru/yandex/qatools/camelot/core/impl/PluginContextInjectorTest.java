@@ -3,12 +3,14 @@ package ru.yandex.qatools.camelot.core.impl;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.test.spring.CamelSpringJUnit4ClassRunner;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import ru.yandex.qatools.camelot.core.ProcessingEngine;
+import ru.yandex.qatools.camelot.common.PluginContextInjectorImpl;
+import ru.yandex.qatools.camelot.common.ProcessingEngine;
 import ru.yandex.qatools.camelot.core.plugins.AggregatorWithContext;
 import ru.yandex.qatools.camelot.core.plugins.AggregatorWithTimer;
 
@@ -19,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -28,7 +29,7 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 @RunWith(CamelSpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath*:camelot-core-context.xml", "classpath*:test-camelot-core-context.xml"})
 @SuppressWarnings("unchecked")
-@DirtiesContext(classMode = AFTER_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class PluginContextInjectorTest {
 
     @Autowired
@@ -54,7 +55,6 @@ public class PluginContextInjectorTest {
         assertNotNull("Context must be injected", agg.input1);
         assertNotNull("Context must be injected", agg.input2);
         assertNotNull("Context must be injected", agg.input3);
-        assertNotNull("Context must be injected", agg.listener);
         assertNotNull("Context must be injected", agg.output1);
         assertNotNull("Context must be injected", agg.output2);
         assertNotNull("Context must be injected", agg.output3);
@@ -68,7 +68,7 @@ public class PluginContextInjectorTest {
         assertEquals("Context must be injected", agg.input1, agg.injectableComponent.input);
         assertEquals("Plugin storage must be injected", agg.storage1, agg.injectableComponent.otherPluginStorage);
         assertNotNull("Context must be injected", agg.injectableInterface);
-        assertEquals("Context must be injected", agg.input1, ((InjectableInterfaceImpl) agg.injectableInterface).input);
-        assertEquals("Plugin storage must be injected", agg.storage1, ((InjectableInterfaceImpl) agg.injectableInterface).otherPluginStorage);
+        Assert.assertEquals("Context must be injected", agg.input1, ((InjectableInterfaceImpl) agg.injectableInterface).input);
+        Assert.assertEquals("Plugin storage must be injected", agg.storage1, ((InjectableInterfaceImpl) agg.injectableInterface).otherPluginStorage);
     }
 }

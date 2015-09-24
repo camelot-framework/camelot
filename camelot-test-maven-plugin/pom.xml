@@ -40,7 +40,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>camelot-extensions</artifactId>
+            <artifactId>camelot-utils</artifactId>
         </dependency>
 
         <!--Jetty-->

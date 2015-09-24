@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import ru.yandex.qatools.camelot.common.PluginContextInjectorImpl;
 import ru.yandex.qatools.camelot.config.PluginContext;
 
 import static ru.yandex.qatools.camelot.util.ContextUtils.autowireFields;

@@ -1,7 +1,7 @@
 package ru.yandex.qatools.camelot.spring;
 
 import org.glassfish.jersey.servlet.WebConfig;
-import ru.yandex.qatools.camelot.core.web.SpringServletFacade;
+import ru.yandex.qatools.camelot.web.core.SpringServletFacade;
 
 import javax.servlet.ServletException;
 

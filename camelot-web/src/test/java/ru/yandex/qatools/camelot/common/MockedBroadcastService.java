@@ -8,9 +8,9 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import ru.yandex.qatools.camelot.config.PluginWeb;
-import ru.yandex.qatools.camelot.core.WebfrontEngine;
-import ru.yandex.qatools.camelot.core.web.AtmosphereClientBroadcastersProvider;
-import ru.yandex.qatools.camelot.core.web.PluginBroadcaster;
+import ru.yandex.qatools.camelot.web.core.WebfrontEngine;
+import ru.yandex.qatools.camelot.web.core.AtmosphereClientBroadcastersProvider;
+import ru.yandex.qatools.camelot.web.core.PluginBroadcaster;
 
 import java.util.HashMap;
 import java.util.Map;

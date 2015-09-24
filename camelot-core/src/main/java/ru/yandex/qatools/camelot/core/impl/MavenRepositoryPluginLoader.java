@@ -3,10 +3,10 @@ package ru.yandex.qatools.camelot.core.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.qatools.clay.aether.Aether;
-import ru.yandex.qatools.camelot.config.PluginsSource;
-import ru.yandex.qatools.camelot.core.PluginLoader;
 import ru.qatools.clay.maven.settings.FluentProfileBuilder;
 import ru.qatools.clay.maven.settings.FluentRepositoryPolicyBuilder;
+import ru.yandex.qatools.camelot.common.PluginLoader;
+import ru.yandex.qatools.camelot.config.PluginsSource;
 
 import java.io.File;
 import java.io.InputStream;
@@ -23,13 +23,13 @@ import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.apache.commons.lang3.ArrayUtils.nullToEmpty;
 import static org.codehaus.plexus.util.FileUtils.copyFile;
 import static org.codehaus.plexus.util.FileUtils.createTempFile;
-import static ru.yandex.qatools.camelot.util.FileUtil.createTempDirectory;
 import static ru.qatools.clay.aether.Aether.MAVEN_CENTRAL_URL;
 import static ru.qatools.clay.aether.Aether.aether;
 import static ru.qatools.clay.maven.settings.FluentProfileBuilder.newProfile;
 import static ru.qatools.clay.maven.settings.FluentRepositoryBuilder.newRepository;
 import static ru.qatools.clay.maven.settings.FluentRepositoryPolicyBuilder.newRepositoryPolicy;
 import static ru.qatools.clay.maven.settings.FluentSettingsBuilder.newSettings;
+import static ru.yandex.qatools.camelot.core.util.FileUtil.createTempDirectory;
 
 /**
  * Plugins loader from the remote maven repository (using Eclipse Aether)
@@ -96,7 +96,7 @@ public class MavenRepositoryPluginLoader implements PluginLoader {
     }
 
     @Override
-    public synchronized ClassLoader getClassLoader(PluginsSource source) throws Exception {
+    public synchronized ClassLoader getClassLoader(PluginsSource source) throws Exception { //NOSONAR
         final String id = id(source);
         if (!classLoadersCache.containsKey(id)) {
             createClassLoader(source);
@@ -105,7 +105,7 @@ public class MavenRepositoryPluginLoader implements PluginLoader {
     }
 
     @Override
-    public synchronized ClassLoader createClassLoader(PluginsSource source) throws Exception {
+    public synchronized ClassLoader createClassLoader(PluginsSource source) throws Exception { //NOSONAR
         final String id = id(source);
         clearClassLoader(id);
 
@@ -131,7 +131,7 @@ public class MavenRepositoryPluginLoader implements PluginLoader {
     }
 
     @Override
-    public InputStream getResourceAsStream(PluginsSource source, String path) throws Exception {
+    public InputStream getResourceAsStream(PluginsSource source, String path) throws Exception { //NOSONAR
         return getClassLoader(source).getResourceAsStream(path);
     }
 

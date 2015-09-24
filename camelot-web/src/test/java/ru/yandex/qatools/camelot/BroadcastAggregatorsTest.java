@@ -14,8 +14,8 @@ import static org.mockito.Matchers.startsWith;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
-import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestBroken;
-import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestStarted;
+import static ru.yandex.qatools.camelot.util.TestEventGenerator.createTestBroken;
+import static ru.yandex.qatools.camelot.util.TestEventGenerator.createTestStarted;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)

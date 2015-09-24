@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import ru.yandex.qatools.camelot.api.Storage;
-import ru.yandex.qatools.camelot.core.ProcessingEngine;
+import ru.yandex.qatools.camelot.common.ProcessingEngine;
 import ru.yandex.qatools.camelot.core.beans.*;
 import ru.yandex.qatools.camelot.core.plugins.ByCustomHeaderAggregator;
 import ru.yandex.qatools.camelot.core.plugins.WithoutIdAggregator;
@@ -23,11 +23,11 @@ import static org.junit.Assert.*;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.CORRELATION_KEY;
-import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.*;
-import static ru.yandex.qatools.camelot.core.util.TestEventsUtils.copyOf;
 import static ru.yandex.qatools.camelot.util.DateUtil.calThen;
 import static ru.yandex.qatools.camelot.util.DateUtil.hourAgo;
 import static ru.yandex.qatools.camelot.util.SerializeUtil.checkAndGetBytesInput;
+import static ru.yandex.qatools.camelot.util.TestEventGenerator.*;
+import static ru.yandex.qatools.camelot.util.TestEventsUtils.copyOf;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)

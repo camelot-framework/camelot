@@ -3,9 +3,10 @@ package ru.yandex.qatools.camelot.core.impl;
 import org.apache.camel.CamelContext;
 import ru.yandex.qatools.camelot.api.annotations.Processor;
 import ru.yandex.qatools.camelot.beans.IncomingMessage;
-import ru.yandex.qatools.camelot.core.MessagesSerializer;
+import ru.yandex.qatools.camelot.common.MessagesSerializer;
+import ru.yandex.qatools.camelot.common.PluggableProcessor;
 
-import static ru.yandex.qatools.camelot.util.ServiceUtil.initEventProducer;
+import static ru.yandex.qatools.camelot.core.util.ServiceUtil.initEventProducer;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -25,7 +26,7 @@ public class IncomingMessagesQueueProcessor extends PluggableProcessor {
         }
 
         @Processor
-        public void process(IncomingMessage message) throws Exception {
+        public void process(IncomingMessage message) throws Exception { //NOSONAR
             initEventProducer(camelContext, message.getInputUri(), serializer).produce(message.getMessage());
         }
     }

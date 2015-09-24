@@ -2,6 +2,7 @@ package ru.yandex.qatools.camelot.core.impl;
 
 import org.junit.Test;
 import org.mockito.InOrder;
+import ru.yandex.qatools.camelot.common.AnnotatedMethodDispatcher;
 import ru.yandex.qatools.fsm.annotations.OnException;
 
 import java.lang.reflect.Method;
@@ -9,7 +10,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
-import static ru.yandex.qatools.camelot.core.impl.Metadata.getMeta;
+import static ru.yandex.qatools.camelot.common.Metadata.getMeta;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)

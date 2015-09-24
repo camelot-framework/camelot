@@ -2,8 +2,8 @@ package ru.yandex.qatools.camelot.test.core;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Processor;
+import ru.yandex.qatools.camelot.common.builders.ProcessorRoutesBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.core.builders.ProcessorRoutesBuilder;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -11,7 +11,9 @@ import ru.yandex.qatools.camelot.core.builders.ProcessorRoutesBuilder;
 class TestProcessorPluginRouteBuilder implements ProcessorRoutesBuilder {
     final ProcessorRoutesBuilder original;
 
-    public TestProcessorPluginRouteBuilder(ClassLoader classLoader, Class procClass, Object procMock, ProcessorRoutesBuilder original, Plugin plugin) throws Exception {
+    public TestProcessorPluginRouteBuilder(ClassLoader classLoader, Class procClass,
+                                           Object procMock, ProcessorRoutesBuilder original,
+                                           Plugin plugin) throws Exception { //NOSONAR
         this.original = original;
         original.setProcessor(
                 new TestCamelotProcessor(classLoader, procClass, procMock, original.getProcessor(), plugin)
@@ -19,12 +21,12 @@ class TestProcessorPluginRouteBuilder implements ProcessorRoutesBuilder {
     }
 
     @Override
-    public void startRoutes() throws Exception {
+    public void startRoutes() throws Exception { //NOSONAR
         original.startRoutes();
     }
 
     @Override
-    public void removeRoutes() throws Exception {
+    public void removeRoutes() throws Exception { //NOSONAR
         original.removeRoutes();
     }
 
@@ -39,7 +41,7 @@ class TestProcessorPluginRouteBuilder implements ProcessorRoutesBuilder {
     }
 
     @Override
-    public void addRoutesToCamelContext(CamelContext context) throws Exception {
+    public void addRoutesToCamelContext(CamelContext context) throws Exception { //NOSONAR
         original.addRoutesToCamelContext(context);
     }
 }

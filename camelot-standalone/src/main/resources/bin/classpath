@@ -1,0 +1,14 @@
+#!/bin/bash
+libDir=$WD/lib
+extDir=$WD/extensions
+
+CLASSPATH="."
+for i in `ls $libDir/*.jar`
+do
+  CLASSPATH=${CLASSPATH}:${i}
+done
+for i in `ls $extDir/*.jar`
+do
+  CLASSPATH=${CLASSPATH}:${i}
+done
+

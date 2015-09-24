@@ -18,15 +18,14 @@
 
     <bean id="kafka" class="ru.yandex.qatools.camelot.core.service.EmbeddedKafkaCluster" init-method="start"
           destroy-method="stop">
-        <constructor-arg name="zkHost" value="#{zookeeper.host}"/>
-        <constructor-arg name="zkPort" value="#{zookeeper.port}"/>
+        <constructor-arg name="zkHosts" value="#{zookeeper.hosts}"/>
         <constructor-arg name="port" value="#{T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort()}"/>
     </bean>
 
     <bean id="configurationProperties" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath:camelot-default.properties</value>
+                <value>classpath*:camelot-default.properties</value>
                 <value>classpath:test-config.properties</value>
                 <value>classpath:kafka-test.properties</value>
             </list>
@@ -42,13 +41,13 @@
     <import resource="classpath:camelot-camel-context.xml"/>
     <import resource="classpath:camelot-processing-context.xml"/>
 
-    <bean id="uriBuilder" class="ru.yandex.qatools.camelot.core.kafka.KafkaPluginUriBuilder">
+    <bean id="uriBuilder" class="ru.yandex.qatools.camelot.kafka.KafkaPluginUriBuilder">
         <constructor-arg name="kafkaHosts" value="localhost:#{kafka.port}"/>
-        <constructor-arg name="zkHost" value="#{zookeeper.host}"/>
-        <constructor-arg name="zkPort" value="#{zookeeper.port}"/>
+        <constructor-arg name="zkHosts" value="#{zookeeper.hosts}"/>
+        <constructor-arg name="defaultConfig" value=""/>
     </bean>
 
-    <bean id="messagesSerializer" class="ru.yandex.qatools.camelot.core.kafka.KafkaMessagesSerializer"/>
-    <bean id="interimProcessor" class="ru.yandex.qatools.camelot.core.kafka.KafkaInterimProcessor"/>
+    <bean id="messagesSerializer" class="ru.yandex.qatools.camelot.kafka.KafkaMessagesSerializer"/>
+    <bean id="interimProcessor" class="ru.yandex.qatools.camelot.kafka.KafkaInterimProcessor"/>
 
 </beans>

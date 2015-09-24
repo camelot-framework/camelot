@@ -10,23 +10,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.quartz.Scheduler;
 import org.springframework.core.io.Resource;
 import ru.yandex.qatools.camelot.api.PluginEndpoints;
+import ru.yandex.qatools.camelot.common.PluginInitializer;
+import ru.yandex.qatools.camelot.common.PluginLoader;
+import ru.yandex.qatools.camelot.common.ProcessingEngine;
+import ru.yandex.qatools.camelot.common.builders.BasicRoutesBuilder;
+import ru.yandex.qatools.camelot.common.builders.QuartzInitializer;
+import ru.yandex.qatools.camelot.common.builders.SchedulerBuildersFactory;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginsConfig;
 import ru.yandex.qatools.camelot.config.PluginsSource;
-import ru.yandex.qatools.camelot.core.PluginInitializer;
-import ru.yandex.qatools.camelot.core.PluginLoader;
-import ru.yandex.qatools.camelot.core.ProcessingEngine;
-import ru.yandex.qatools.camelot.core.builders.BasicRoutesBuilder;
 import ru.yandex.qatools.camelot.core.builders.NoSchedulerBuildersFactory;
-import ru.yandex.qatools.camelot.core.builders.QuartzInitializer;
-import ru.yandex.qatools.camelot.core.builders.SchedulerBuildersFactory;
 
 import java.util.*;
 
 import static java.lang.String.format;
 import static org.apache.camel.LoggingLevel.DEBUG;
+import static ru.yandex.qatools.camelot.core.util.ServiceUtil.gracefullyRemoveRoute;
 import static ru.yandex.qatools.camelot.util.NameUtil.routeId;
-import static ru.yandex.qatools.camelot.util.ServiceUtil.gracefullyRemoveRoute;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -80,7 +80,8 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
         try {
             camelContext.addStartupListener(new StartupListener() {
                 @Override
-                public void onCamelContextStarted(CamelContext context, boolean alreadyStarted) throws Exception {
+                public void onCamelContextStarted(CamelContext context,
+                                                  boolean alreadyStarted) throws Exception { //NOSONAR
                     for (Plugin plugin : getPluginsMap().values()) {
                         initPlugin(plugin);
                     }
@@ -173,7 +174,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     /**
      * Builds all the necessary routes for the plugins
      */
-    private void buildRoutes(final PluginsConfig config) throws Exception {
+    private void buildRoutes(final PluginsConfig config) throws Exception { //NOSONAR
         for (final PluginsSource source : config.getSources()) {
             for (final Plugin plugin : source.getPlugins()) {
                 if (pluginCanConsume(plugin)) {
@@ -186,18 +187,18 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     /**
      * Builds all the consumers routes
      */
-    private void buildConsumersRoutes() throws Exception {
+    private void buildConsumersRoutes() throws Exception { //NOSONAR
         final Map<String, Plugin> pluginsMap = getPluginsMap();
         final Map<String, Set<String>> consumersMap = getPluginsConsumersMap();
         // Add route to populate all the completed tests events to all the registered plugins or to stop
         camelContext.addRoutes(new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() throws Exception { //NOSONAR
                 // Producer plugins messages go to the consumers from INPUT or other plugin
                 for (String fromId : consumersMap.keySet()) {
                     final String fromUri = fromId == null ? inputUri
                             : pluginsMap.get(fromId).getContext().getEndpoints().getOutputUri();
-                    String[] consumers = calcConsumers(fromId, consumersMap.get(fromId));
+                    String[] consumers = calcConsumers(consumersMap.get(fromId));
                     addInterimRoute(from(fromUri)
                             .multicast()
                             .executorServiceRef(CAMELOT_MULTICAST_PROFILE)
@@ -217,9 +218,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
                                 .executorServiceRef(CAMELOT_MULTICAST_PROFILE)
                                 .parallelProcessing()
                                 .log(DEBUG, format("===> ROUTE %s ===> %s", endpoints.getOutputUri(), outputUri)))
-                                .to((isListenersEnabled()) ?
-                                        new String[]{outputUri, endpoints.getEndpointListenerUri()} :
-                                        new String[]{outputUri});
+                                .to(new String[]{outputUri});
                     }
                 }
             }
@@ -229,17 +228,13 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     /**
      * Calculate the consumers array from the set of consumers for the plugin (or null (as INPUT))
      */
-    private String[] calcConsumers(String fromId, Set<String> consumers) {
+    private String[] calcConsumers(Set<String> consumers) {
         final Collection consumersSet = CollectionUtils.collect(consumers, new Transformer() {
             @Override
             public Object transform(Object pluginId) {
                 return getPluginsMap().get(pluginId).getContext().getEndpoints().getConsumerUri();
             }
         });
-        if (fromId != null && isListenersEnabled()) {
-            final PluginEndpoints endpoints = getPluginsMap().get(fromId).getContext().getEndpoints();
-            consumersSet.add(endpoints.getEndpointListenerUri());
-        }
         return (String[]) (consumersSet).toArray(new String[consumersSet.size()]);
     }
 
@@ -268,7 +263,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     /**
      * Adds the plugin adapter routes according to the adapter configuration
      */
-    private void addPluginRoutes(final Plugin plugin) throws Exception {
+    private void addPluginRoutes(final Plugin plugin) throws Exception { //NOSONAR
         if (plugin.getAggregator() != null) {
             camelContext.addRoutes(newAggregatorRouteBuilder(plugin));
         } else if (plugin.getProcessor() != null) {
@@ -279,7 +274,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     /**
      * Invoke init methods upon the plugin
      */
-    protected void initPlugin(Plugin plugin) throws Exception {
+    protected void initPlugin(Plugin plugin) throws Exception { //NOSONAR
         if (pluginCanConsume(plugin)) {
             getPluginInitializer().init(plugin);
             plugin.getContext().setSchedulerBuilder(schedulerBuildersFactory.build(plugin));
@@ -290,7 +285,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     /**
      * Perform the plugin uninitialization
      */
-    protected void unInitPlugin(Plugin plugin) throws Exception {
+    protected void unInitPlugin(Plugin plugin) throws Exception { //NOSONAR
         plugin.getContext().setShuttingDown(true);
         plugin.getContext().getSchedulerBuilder().unschedule();
     }
@@ -299,12 +294,12 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
      * stop the routes for the plugin
      */
     @Override
-    protected void stopRoutes(final Plugin plugin) throws Exception {
+    protected void stopRoutes(final Plugin plugin) throws Exception { //NOSONAR
         super.stopRoutes(plugin);
         final Map<String, Set<String>> consumersMap = getPluginsConsumersMap();
         for (String fromId : consumersMap.keySet()) {
             final String fromUri = (fromId == null) ? inputUri : pluginsMap.get(fromId).getContext().getEndpoints().getOutputUri();
-            String[] consumers = calcConsumers(fromId, consumersMap.get(fromId));
+            String[] consumers = calcConsumers(consumersMap.get(fromId));
             gracefullyRemoveRoute(camelContext, routeId(fromUri, consumers));
         }
         gracefullyRemoveRoute(camelContext, routeId(routeId(plugin.getContext().getEndpoints().getOutputUri(), outputUri)));
@@ -318,7 +313,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     /**
      * Initialize the processor plugin route builder
      */
-    protected BasicRoutesBuilder newProcessorRouteBuilder(Plugin plugin) throws Exception {
+    protected BasicRoutesBuilder newProcessorRouteBuilder(Plugin plugin) throws Exception { //NOSONAR
         return getBuildersFactory().newProcessorPluginRouteBuilder(
                 camelContext, plugin
         );
@@ -327,7 +322,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     /**
      * Initialize the aggregator plugin route builder
      */
-    protected BasicRoutesBuilder newAggregatorRouteBuilder(Plugin plugin) throws Exception {
+    protected BasicRoutesBuilder newAggregatorRouteBuilder(Plugin plugin) throws Exception { //NOSONAR
         return getBuildersFactory().newAggregatorPluginRouteBuilder(
                 camelContext, plugin);
     }

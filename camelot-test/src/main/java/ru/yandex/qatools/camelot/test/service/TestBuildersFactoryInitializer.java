@@ -5,7 +5,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
-import ru.yandex.qatools.camelot.core.PluginsService;
+import ru.yandex.qatools.camelot.common.PluginsService;
 import ru.yandex.qatools.camelot.test.core.TestBuildersFactory;
 import ru.yandex.qatools.camelot.test.core.TestContextInjector;
 

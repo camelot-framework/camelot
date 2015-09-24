@@ -6,7 +6,7 @@
 
     <!-- Beans -->
 
-    <bean id="contextInjector" class="ru.yandex.qatools.camelot.core.impl.PluginContextInjectorImpl"/>
+    <bean id="contextInjector" class="ru.yandex.qatools.camelot.common.PluginContextInjectorImpl"/>
     <bean id="resourceBuilder" class="ru.yandex.qatools.camelot.core.builders.SpringPluginResourceBuilder"/>
     <bean id="appConfig" class="ru.yandex.qatools.camelot.core.impl.AppConfigSpringProperties"/>
     <bean id="pluginInitializer" class="ru.yandex.qatools.camelot.core.impl.PluginInitializerImpl"/>
