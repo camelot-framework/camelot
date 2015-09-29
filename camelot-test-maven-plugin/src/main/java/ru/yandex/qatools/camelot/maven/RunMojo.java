@@ -46,7 +46,7 @@ import static ru.yandex.qatools.camelot.maven.service.CamelotRunner.camelot;
 import static ru.yandex.qatools.camelot.maven.util.FileUtil.processTemplate;
 import static ru.yandex.qatools.camelot.maven.util.FileUtil.replaceInFile;
 import static ru.yandex.qatools.camelot.util.MapUtil.map;
-import static ru.yandex.qatools.camelot.util.ReflectUtil.resolveResourcesAsStringsFromPattern;
+import static ru.yandex.qatools.camelot.core.util.ReflectUtil.resolveResourcesAsStringsFromPattern;
 import static ru.qatools.clay.aether.Aether.aether;
 import static ru.qatools.clay.utils.archive.ArchiveUtil.unpackJar;
 
@@ -62,7 +62,7 @@ public class RunMojo extends AbstractMojo {
     public static final String CAMELOT_PROPERTIES = "/camelot-default.properties";
     public static final String VERSION_PROPERTY_NAME = "version";
     public static final String CAMELOT_WEB = "camelot-web";
-    public static final String CAMELOT_EXTENSIONS = "camelot-extensions";
+    public static final String CAMELOT_UTILS = "camelot-utils";
     public static final String WAR = "war";
     public static final String JAR = "jar";
     public static final String PROPERTIES_FTL = "/plugin.camelot.properties.ftl";
@@ -111,7 +111,7 @@ public class RunMojo extends AbstractMojo {
     protected String camelotWebArtifact = null;
 
     @Parameter
-    protected String camelotExtensionsArtifact = null;
+    protected String camelotUtilsArtifact = null;
 
     @Parameter
     protected String camelotVersion = null;
@@ -226,21 +226,21 @@ public class RunMojo extends AbstractMojo {
         aether = aether(system, session, remotes);
     }
 
-    public void processPluginsScriptsIfNeeded() throws Exception {
+    public void processPluginsScriptsIfNeeded() throws Exception { //NOSONAR
         if (camelotConfigSrcFile.exists()) {
             processMainLayoutFile();
             removePluginsScriptsPattern();
         }
     }
 
-    public void processMainLayoutFile() throws Exception {
+    public void processMainLayoutFile() throws Exception { //NOSONAR
         final File mainLayoutFile = new File(outputDir + "/WEB-INF/layouts/main.jade");
         replaceInFile(mainLayoutFile, map(
                 " {1,8}script\\(src=\"#\\{context_path\\}/wro/plugins.js\\\"\\)", buildPluginsScripts()
         ));
     }
 
-    public String buildPluginsScripts() throws Exception {
+    public String buildPluginsScripts() throws Exception { //NOSONAR
         StringBuilder pluginsScripts = new StringBuilder();
         pluginsScripts.append("        script(src='#{context_path}/wro/plugins.js')\n");
         for (PluginsSource source : loadPluginsConfig().getSources()) {
@@ -287,7 +287,7 @@ public class RunMojo extends AbstractMojo {
      *
      * @return loaded plugin configuration
      */
-    public PluginsConfig loadPluginsConfig() throws Exception {
+    public PluginsConfig loadPluginsConfig() throws Exception { //NOSONAR
         JAXBContext jc = JAXBContext.newInstance(PluginsConfig.class);
         Unmarshaller unmarshaller = jc.createUnmarshaller();
         return ((PluginsConfig) unmarshaller.unmarshal(camelotConfigSrcFile));
@@ -334,16 +334,16 @@ public class RunMojo extends AbstractMojo {
     }
 
     /**
-     * Override wro configuration. Change wro filter to {@link ru.yandex.qatools.camelot.core.web.wro.WroFilter} and
-     * wro manager factory to {@link ru.yandex.qatools.camelot.core.web.wro.ConfigurableWroManagerFactory}
+     * Override wro configuration. Change wro filter to {@link ru.yandex.qatools.camelot.web.wro.WroFilter} and
+     * wro manager factory to {@link ru.yandex.qatools.camelot.web.wro.ConfigurableWroManagerFactory}
      *
      * @param webXmlFile web.xml file
      * @throws IOException if an I/O error occurs while reading web.xml file
      */
     public void overrideWroConfiguration(File webXmlFile) throws IOException {
         replaceInFile(webXmlFile, map(
-                ru.yandex.qatools.camelot.core.web.wro.WroFilter.class.getName(), WroFilter.class.getName(),
-                ru.yandex.qatools.camelot.core.web.wro.ConfigurableWroManagerFactory.class.getName(), ConfigurableWroManagerFactory.class.getName()
+                ru.yandex.qatools.camelot.web.wro.WroFilter.class.getName(), WroFilter.class.getName(),
+                ru.yandex.qatools.camelot.web.wro.ConfigurableWroManagerFactory.class.getName(), ConfigurableWroManagerFactory.class.getName()
         ));
     }
 
@@ -470,7 +470,7 @@ public class RunMojo extends AbstractMojo {
 
     public void copyCamelotExtensionArtifactToLib() throws IOException, AetherException {
         File camelotExtensionsJarFile = aether.resolve(
-                getCamelotExtensionsArtifact(), false
+                getCamelotUtilsArtifact(), false
         ).get().get(0).getArtifact().getFile();
 
         copyFile(camelotExtensionsJarFile,
@@ -478,7 +478,7 @@ public class RunMojo extends AbstractMojo {
         );
     }
 
-    public String[] createJettyClassPath() throws Exception {
+    public String[] createJettyClassPath() throws Exception { //NOSONAR
         List<String> classpath = convertPathsToUrls(srcResDir);
         classpath.addAll(getCamelotExtensionsArtifactClassPath());
         return classpath.toArray(new String[classpath.size()]);
@@ -488,9 +488,9 @@ public class RunMojo extends AbstractMojo {
      * Create classpath for application. Contains all compile artifacts from project and camelot-extension artifact
      *
      * @return classpath for application
-     * @throws Exception if can't resolve camelot-extensions
+     * @throws Exception if can't resolve camelot-utils
      */
-    public String[] createApplicationClassPath() throws Exception {
+    public String[] createApplicationClassPath() throws Exception { //NOSONAR
         List<String> classpath = convertPathsToUrls("/WEB-INF/classes", srcOutputDir);
         classpath.addAll(getCompileArtifacts(project.getArtifacts()));
         return classpath.toArray(new String[classpath.size()]);
@@ -502,8 +502,8 @@ public class RunMojo extends AbstractMojo {
      * @return classpath elements for camelot-extensions
      * @throws Exception if can't resolve camelot-extensions
      */
-    public List<String> getCamelotExtensionsArtifactClassPath() throws Exception {
-        return Arrays.asList(aether.resolve(getCamelotExtensionsArtifact()).getAsClassPath());
+    public List<String> getCamelotExtensionsArtifactClassPath() throws Exception { //NOSONAR
+        return Arrays.asList(aether.resolve(getCamelotUtilsArtifact()).getAsClassPath());
     }
 
     /**
@@ -557,15 +557,15 @@ public class RunMojo extends AbstractMojo {
     }
 
     /**
-     * Get camelot-extensions artifact coordinates as {groupId}:{artifactId}:{extension}:{version}
+     * Get camelot-utils artifact coordinates as {groupId}:{artifactId}:{extension}:{version}
      *
      * @return artifact coordinates
      */
-    public String getCamelotExtensionsArtifact() {
-        if (isBlank(camelotExtensionsArtifact)) {
-            camelotExtensionsArtifact = getArtifactCoords(groupId, CAMELOT_EXTENSIONS, JAR, getCamelotVersion());
+    public String getCamelotUtilsArtifact() {
+        if (isBlank(camelotUtilsArtifact)) {
+            camelotUtilsArtifact = getArtifactCoords(groupId, CAMELOT_UTILS, JAR, getCamelotVersion());
         }
-        return camelotExtensionsArtifact;
+        return camelotUtilsArtifact;
     }
 
     public String getArtifactCoords(String groupId, String artifactId, String extensions, String version) {

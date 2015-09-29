@@ -3,7 +3,7 @@ package ru.yandex.qatools.camelot.test.core;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.core.impl.CamelotProcessor;
+import ru.yandex.qatools.camelot.common.CamelotProcessor;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)

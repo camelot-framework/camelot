@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import ru.yandex.qatools.camelot.config.PluginContext;
-import ru.yandex.qatools.camelot.core.WebfrontEngine;
+import ru.yandex.qatools.camelot.web.core.WebfrontEngine;
 import ru.yandex.qatools.camelot.core.plugins.AllSkippedService;
 import ru.yandex.qatools.camelot.core.plugins.LifecycleFSM;
 import ru.yandex.qatools.camelot.core.plugins.TestStartedCounterAggregator;

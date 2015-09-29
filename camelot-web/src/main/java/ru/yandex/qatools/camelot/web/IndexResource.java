@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
-import ru.yandex.qatools.camelot.core.WebfrontEngine;
-import ru.yandex.qatools.camelot.core.web.ViewHelper;
+import ru.yandex.qatools.camelot.web.core.ViewHelper;
+import ru.yandex.qatools.camelot.web.core.WebfrontEngine;
 
 import javax.ws.rs.Path;
 import java.util.Map;

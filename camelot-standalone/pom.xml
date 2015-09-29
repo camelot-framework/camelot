@@ -17,12 +17,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>camelot-core</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-deploy</artifactId>
         </dependency>
@@ -82,7 +76,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <addClasspath>true</addClasspath>
+                            <addClasspath>false</addClasspath>
                             <classpathPrefix>../lib/</classpathPrefix>
                             <mainClass>org.eclipse.jetty.start.Main</mainClass>
                             <useUniqueVersions>false</useUniqueVersions>

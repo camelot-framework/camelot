@@ -42,9 +42,6 @@ public class AggregatorWithContext {
     @Repository(id = "all-skipped")
     public AggregatorRepository repo3;
 
-    @Listener
-    public EndpointListener listener;
-
     @Config
     public AppConfig config;
 

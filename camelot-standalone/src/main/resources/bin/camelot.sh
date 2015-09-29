@@ -12,7 +12,8 @@ scriptFile=$scriptDir/run-web.sh
 serviceNameLo="camelot"
 serviceName="Camelot"
 serviceLogFile="$WD/log/camelot.log"
-args="$JAVA_ARGS $CAMELOT_ARGS -jar camelot.jar $WD/conf/jetty.xml jetty.home=$WD"
 
-. $WD/bin/init.sh
+. $WD/bin/classpath
+args="$JAVA_ARGS $CAMELOT_ARGS -cp '$CLASSPATH' org.eclipse.jetty.start.Main $WD/conf/jetty.xml jetty.home=$WD"
+. $WD/bin/runner
 

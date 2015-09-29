@@ -7,11 +7,13 @@ import org.apache.camel.component.jms.JmsBinding;
 import org.apache.camel.component.jms.JmsMessage;
 import org.apache.camel.spi.AggregationRepository;
 import org.junit.Test;
+import ru.yandex.qatools.camelot.activemq.ActivemqMessagesSerializer;
 import ru.yandex.qatools.camelot.api.annotations.OnClientMessage;
+import ru.yandex.qatools.camelot.common.AggregatorPluginAnnotatedMethodInvoker;
+import ru.yandex.qatools.camelot.common.FoundMethodProcessor;
+import ru.yandex.qatools.camelot.common.PluginContextInjectorImpl;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
-import ru.yandex.qatools.camelot.core.FoundMethodProcessor;
-import ru.yandex.qatools.camelot.core.activemq.ActivemqMessagesSerializer;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;

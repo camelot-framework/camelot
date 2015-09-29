@@ -2,6 +2,7 @@ package ru.yandex.qatools.camelot.core.builders;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.spi.AggregationRepository;
+import ru.yandex.qatools.camelot.common.builders.MemoryAggregationRepositoryBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.core.impl.UnreachableAggregationRepository;
 
@@ -14,7 +15,7 @@ public class UnreachableAggregationRepositoryBuilder extends MemoryAggregationRe
     }
 
     @Override
-    public AggregationRepository initWritable(Plugin plugin) throws Exception {
+    public AggregationRepository initWritable(Plugin plugin) throws Exception { //NOSONAR
         return new UnreachableAggregationRepository();
     }
 }

@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import ru.yandex.qatools.camelot.core.kafka.KafkaPluginUriBuilder;
+import ru.yandex.qatools.camelot.kafka.KafkaPluginUriBuilder;
 import ru.yandex.qatools.camelot.core.service.EmbeddedKafkaCluster;
 import ru.yandex.qatools.camelot.core.service.EmbeddedZookeeper;
 

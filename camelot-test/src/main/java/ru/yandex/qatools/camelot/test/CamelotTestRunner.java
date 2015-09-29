@@ -27,7 +27,9 @@ import static java.util.Arrays.asList;
 import static org.apache.camel.test.spring.CamelSpringTestHelper.setTestClass;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode;
 import static ru.yandex.qatools.camelot.util.MapUtil.map;
-import static ru.yandex.qatools.camelot.util.ReflectUtil.*;
+import static ru.yandex.qatools.camelot.util.ReflectUtil.getAnnotation;
+import static ru.yandex.qatools.camelot.util.ReflectUtil.getAnnotationValue;
+import static ru.yandex.qatools.camelot.util.ReflectUtil.getMethodsInClassHierarchy;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)

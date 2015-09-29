@@ -8,7 +8,7 @@ import ru.yandex.qatools.camelot.api.annotations.Input;
 import ru.yandex.qatools.camelot.api.annotations.MainInput;
 import ru.yandex.qatools.camelot.api.annotations.Repository;
 import ru.yandex.qatools.camelot.core.beans.CounterState;
-import ru.yandex.qatools.camelot.core.builders.ReadonlyAggregatorRepository;
+import ru.yandex.qatools.camelot.common.builders.ReadonlyAggregatorRepository;
 
 import javax.ws.rs.Path;
 

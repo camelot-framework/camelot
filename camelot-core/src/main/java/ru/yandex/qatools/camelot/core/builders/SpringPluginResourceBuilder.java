@@ -9,6 +9,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import ru.yandex.qatools.camelot.common.builders.ResourceBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.error.PluginsSystemException;
 import ru.yandex.qatools.camelot.spring.ClassLoaderBeanDefinition;
@@ -23,8 +24,10 @@ import static java.lang.Thread.currentThread;
 import static java.util.Collections.sort;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
+import static ru.yandex.qatools.camelot.core.util.ReflectUtil.resolveResourcesAsStringsFromPattern;
 import static ru.yandex.qatools.camelot.util.NameUtil.pluginResourceBeanName;
-import static ru.yandex.qatools.camelot.util.ReflectUtil.*;
+import static ru.yandex.qatools.camelot.util.ReflectUtil.getAnnotation;
+import static ru.yandex.qatools.camelot.util.ReflectUtil.getAnnotationValue;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -46,7 +49,7 @@ public class SpringPluginResourceBuilder implements ResourceBuilder, BeanFactory
      * Build resources and add them to the context
      */
     @Override
-    public void build(CamelContext camelContext, Plugin plugin) throws Exception {
+    public void build(CamelContext camelContext, Plugin plugin) throws Exception { //NOSONAR
         final String pluginId = plugin.getId();
         final ClassLoader classLoader = plugin.getContext().getClassLoader();
         if (!isBlank(plugin.getResource())) {
@@ -60,7 +63,7 @@ public class SpringPluginResourceBuilder implements ResourceBuilder, BeanFactory
         }
     }
 
-    private void initResourcesConfig(Class baseClass, Plugin plugin) throws Exception {
+    private void initResourcesConfig(Class baseClass, Plugin plugin) throws Exception { //NOSONAR
         plugin.getContext().getCssPaths().addAll(findTemplatePaths(baseClass, "**/*", CSS_EXTS));
         plugin.getContext().getJsPaths().addAll(findTemplatePaths(baseClass, "**/*", JS_EXTS));
         plugin.getContext().setDashboardPath(findTemplatePath(baseClass, "dashboard", TPL_EXTS));
@@ -94,7 +97,8 @@ public class SpringPluginResourceBuilder implements ResourceBuilder, BeanFactory
         return null;
     }
 
-    private Object registerResBean(Class clazz, String beanName, Plugin plugin, ClassLoader classLoader, CamelContext camelContext) throws Exception {
+    private Object registerResBean(Class clazz, String beanName, Plugin plugin,
+                                   ClassLoader classLoader, CamelContext camelContext) throws Exception { //NOSONAR
         ClassLoader contextLoader = currentThread().getContextClassLoader();
         currentThread().setContextClassLoader(classLoader);
         try {
@@ -129,7 +133,7 @@ public class SpringPluginResourceBuilder implements ResourceBuilder, BeanFactory
     /**
      * Returns the path mapping for the class
      */
-    private String getPathMapping(Class resClass) throws Exception {
+    private String getPathMapping(Class resClass) throws Exception { //NOSONAR
         Object path = getAnnotation(resClass, Path.class);
         return (path != null) ? (String) getAnnotationValue(path, "value") : null;
     }

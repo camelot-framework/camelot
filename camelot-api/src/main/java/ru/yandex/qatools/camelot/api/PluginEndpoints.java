@@ -101,16 +101,6 @@ public interface PluginEndpoints {
     String getFrontendSendRouteId();
 
     /**
-     * Plugin's uri for endpoint listeners
-     */
-    String getEndpointListenerUri();
-
-    /**
-     * Plugin's route id for endpoint listeners
-     */
-    String getEndpointListenerRouteId();
-
-    /**
      * Get plugins system engine name
      */
     String getEngineName();

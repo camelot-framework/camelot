@@ -1,8 +1,10 @@
 package ru.yandex.qatools.camelot.core.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.camelot.api.PluginEndpoints;
+import ru.yandex.qatools.camelot.common.PluginUriBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.core.PluginUriBuilder;
 
 import static ru.yandex.qatools.camelot.Constants.*;
 import static ru.yandex.qatools.camelot.util.NameUtil.*;
@@ -11,6 +13,7 @@ import static ru.yandex.qatools.camelot.util.NameUtil.*;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public class PluginEndpointsImpl implements PluginEndpoints {
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
     protected final Plugin plugin;
     final String inputUri;
     final String delayedInputUri;
@@ -22,7 +25,6 @@ public class PluginEndpointsImpl implements PluginEndpoints {
     final String clientSendUri;
     final String broadcastFrontendUri;
     final String mainInputUri;
-    final String endpointListenerUri;
     final String inputRouteId;
     final String delayedInputRouteId;
     final String outputRouteId;
@@ -32,7 +34,6 @@ public class PluginEndpointsImpl implements PluginEndpoints {
     final String consumerRouteId;
     final String clientSendRouteId;
     final String mainInputRouteId;
-    final String endpointListenerRouteId;
     final String engineName;
 
     public PluginEndpointsImpl(String mainInputUri, Plugin plugin, String engineName, PluginUriBuilder uriBuilder) {
@@ -48,7 +49,6 @@ public class PluginEndpointsImpl implements PluginEndpoints {
         this.consumerUri = uriBuilder.localUri(plugin.getId(), CONSUMER_SUFFIX);
         this.producerUri = uriBuilder.localUri(plugin.getId(), PRODUCER_SUFFIX);
         this.clientSendUri = uriBuilder.localUri(plugin.getId(), CLIENT_SEND_SUFFIX);
-        this.endpointListenerUri = uriBuilder.broadcastUri(plugin.getId(), RES_LISTENER_SUFFIX);
         this.broadcastFrontendUri = uriBuilder.frontendBroadcastUri();
 
         this.mainInputRouteId = mainInputUri + engineName;
@@ -60,7 +60,7 @@ public class PluginEndpointsImpl implements PluginEndpoints {
         this.consumerRouteId = localRouteId(consumerUri, engineName);
         this.producerRouteId = localRouteId(producerUri, engineName);
         this.clientSendRouteId = localRouteId(clientSendUri, engineName);
-        this.endpointListenerRouteId = broadcastRouteId(endpointListenerUri, engineName);
+        LOGGER.info("Built plugin {} endpoints with input uri={}", plugin.getId(), inputUri);
     }
 
     @Override
@@ -114,11 +114,6 @@ public class PluginEndpointsImpl implements PluginEndpoints {
     }
 
     @Override
-    public String getEndpointListenerUri() {
-        return endpointListenerUri;
-    }
-
-    @Override
     public String getEngineName() {
         return engineName;
     }
@@ -166,10 +161,5 @@ public class PluginEndpointsImpl implements PluginEndpoints {
     @Override
     public String getMainInputRouteId() {
         return mainInputRouteId;
-    }
-
-    @Override
-    public String getEndpointListenerRouteId() {
-        return endpointListenerRouteId;
     }
 }

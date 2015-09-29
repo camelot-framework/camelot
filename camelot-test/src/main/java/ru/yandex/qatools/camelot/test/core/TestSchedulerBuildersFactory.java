@@ -1,9 +1,9 @@
 package ru.yandex.qatools.camelot.test.core;
 
 import org.apache.camel.CamelContext;
+import ru.yandex.qatools.camelot.common.builders.SchedulerBuilder;
+import ru.yandex.qatools.camelot.common.builders.SchedulerBuildersFactory;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.core.builders.SchedulerBuilder;
-import ru.yandex.qatools.camelot.core.builders.SchedulerBuildersFactory;
 
 import java.util.Map;
 

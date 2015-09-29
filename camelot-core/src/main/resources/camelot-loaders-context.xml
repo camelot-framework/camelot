@@ -21,7 +21,7 @@
     <bean id="schedulerFactory" class="org.quartz.impl.StdSchedulerFactory"/>
     <bean id="scheduler" factory-bean="schedulerFactory" factory-method="getScheduler"/>
 
-    <bean id="FACTORY-MEM" class="ru.yandex.qatools.camelot.core.builders.BuildersFactoryImpl">
+    <bean id="FACTORY-MEM" class="ru.yandex.qatools.camelot.common.builders.BuildersFactoryImpl">
         <property name="waitForLockSec" value="${camelot.mem.waitForLockSec}"/>
     </bean>
 

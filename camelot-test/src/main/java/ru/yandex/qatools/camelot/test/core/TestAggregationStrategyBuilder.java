@@ -1,9 +1,9 @@
 package ru.yandex.qatools.camelot.test.core;
 
+import org.apache.camel.Processor;
 import ru.yandex.qatools.camelot.beans.AggregatorConfig;
-import ru.yandex.qatools.camelot.core.builders.AggregationStrategyBuilder;
-import ru.yandex.qatools.camelot.core.impl.CamelotAggregationStrategy;
-import ru.yandex.qatools.camelot.core.impl.CamelotFSMBuilder;
+import ru.yandex.qatools.camelot.common.builders.AggregationStrategyBuilder;
+import ru.yandex.qatools.camelot.common.CamelotFSMBuilder;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -42,7 +42,7 @@ class TestAggregationStrategyBuilder implements AggregationStrategyBuilder {
     }
 
     @Override
-    public CamelotAggregationStrategy build() throws Exception {
+    public Processor build() throws Exception { //NOSONAR
         return original.build();
     }
 }

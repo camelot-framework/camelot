@@ -42,9 +42,6 @@ public class Steps {
     @ClientSenderMock(value = TestAggregator.class, topic = "someInterface")
     ClientMessageSender senderInterfaceTopic;
 
-    @Resource(TestProcessor.class)
-    TestResource testResource;
-
     public void testRoute() throws Exception {
         helper.send("test4", UUID, "uuid1");
         helper.send("test4", UUID, "uuid2");

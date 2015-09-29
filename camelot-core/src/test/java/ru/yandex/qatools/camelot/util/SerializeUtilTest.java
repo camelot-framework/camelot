@@ -5,8 +5,6 @@ import org.junit.Test;
 import ru.yandex.qatools.camelot.core.beans.StopEvent;
 import ru.yandex.qatools.camelot.core.beans.TestStarted;
 
-import java.io.Serializable;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 import static javax.xml.bind.DatatypeConverter.printBase64Binary;
@@ -16,7 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static ru.yandex.qatools.camelot.core.util.TestEventGenerator.createTestStarted;
+import static ru.yandex.qatools.camelot.util.TestEventGenerator.createTestStarted;
 import static ru.yandex.qatools.camelot.util.SerializeUtil.*;
 
 /**
@@ -51,7 +49,7 @@ public class SerializeUtilTest {
         final String bodyClass = unwrapBodyClassName(wrapped);
         assertThat(bodyClass, equalTo(event.getClass().getName()));
         assertThat(unwrapped, equalTo(serialized));
-        final Object deserialized = deserializeFromBytes(unwrapped, cl, (Class<? extends Serializable>) cl.loadClass(bodyClass));
+        final Object deserialized = deserializeFromBytes(unwrapped, cl);
         assertThat(deserialized, instanceOf(event.getClass()));
         assertThat(((StopEvent) deserialized).getMethodname(), equalTo(event.getMethodname()));
     }

@@ -1,8 +1,6 @@
 package ru.yandex.qatools.camelot.core.impl;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.LoggingLevel;
-import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.ProcessorDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,17 +10,9 @@ import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.api.EventProducer;
 import ru.yandex.qatools.camelot.api.PluginEndpoints;
 import ru.yandex.qatools.camelot.api.PluginsInterop;
-import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.config.PluginContext;
-import ru.yandex.qatools.camelot.config.PluginsConfig;
-import ru.yandex.qatools.camelot.config.PluginsSource;
-import ru.yandex.qatools.camelot.core.*;
-import ru.yandex.qatools.camelot.core.activemq.ActivemqMessagesSerializer;
-import ru.yandex.qatools.camelot.core.activemq.ActivemqPluginUriBuilder;
-import ru.yandex.qatools.camelot.core.builders.AggregationRepositoryBuilder;
-import ru.yandex.qatools.camelot.core.builders.BuildersFactory;
-import ru.yandex.qatools.camelot.core.builders.BuildersFactoryImpl;
-import ru.yandex.qatools.camelot.core.builders.ResourceBuilder;
+import ru.yandex.qatools.camelot.common.*;
+import ru.yandex.qatools.camelot.common.builders.*;
+import ru.yandex.qatools.camelot.config.*;
 import ru.yandex.qatools.camelot.error.MetadataException;
 import ru.yandex.qatools.camelot.error.PluginsSystemException;
 
@@ -35,10 +25,10 @@ import java.util.*;
 
 import static java.lang.String.format;
 import static jodd.util.StringUtil.isEmpty;
-import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
-import static ru.yandex.qatools.camelot.util.IOUtils.readResource;
+import static ru.yandex.qatools.camelot.core.util.IOUtils.readResource;
+import static ru.yandex.qatools.camelot.core.util.ServiceUtil.*;
+import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 import static ru.yandex.qatools.camelot.util.NameUtil.defaultPluginId;
-import static ru.yandex.qatools.camelot.util.ServiceUtil.*;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -75,8 +65,8 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
         this.inputUri = inputUri;
         this.outputUri = outputUri;
         this.engineName = getClass().getSimpleName();
-        this.uriBuilder = new ActivemqPluginUriBuilder();
-        this.messagesSerializer = new ActivemqMessagesSerializer();
+        this.uriBuilder = new BasicPluginUriBuilder();
+        this.messagesSerializer = new BasicMessagesSerializer();
         setBuildersFactory(new BuildersFactoryImpl());
         setContextInjector(new PluginContextInjectorImpl());
         setAppConfig(new AppConfigSystemProperties());
@@ -97,7 +87,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
             initializePlugins();
             initWebResources();
         } catch (Exception e) {
-            logger.error("Could not initialize plugins configurations", e);
+            logger.error("Could not initialize plugins configurations: {}", formatStackTrace(e), e);
         }
         stopLoading();
     }
@@ -107,7 +97,6 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
      */
     @Override
     public void reload() {
-        stop();
         reloadAndStart();
     }
 
@@ -387,16 +376,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     /**
      * Stop the plugins and their contexts
      */
-    protected synchronized void stopPlugins() throws Exception {
-        // stop old routes
-        for (Plugin plugin : getPluginsMap().values()) {
-            try {
-                stopRoutes(plugin);
-            } catch (Exception e) {
-                logger.error("Failed to stop route for plugin " + plugin.getId(), e);
-            }
-        }
-
+    protected synchronized void stopPlugins() throws Exception { //NOSONAR
         for (PluginsConfig config : getConfigs()) {
             releasePluginsContexts(config);
         }
@@ -405,7 +385,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     /**
      * Initialize the plugins and their contexts
      */
-    protected synchronized void initializePlugins() throws Exception {
+    protected synchronized void initializePlugins() throws Exception { //NOSONAR
         for (PluginsConfig config : getConfigs()) {
             initPluginsContexts(config);
         }
@@ -417,18 +397,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     /**
      * Stop the routes built upon this plugin
      */
-    protected void stopRoutes(Plugin plugin) throws Exception {
-        if (isListenersEnabled()) {
-            gracefullyRemoveRoute(camelContext, plugin.getContext().getEndpoints().getEndpointListenerRouteId());
-            gracefullyRemoveEndpoints(camelContext, plugin.getContext().getEndpoints().getEndpointListenerUri());
-        }
-    }
-
-    /**
-     * Returns true if we should enable plugin listeners and false if not
-     */
-    protected boolean isListenersEnabled() {
-        return getAppConfig().getBoolean("camelot.enableListeners");
+    protected void stopRoutes(Plugin plugin) throws Exception { //NOSONAR
     }
 
     /**
@@ -466,25 +435,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     /**
      * Initialize the basic routes for the plugin
      */
-    protected void initBasicPluginRoutes(final Plugin plugin) throws Exception {
-        // add the endpoint listener processor
-        camelContext.addRoutes(new RouteBuilder() {
-            @Override
-            public void configure() throws Exception {
-                if (isListenersEnabled() && pluginCanConsume(plugin)) {
-                    addInterimRoute(
-                            from(plugin.getContext().getEndpoints().getEndpointListenerUri())
-                            .log(LoggingLevel.DEBUG, "Plugin " + plugin.getId() + " endpoint listener input " +
-                                    "${in.headers." + BODY_CLASS + "}")
-                            .bean(plugin.getContext().getListener(), "notifyOnMessage"))
-                            .stop()
-                            .routeId(plugin.getContext().getEndpoints().getEndpointListenerRouteId());
-                } else {
-                    addInterimRoute(from(plugin.getContext().getEndpoints().getEndpointListenerUri()))
-                            .stop();
-                }
-            }
-        });
+    protected void initBasicPluginRoutes(final Plugin plugin) throws Exception { //NOSONAR
 
     }
 
@@ -499,7 +450,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     /**
      * Release the plugin configuration
      */
-    protected void releasePluginsContexts(PluginsConfig config) throws Exception {
+    protected void releasePluginsContexts(PluginsConfig config) throws Exception { //NOSONAR
         for (final PluginsSource source : config.getSources()) {
             try {
                 pluginLoader.releaseClassLoader(source);
@@ -512,7 +463,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     /**
      * Initialize plugins configurations
      */
-    protected void initPluginsContexts(PluginsConfig config) throws Exception {
+    protected void initPluginsContexts(PluginsConfig config) throws Exception { //NOSONAR
         for (final PluginsSource source : config.getSources()) {
             final ClassLoader classLoader = pluginLoader.createClassLoader(source);
             for (final Plugin plugin : source.getPlugins()) {
@@ -525,7 +476,8 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     /**
      * Initialize configuration for the plugin
      */
-    protected void initPluginContext(PluginsSource source, final Plugin plugin, PluginContext context, ClassLoader classLoader) throws Exception {
+    protected void initPluginContext(PluginsSource source, final Plugin plugin,
+                                     PluginContext context, ClassLoader classLoader) throws Exception { //NOSONAR
         context.setSource(source);
         plugin.setContext(context);
         if (pluginCanConsume(plugin)) {
@@ -561,7 +513,6 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
             context.setStorage(repositoryBuilder.initStorage(plugin));
             context.setAggregationRepo(repositoryBuilder.initWritable(plugin));
             context.setRepository(repositoryBuilder.initReadonly(plugin));
-            context.setListener(new EndpointListenerImpl(context));
         } else {
             logger.warn("Plugin {} does not contain processing code! It contains resource only", plugin.getId());
         }
@@ -575,7 +526,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     /**
      * Add all the registered resources to the context
      */
-    private void buildResources(final PluginsConfig config) throws Exception {
+    private void buildResources(final PluginsConfig config) throws Exception { //NOSONAR
         for (final PluginsSource source : config.getSources()) {
             for (final Plugin plugin : source.getPlugins()) {
                 getResourceBuilder().build(camelContext, plugin);

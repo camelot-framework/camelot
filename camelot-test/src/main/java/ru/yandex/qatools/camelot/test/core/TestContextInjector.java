@@ -2,9 +2,9 @@ package ru.yandex.qatools.camelot.test.core;
 
 import org.apache.camel.Exchange;
 import ru.yandex.qatools.camelot.api.annotations.PluginComponent;
+import ru.yandex.qatools.camelot.common.PluginContextInjector;
 import ru.yandex.qatools.camelot.config.PluginContext;
-import ru.yandex.qatools.camelot.core.PluginContextInjector;
-import ru.yandex.qatools.camelot.core.impl.PluginContextInjectorImpl;
+import ru.yandex.qatools.camelot.common.PluginContextInjectorImpl;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ public class TestContextInjector<P> extends PluginContextInjectorImpl<P> impleme
             final Map<Class, Object> components = new HashMap<>();
             injectField(pluginObj.getClass(), PluginComponent.class, pluginObj, new FieldListener<Object>() {
                 @Override
-                public Object found(Field field, AnnotationInfo info) throws Exception {
+                public Object found(Field field, AnnotationInfo info) throws Exception { //NOSONAR
 
                     @SuppressWarnings("unchecked")
                     final Class<P> type = (Class<P>) overriddenComponents.get(field.getType());

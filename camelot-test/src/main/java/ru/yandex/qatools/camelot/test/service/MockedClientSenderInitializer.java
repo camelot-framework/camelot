@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.qatools.camelot.api.ClientMessageSender;
 import ru.yandex.qatools.camelot.api.ClientSendersProvider;
+import ru.yandex.qatools.camelot.common.ProcessingEngine;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.core.ProcessingEngine;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;

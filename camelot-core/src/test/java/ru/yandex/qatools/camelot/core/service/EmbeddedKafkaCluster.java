@@ -29,12 +29,11 @@ import java.util.Properties;
 
 import static java.lang.String.format;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
-import static ru.yandex.qatools.camelot.util.FileUtil.createTempDirectory;
+import static ru.yandex.qatools.camelot.core.util.FileUtil.createTempDirectory;
 
 public class EmbeddedKafkaCluster {
     private final int port;
-    private final int zkPort;
-    private final String zkHost;
+    private final String zkHosts;
     private final Properties baseProperties;
 
     private final String brokerList;
@@ -42,9 +41,8 @@ public class EmbeddedKafkaCluster {
     private final List<KafkaServer> brokers;
     private final List<File> logDirs;
 
-    public EmbeddedKafkaCluster(String zkHost, int zkPort, int port) {
-        this.zkPort = zkPort;
-        this.zkHost = zkHost;
+    public EmbeddedKafkaCluster(String zkHosts, int port) {
+        this.zkHosts = zkHosts;
         this.port = port;
         this.baseProperties = new Properties();
         this.brokers = new ArrayList<>();
@@ -53,8 +51,8 @@ public class EmbeddedKafkaCluster {
     }
 
     public String allUri(String topic) {
-        return format("kafka:localhost:%s?groupId=all&topic=%s&zookeeperHost=%s&zookeeperPort=%s",
-                port, topic, zkHost, zkPort);
+        return format("kafka:localhost:%s?groupId=all&topic=%s&zookeeperConnect=%s",
+                port, topic, zkHosts);
     }
 
     public ZkClient getZkClient() {
@@ -85,7 +83,7 @@ public class EmbeddedKafkaCluster {
 
         Properties properties = new Properties();
         properties.putAll(baseProperties);
-        properties.setProperty("zookeeper.connect", getZkConnection());
+        properties.setProperty("zookeeper.connect", zkHosts);
         properties.setProperty("broker.id", String.valueOf(0));
         properties.setProperty("host.name", "localhost");
         properties.setProperty("port", Integer.toString(port));
@@ -114,10 +112,6 @@ public class EmbeddedKafkaCluster {
 
     public int getPort() {
         return port;
-    }
-
-    public String getZkConnection() {
-        return zkHost + ":" + zkPort;
     }
 
     public void stop() {

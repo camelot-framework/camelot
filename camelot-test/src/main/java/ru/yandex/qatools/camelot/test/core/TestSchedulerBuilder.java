@@ -2,10 +2,10 @@ package ru.yandex.qatools.camelot.test.core;
 
 import org.apache.camel.CamelContext;
 import ru.yandex.qatools.camelot.api.annotations.OnTimer;
+import ru.yandex.qatools.camelot.common.AggregatorPluginAnnotatedMethodInvoker;
+import ru.yandex.qatools.camelot.common.AnnotatedMethodListener;
+import ru.yandex.qatools.camelot.common.builders.SchedulerBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.core.AnnotatedMethodListener;
-import ru.yandex.qatools.camelot.core.builders.SchedulerBuilder;
-import ru.yandex.qatools.camelot.core.impl.AggregatorPluginAnnotatedMethodInvoker;
 
 import java.lang.reflect.Method;
 
@@ -30,17 +30,17 @@ class TestSchedulerBuilder implements SchedulerBuilder {
     }
 
     @Override
-    public void schedule() throws Exception {
+    public void schedule() throws Exception { //NOSONAR
         original.schedule();
     }
 
     @Override
-    public void unschedule() throws Exception {
+    public void unschedule() throws Exception { //NOSONAR
         original.unschedule();
     }
 
     @Override
-    public void invokeJobs() throws Exception {
+    public void invokeJobs() throws Exception { //NOSONAR
         Class pluginClass = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass());
         forEachAnnotatedMethod(pluginClass, OnTimer.class, new AnnotatedMethodListener<Object, OnTimer>() {
             @Override
@@ -51,7 +51,7 @@ class TestSchedulerBuilder implements SchedulerBuilder {
     }
 
     @Override
-    public boolean invokeJob(String method) throws Exception {
+    public boolean invokeJob(String method) throws Exception { //NOSONAR
         if (original.invokeJob(method)) {
             Class pluginClass = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass());
             final Method m = getMethodFromClassHierarchy(pluginClass, method);

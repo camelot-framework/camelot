@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.qatools.camelot.api.Constants;
-import ru.yandex.qatools.camelot.core.ProcessingEngine;
+import ru.yandex.qatools.camelot.common.ProcessingEngine;
 import ru.yandex.qatools.camelot.core.beans.StopEvent;
 import ru.yandex.qatools.camelot.core.beans.TestEvent;
 

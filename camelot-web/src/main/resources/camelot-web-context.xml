@@ -14,7 +14,6 @@
         <property name="locations">
             <list>
                 <value>classpath*:camelot-default.properties</value>
-                <value>classpath*:camelot-web.properties</value>
                 <value>classpath*:camelot.properties</value>
             </list>
         </property>
@@ -22,12 +21,10 @@
         <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
     </bean>
 
-    <import resource="classpath:camelot-amq-context.xml"/>
-    <import resource="classpath:camelot-repo-context.xml"/>
     <import resource="classpath:camelot-loaders-context.xml"/>
     <import resource="classpath:camelot-camel-context.xml"/>
     <import resource="classpath:camelot-processing-context.xml"/>
-    <import resource="classpath:camelot-front-context.xml"/>
+    <import resource="classpath:camelot-webfront-context.xml"/>
     <import resource="classpath*:camelot-extensions.xml"/>
 
 </beans>

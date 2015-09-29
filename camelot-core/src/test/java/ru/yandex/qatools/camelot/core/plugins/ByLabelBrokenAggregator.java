@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ru.yandex.qatools.camelot.api.Constants.Headers.LABEL;
-import static ru.yandex.qatools.camelot.util.CloneUtil.deepCopy;
+import static ru.yandex.qatools.camelot.core.util.CloneUtil.deepCopy;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)

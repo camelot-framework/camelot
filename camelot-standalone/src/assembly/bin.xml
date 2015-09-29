@@ -26,21 +26,24 @@
             <directory>src/main/resources/plugins</directory>
             <outputDirectory>plugins</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../camelot-front/target/lib</directory>
+            <outputDirectory>lib</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../camelot-web/target/lib</directory>
+            <outputDirectory>lib</outputDirectory>
+        </fileSet>
     </fileSets>
 
     <files>
-        <file>
-            <source>${project.basedir}/../camelot-core/target/camelot-core-${project.version}.jar</source>
-            <outputDirectory>runner</outputDirectory>
-            <destName>runner.jar</destName>
-        </file>
         <file>
             <source>${project.basedir}/../camelot-front/target/camelot-front-${project.version}.war</source>
             <outputDirectory>front/webapps</outputDirectory>
             <destName>ROOT.war</destName>
         </file>
         <file>
-            <source>${project.basedir}/../camelot-web/target/camelot-web-${project.version}.war</source>
+            <source>${project.basedir}/../camelot-web/target/camelot-web-${project.version}-tiny.war</source>
             <outputDirectory>webapps</outputDirectory>
             <destName>ROOT.war</destName>
         </file>
@@ -52,11 +55,6 @@
     </files>
 
     <dependencySets>
-        <dependencySet>
-            <outputDirectory>runner/lib</outputDirectory>
-            <unpack>false</unpack>
-            <scope>provided</scope>
-        </dependencySet>
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <useProjectArtifact>false</useProjectArtifact>
