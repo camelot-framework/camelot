@@ -25,6 +25,7 @@
     <import resource="classpath:camelot-camel-context.xml"/>
     <import resource="classpath:camelot-processing-context.xml"/>
     <import resource="classpath:camelot-webfront-context.xml"/>
+    <import resource="classpath*:camelot-extension.xml"/>
     <import resource="classpath*:camelot-extensions.xml"/>
 
 </beans>
