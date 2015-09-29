@@ -16,7 +16,6 @@
         <property name="locations">
             <list>
                 <value>classpath*:camelot-default.properties</value>
-                <value>classpath:camelot-web.properties</value>
                 <value>classpath:test-config.properties</value>
                 <value>classpath:test-web-config.properties</value>
             </list>
