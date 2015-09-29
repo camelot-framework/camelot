@@ -10,7 +10,6 @@ import ru.yandex.qatools.camelot.test.TestHelper;
 
 import java.util.Map;
 
-import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
 import static ru.yandex.qatools.camelot.util.MapUtil.map;
 
 /**
@@ -57,13 +56,12 @@ public class TestHelperImpl implements CamelContextAware, TestHelper {
 
     @Override
     public void send(Object event) {
-        producerTemplate.sendBodyAndHeader(event, BODY_CLASS, event.getClass().getName());
+        pluginsService.getMainInput().produce(event);
     }
 
     @Override
     public void send(Object event, Map<String, Object> headers) {
-        headers.put(BODY_CLASS, event.getClass().getName());
-        producerTemplate.sendBodyAndHeaders(event, headers);
+        pluginsService.getMainInput().produce(event, headers);
     }
 
     @Override
