@@ -12,8 +12,6 @@
 
         <camelot-test.runForked>true</camelot-test.runForked>
         <jetty.port>8080</jetty.port>
-        <activemq.port>62618</activemq.port>
-        <activemq.brokers>tcp://localhost:62618</activemq.brokers>
         <camelot.version>${project.version}</camelot.version>
     </properties>
 
@@ -40,8 +38,6 @@
                 <configuration>
                     <runForked>${camelot-test.runForked}</runForked>
                     <jettyPort>${jetty.port}</jettyPort>
-                    <activemqPort>${activemq.port}</activemqPort>
-                    <activemqBrokers>${activemq.brokers}</activemqBrokers>
                 </configuration>
             </plugin>
             <plugin>

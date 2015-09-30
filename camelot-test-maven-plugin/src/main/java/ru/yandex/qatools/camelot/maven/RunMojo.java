@@ -21,20 +21,18 @@ import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
 import ru.qatools.clay.aether.Aether;
 import ru.qatools.clay.aether.AetherException;
+import ru.qatools.clay.utils.archive.PathJarEntryFilter;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginsConfig;
 import ru.yandex.qatools.camelot.config.PluginsSource;
 import ru.yandex.qatools.camelot.maven.web.ConfigurableWroManagerFactory;
 import ru.yandex.qatools.camelot.maven.web.WroFilter;
-import ru.qatools.clay.utils.archive.PathJarEntryFilter;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
 
 import static ch.lambdaj.Lambda.convert;
@@ -42,13 +40,13 @@ import static java.io.File.separator;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.codehaus.plexus.util.FileUtils.copyFile;
+import static ru.qatools.clay.aether.Aether.aether;
+import static ru.qatools.clay.utils.archive.ArchiveUtil.unpackJar;
+import static ru.yandex.qatools.camelot.core.util.ReflectUtil.resolveResourcesAsStringsFromPattern;
 import static ru.yandex.qatools.camelot.maven.service.CamelotRunner.camelot;
 import static ru.yandex.qatools.camelot.maven.util.FileUtil.processTemplate;
 import static ru.yandex.qatools.camelot.maven.util.FileUtil.replaceInFile;
 import static ru.yandex.qatools.camelot.util.MapUtil.map;
-import static ru.yandex.qatools.camelot.core.util.ReflectUtil.resolveResourcesAsStringsFromPattern;
-import static ru.qatools.clay.aether.Aether.aether;
-import static ru.qatools.clay.utils.archive.ArchiveUtil.unpackJar;
 
 /**
  * @author Dmitry Baev charlie@yandex-team.ru
@@ -145,21 +143,7 @@ public class RunMojo extends AbstractMojo {
     @Parameter(property = "camelot-test.disableMinification", defaultValue = "true")
     private boolean disableMinification;
 
-//    ActiveMQ config
-
-    @Parameter(defaultValue = "true")
-    protected boolean useEmbeddedActivemq;
-
-    @Parameter(defaultValue = "tcp://localhost:62618")
-    protected String activemqBrokers;
-
-    @Parameter(defaultValue = "62618")
-    protected int activemqPort;
-
-    @Parameter(defaultValue = "classpath*:camelot-repo-context.xml")
-    protected String hazelcastContextConfigPath;
-
-    @Parameter(property = "camelot-test.inputUri", defaultValue = "activemq:queue:events.input?maxConcurrentConsumers=5")
+    @Parameter(property = "camelot-test.inputUri", defaultValue = "direct:events.input")
     protected String mainInputUri;
 
     @Parameter(property = "camelot-test.outputUri", defaultValue = "direct:plugin.stop")
@@ -371,26 +355,6 @@ public class RunMojo extends AbstractMojo {
         }
     }
 
-    /**
-     * Build network connectors for activemq.
-     *
-     * @return list of connectors
-     */
-    public List<URI> buildNetworkConnectors() {
-        List<URI> connectors = new ArrayList<>();
-
-        for (String broker : activemqBrokers.split(",")) {
-            try {
-                URI uri = new URI(broker);
-                if (uri.getPort() != activemqPort) {
-                    connectors.add(uri);
-                }
-            } catch (URISyntaxException e) {
-                getLog().error("Can't parse broker uri", e);
-            }
-        }
-        return connectors;
-    }
 
     /**
      * Create new camelot web context
@@ -407,13 +371,8 @@ public class RunMojo extends AbstractMojo {
         File newCamelotWebContextFile = new File(outputDir + "/WEB-INF/classes/camelot-web-context.xml");
         copyFile(appContextFile, originalAppContextFile);
         processTemplate(cfg, WEB_CONTEXT_XML_FTL, new FileWriter(newCamelotWebContextFile), map(
-                "useEmbeddedActivemq", useEmbeddedActivemq,
                 "originalAppContextFile", originalAppContextFile.getAbsolutePath(),
-                "hazelcastContextConfigPath", hazelcastContextConfigPath,
-                "activemqBrokers", activemqBrokers,
-                "activemqPort", Integer.toString(activemqPort),
                 "newConfigFile", newConfigFile.getAbsolutePath(),
-                "networkConnectors", buildNetworkConnectors(),
                 "additionalProperties", additionalProperties,
                 "srcResDir", srcResDir,
                 "testSrcResDir", testSrcResDir
@@ -434,7 +393,6 @@ public class RunMojo extends AbstractMojo {
         processTemplate(cfg, PROPERTIES_FTL, new FileWriter(newConfigFile), map(
                 "localRepo", localRepo.getBasedir(),
                 "remoteRepos", StringUtils.join(convertRemotesToUrls(remotes), ","),
-                "activemqBrokers", String.valueOf(activemqBrokers),
                 "newConfigFile", newConfigFile.getAbsolutePath(),
                 "mainInputUri", mainInputUri,
                 "mainOutputUri", mainOutputUri,
