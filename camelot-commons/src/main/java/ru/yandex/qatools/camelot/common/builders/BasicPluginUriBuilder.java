@@ -17,7 +17,7 @@ public class BasicPluginUriBuilder implements PluginUriBuilder {
 
     @Override
     public String localUri(String pluginId, String suffix) {
-        return "direct:plugin." + pluginId + ((isEmpty(suffix)) ? "" : "." + suffix);
+        return "seda:plugin." + pluginId + ((isEmpty(suffix)) ? "" : "." + suffix);
     }
 
     @Override
@@ -40,6 +40,6 @@ public class BasicPluginUriBuilder implements PluginUriBuilder {
 
     @Override
     public String basePluginInputUri() {
-        return "direct:plugin";
+        return "seda:plugin";
     }
 }
