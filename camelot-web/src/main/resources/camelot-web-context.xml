@@ -8,7 +8,7 @@
             http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
     <context:annotation-config/>
-    <context:component-scan base-package="ru.yandex.qatools.camelot,ru.yandex.qatools.camelot.web,ru.yandex.qatools.camelot.core,ru.yandex.qatools.camelot.core.web"/>
+    <context:component-scan base-package="ru.yandex.qatools.camelot,ru.yandex.qatools.camelot.web,ru.yandex.qatools.camelot.core"/>
 
     <bean id="configurationProperties" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
         <property name="locations">
