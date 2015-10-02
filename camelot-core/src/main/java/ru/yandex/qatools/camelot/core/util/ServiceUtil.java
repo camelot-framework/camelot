@@ -19,6 +19,7 @@ import static java.lang.ClassLoader.getSystemClassLoader;
 import static java.lang.Thread.currentThread;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.TOPIC;
 import static ru.yandex.qatools.camelot.core.util.ReflectUtil.resolveResourcesFromPattern;
+import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -46,7 +47,7 @@ public abstract class ServiceUtil {
                     producerTemplate.sendBodyAndHeaders(
                             serializer.processBodyAndHeadersBeforeSend(event, headers, cl), headers);
                 } catch (Exception e) {
-                    logger.error("Failed to produce message to the uri " + uri, e);
+                    logger.error("Failed to produce message to the uri {}: {}", uri, formatStackTrace(e)); //NOSONAR
                 }
             }
         };
