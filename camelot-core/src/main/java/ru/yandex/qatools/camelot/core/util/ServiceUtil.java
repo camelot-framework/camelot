@@ -1,10 +1,7 @@
 package ru.yandex.qatools.camelot.core.util;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.Endpoint;
 import org.apache.camel.ProducerTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.api.ClientMessageSender;
@@ -17,7 +14,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 import static java.lang.ClassLoader.getSystemClassLoader;
 import static java.lang.Thread.currentThread;
@@ -28,8 +24,6 @@ import static ru.yandex.qatools.camelot.core.util.ReflectUtil.resolveResourcesFr
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public abstract class ServiceUtil {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceUtil.class);
 
     ServiceUtil() {
     }
@@ -103,37 +97,5 @@ public abstract class ServiceUtil {
                 return (res != null) ? res : properties.getProperty(key);
             }
         };
-    }
-
-
-    /**
-     * Remove all the endpoints associated with uri
-     */
-    public static void gracefullyRemoveEndpoints(CamelContext camelContext, String uri) throws Exception { //NOSONAR
-        try {
-            LOGGER.info("Gracefully removing endpoint " + uri);
-            final Endpoint endpoint = camelContext.getEndpoint(uri);
-            if (endpoint != null) {
-                endpoint.stop();
-                camelContext.removeEndpoints(endpoint.getEndpointUri());
-            }
-        } catch (Exception e) {
-            LOGGER.debug("Failed to remove endpoint: " + uri, e);
-        }
-    }
-
-    /**
-     * Stop and remove the route by id
-     */
-    public static void gracefullyRemoveRoute(CamelContext camelContext, String id) throws Exception { //NOSONAR
-        if (camelContext.getRoute(id) != null) {
-            LOGGER.info("Gracefully removing route " + id);
-            try {
-                camelContext.stopRoute(id, 10, TimeUnit.SECONDS);
-                camelContext.removeRoute(id);
-            } catch (Exception e) {
-                LOGGER.debug("Failed to remove route: " + id, e);
-            }
-        }
     }
 }

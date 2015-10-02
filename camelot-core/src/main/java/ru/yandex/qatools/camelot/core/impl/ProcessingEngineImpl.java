@@ -21,12 +21,16 @@ import ru.yandex.qatools.camelot.config.PluginsConfig;
 import ru.yandex.qatools.camelot.config.PluginsSource;
 import ru.yandex.qatools.camelot.core.builders.NoSchedulerBuildersFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static java.lang.String.format;
 import static org.apache.camel.LoggingLevel.DEBUG;
-import static ru.yandex.qatools.camelot.core.util.ServiceUtil.gracefullyRemoveRoute;
 import static ru.yandex.qatools.camelot.util.NameUtil.routeId;
+import static ru.yandex.qatools.camelot.util.ServiceUtil.gracefullyRemoveRoute;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -228,6 +232,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     /**
      * Calculate the consumers array from the set of consumers for the plugin (or null (as INPUT))
      */
+    @SuppressWarnings("unchecked, SuspiciousMethodCalls")
     private String[] calcConsumers(Set<String> consumers) {
         final Collection consumersSet = CollectionUtils.collect(consumers, new Transformer() {
             @Override

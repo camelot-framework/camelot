@@ -7,7 +7,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
 import ru.yandex.qatools.camelot.common.PluginLoader;
-import ru.yandex.qatools.camelot.config.*;
+import ru.yandex.qatools.camelot.config.Plugin;
+import ru.yandex.qatools.camelot.config.PluginContext;
+import ru.yandex.qatools.camelot.config.PluginWeb;
+import ru.yandex.qatools.camelot.config.PluginWebContext;
+import ru.yandex.qatools.camelot.config.PluginsConfig;
+import ru.yandex.qatools.camelot.config.PluginsSource;
 import ru.yandex.qatools.camelot.core.impl.GenericPluginsEngine;
 import ru.yandex.qatools.camelot.core.impl.IncomingMessagesQueueProcessor;
 import ru.yandex.qatools.camelot.web.ApiResource;
@@ -18,10 +23,10 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static ru.yandex.qatools.camelot.core.util.ServiceUtil.gracefullyRemoveEndpoints;
-import static ru.yandex.qatools.camelot.core.util.ServiceUtil.gracefullyRemoveRoute;
 import static ru.yandex.qatools.camelot.util.ContextUtils.autowireFields;
 import static ru.yandex.qatools.camelot.util.NameUtil.routeId;
+import static ru.yandex.qatools.camelot.util.ServiceUtil.gracefullyRemoveEndpoints;
+import static ru.yandex.qatools.camelot.util.ServiceUtil.gracefullyRemoveRoute;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
