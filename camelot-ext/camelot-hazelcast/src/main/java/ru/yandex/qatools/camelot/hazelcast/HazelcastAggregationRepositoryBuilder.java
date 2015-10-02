@@ -3,19 +3,16 @@ package ru.yandex.qatools.camelot.hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import org.apache.camel.CamelContext;
 import org.apache.camel.spi.AggregationRepository;
-import ru.yandex.qatools.camelot.api.AggregatorRepository;
 import ru.yandex.qatools.camelot.api.Storage;
-import ru.yandex.qatools.camelot.common.builders.AggregationRepositoryBuilder;
+import ru.yandex.qatools.camelot.common.builders.MemoryAggregationRepositoryBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
-
-import java.util.Set;
 
 import static ru.yandex.qatools.camelot.util.NameUtil.pluginStorageKey;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public class HazelcastAggregationRepositoryBuilder implements AggregationRepositoryBuilder {
+public class HazelcastAggregationRepositoryBuilder extends MemoryAggregationRepositoryBuilder {
 
     private final HazelcastInstance hazelcastInstance;
     private final long waitForLockSec;
@@ -23,6 +20,7 @@ public class HazelcastAggregationRepositoryBuilder implements AggregationReposit
 
     public HazelcastAggregationRepositoryBuilder(HazelcastInstance hazelcastInstance, CamelContext camelContext,
                                                  long waitForLockSec, long lockWaitHeartBeatSec) {
+        super(camelContext, waitForLockSec);
         this.hazelcastInstance = hazelcastInstance;
         this.waitForLockSec = waitForLockSec;
         this.lockWaitHeartBeatSec = lockWaitHeartBeatSec;
@@ -47,26 +45,4 @@ public class HazelcastAggregationRepositoryBuilder implements AggregationReposit
     public <T> Storage<T> initStorage(Plugin plugin) throws Exception { //NOSONAR
         return new HazelcastStorage<>(hazelcastInstance, pluginStorageKey(plugin.getId()));
     }
-
-    @Override
-    public <T> AggregatorRepository<T> initReadonly(Plugin plugin) throws Exception { //NOSONAR
-        final Storage<T> storage = initStorage(plugin);
-        return new AggregatorRepository<T>() {
-            @Override
-            public T get(String key) {
-                return storage.get(key);
-            }
-
-            @Override
-            public Set<String> keys() {
-                return storage.keys();
-            }
-
-            @Override
-            public Set<String> localKeys() {
-                return storage.localKeys();
-            }
-        };
-    }
-
 }
