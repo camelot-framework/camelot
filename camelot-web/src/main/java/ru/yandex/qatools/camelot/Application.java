@@ -19,7 +19,6 @@ public class Application extends ResourceConfig {
         register(JacksonFeature.class);
         register(LoadPluginResourceFeature.class);
         registerFinder(packageScanner(".web"));
-        registerFinder(packageScanner(".core.web"));
     }
 
     private PackageNamesScanner packageScanner(String path) {
