@@ -33,7 +33,7 @@
         <servlet-class>ru.yandex.qatools.camelot.web.core.AtmosphereServlet</servlet-class>
         <init-param>
             <param-name>org.atmosphere.cpr.packages</param-name>
-            <param-value>org.atmosphere.samples.chat.jersey.web</param-value>
+            <param-value>ru.yandex.qatools.camelot.web.core</param-value>
         </init-param>
         <init-param>
             <param-name>org.atmosphere.websocket.messageContentType</param-name>
