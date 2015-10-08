@@ -27,5 +27,5 @@
     <import resource="classpath:camelot-webfront-context.xml"/>
     <import resource="classpath*:camelot-extension.xml"/>
     <import resource="classpath*:camelot-extensions.xml"/>
-
+    <bean id="springServletFacade" class="ru.yandex.qatools.camelot.web.core.SpringServletFacade"/>
 </beans>
