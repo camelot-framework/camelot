@@ -12,14 +12,14 @@ public interface PluginUriBuilder {
     String broadcastUri(String pluginId, String suffix);
 
     /**
-     * Generates local plugin uri with id and suffix
+     * Generates local plugin uri with id and suffix (without queue)
      */
     String localUri(String pluginId, String suffix);
 
     /**
-     * Generates the plugin input uri
+     * Generates the plugin uri (with the queue)
      */
-    String pluginInputUri(Plugin plugin, String suffix, String brokerConfig);
+    String pluginUri(Plugin plugin, String suffix, String brokerConfig);
 
     /**
      * Generates uri for tmp buffer
@@ -34,5 +34,5 @@ public interface PluginUriBuilder {
     /**
      * Generates the default basic input uri (for all plugins)
      */
-    String basePluginInputUri();
+    String basePluginUri();
 }

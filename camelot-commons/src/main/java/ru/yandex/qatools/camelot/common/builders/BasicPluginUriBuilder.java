@@ -17,15 +17,14 @@ public class BasicPluginUriBuilder implements PluginUriBuilder {
 
     @Override
     public String localUri(String pluginId, String suffix) {
-        return "seda:plugin." + pluginId + ((isEmpty(suffix)) ? "" : "." + suffix);
+        return "direct:plugin." + pluginId + (isEmpty(suffix) ? "" : "." + suffix);
     }
 
     @Override
-    public String pluginInputUri(Plugin plugin, String suffix, String brokerConfig) {
-        return plugin.getBaseInputUri() +
-                "." + plugin.getId() +
-                ((isEmpty(suffix)) ? "" : "." + suffix) +
-                ((isEmpty(brokerConfig)) ? "" : suffix);
+    public String pluginUri(Plugin plugin, String suffix, String brokerConfig) {
+        return plugin.getBaseInputUri() + "." + plugin.getId() +
+                (isEmpty(suffix) ? "" : "." + suffix) +
+                (isEmpty(brokerConfig) ? "" : brokerConfig);
     }
 
     @Override
@@ -39,7 +38,7 @@ public class BasicPluginUriBuilder implements PluginUriBuilder {
     }
 
     @Override
-    public String basePluginInputUri() {
+    public String basePluginUri() {
         return "seda:plugin";
     }
 }

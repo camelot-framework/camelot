@@ -23,8 +23,8 @@ public class KafkaPluginUriBuilder extends BasicPluginUriBuilder {
     }
 
     @Override
-    public String pluginInputUri(Plugin plugin, String suffix, String brokerConfig) {
-        return kafkaTopicUri(plugin.getBaseInputUri(), plugin.getId() + ".input"
+    public String pluginUri(Plugin plugin, String suffix, String brokerConfig) {
+        return kafkaTopicUri(plugin.getBaseInputUri(), plugin.getId()
                 + (isEmpty(suffix) ? "" : "." + suffix), brokerConfig);
     }
 
@@ -59,7 +59,7 @@ public class KafkaPluginUriBuilder extends BasicPluginUriBuilder {
     }
 
     @Override
-    public String basePluginInputUri() {
+    public String basePluginUri() {
         return kafkaBaseUri();
     }
 }
