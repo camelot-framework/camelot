@@ -492,7 +492,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
             plugin.setId(defaultPluginId(plugin));
         }
         if (isEmpty(plugin.getBaseInputUri())) {
-            plugin.setBaseInputUri(uriBuilder.basePluginInputUri());
+            plugin.setBaseInputUri(uriBuilder.basePluginUri());
         }
         logger.info("Initializing plugin " + plugin.getId());
         final PluginEndpoints endpoints = new PluginEndpointsImpl(inputUri, plugin, getEngineName(), uriBuilder);

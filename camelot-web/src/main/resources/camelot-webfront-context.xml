@@ -7,7 +7,11 @@
             http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-    <bean id="springServletFacade" class="ru.yandex.qatools.camelot.web.core.SpringServletFacade"/>
+
+    <bean id="appConfig" class="ru.yandex.qatools.camelot.core.impl.AppConfigSpringProperties"/>
+    <bean id="interimProcessor" class="ru.yandex.qatools.camelot.core.impl.DefaultInterimProcessor"/>
+    <bean id="resourceBuilder" class="ru.yandex.qatools.camelot.core.builders.SpringPluginResourceBuilder"/>
+    <bean id="contextInjector" class="ru.yandex.qatools.camelot.common.PluginContextInjectorImpl"/>
     <bean id="webfrontEngine" class="ru.yandex.qatools.camelot.web.core.WebfrontEngineImpl" init-method="init">
         <constructor-arg name="configResources" value="${plugins.config.path}"/>
         <constructor-arg name="camelContext" ref="camelotCamelContext"/>
@@ -15,12 +19,12 @@
         <constructor-arg name="inputUri" value="ref:events.input"/>
         <constructor-arg name="outputUri" value="ref:events.output"/>
         <property name="buildersFactory" ref="${camelot.factory}"/>
-        <property name="resourceBuilder">
-            <bean class="ru.yandex.qatools.camelot.core.builders.SpringPluginResourceBuilder"/>
-        </property>
-        <property name="appConfig">
-            <bean class="ru.yandex.qatools.camelot.core.impl.AppConfigSpringProperties"/>
-        </property>
+        <property name="contextInjector" ref="contextInjector"/>
+        <property name="resourceBuilder" ref="resourceBuilder"/>
+        <property name="appConfig" ref="appConfig"/>
+        <property name="uriBuilder" ref="uriBuilder"/>
+        <property name="messagesSerializer" ref="messagesSerializer"/>
+        <property name="interimProcessor" ref="interimProcessor"/>
     </bean>
 
 </beans>

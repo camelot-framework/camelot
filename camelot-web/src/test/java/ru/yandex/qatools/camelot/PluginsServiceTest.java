@@ -51,7 +51,7 @@ public class PluginsServiceTest {
         assertNotNull(conf.getStorage());
         assertNotNull(conf.getRepository());
         assertNotNull(conf.getTmpBufferUri());
-        assertNotNull(conf.getClientNotifyUri());
+        assertNotNull(conf.getFrontendNotifyUri());
         assertEquals("/allSkipped", conf.getResPathMapping());
     }
 

@@ -36,7 +36,7 @@ import java.util.List;
         "resPathMapping",
         "pluginClass",
         "tmpBufferUri",
-        "clientNotifyUri",
+        "frontendNotifyUri",
 })
 public class PluginContext
         implements Serializable {
@@ -51,7 +51,7 @@ public class PluginContext
     protected String resDirPath;
     protected String resPathMapping;
     protected String tmpBufferUri;
-    protected String clientNotifyUri;
+    protected String frontendNotifyUri;
     protected volatile boolean isShuttingDown = false;
     protected transient AggregatorRepository repository;
     protected transient Storage storage;
@@ -519,12 +519,12 @@ public class PluginContext
         this.tmpBufferUri = tmpBufferUri;
     }
 
-    public String getClientNotifyUri() {
-        return clientNotifyUri;
+    public String getFrontendNotifyUri() {
+        return frontendNotifyUri;
     }
 
-    public void setClientNotifyUri(String clientNotifyUri) {
-        this.clientNotifyUri = clientNotifyUri;
+    public void setFrontendNotifyUri(String frontendNotifyUri) {
+        this.frontendNotifyUri = frontendNotifyUri;
     }
 
     public MessagesSerializer getMessagesSerializer() {

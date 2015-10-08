@@ -41,8 +41,8 @@ public class PluginEndpointsImpl implements PluginEndpoints {
         this.engineName = engineName;
         this.plugin = plugin;
         this.mainInputUri = mainInputUri;
-        this.inputUri = uriBuilder.pluginInputUri(plugin, "", brokerConfig);
-        this.delayedInputUri = uriBuilder.pluginInputUri(plugin, DELAYED_SUFFIX, "");
+        this.inputUri = uriBuilder.pluginUri(plugin, INPUT_SUFFIX, brokerConfig);
+        this.delayedInputUri = uriBuilder.pluginUri(plugin, DELAYED_SUFFIX, "");
         this.outputUri = uriBuilder.localUri(plugin.getId(), OUTPUT_SUFFIX);
         this.splitUri = uriBuilder.localUri(plugin.getId(), SPLIT_SUFFIX);
         this.filteredUri = uriBuilder.localUri(plugin.getId(), FILTERED_SUFFIX);

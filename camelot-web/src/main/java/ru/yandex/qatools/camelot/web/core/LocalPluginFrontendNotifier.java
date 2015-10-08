@@ -15,20 +15,20 @@ import static ru.yandex.qatools.camelot.util.SerializeUtil.deserializeFromBytes;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public class LocalPluginClientNotifier extends PluggableProcessor {
+public class LocalPluginFrontendNotifier extends PluggableProcessor {
     protected Notifier processorImpl;
 
-    public LocalPluginClientNotifier(MessagesSerializer serializer) {
+    public LocalPluginFrontendNotifier(MessagesSerializer serializer) {
         super(Notifier.class, serializer);
     }
 
-    public LocalPluginClientNotifier(Notifier processorImpl, MessagesSerializer serializer) {
+    public LocalPluginFrontendNotifier(Notifier processorImpl, MessagesSerializer serializer) {
         super(Notifier.class, processorImpl, serializer);
         this.processorImpl = processorImpl;
     }
 
     public static class Notifier {
-        static final Logger logger = LoggerFactory.getLogger(LocalPluginClientNotifier.class);
+        static final Logger logger = LoggerFactory.getLogger(LocalPluginFrontendNotifier.class);
 
         @Autowired
         WebfrontEngine pluginsService;

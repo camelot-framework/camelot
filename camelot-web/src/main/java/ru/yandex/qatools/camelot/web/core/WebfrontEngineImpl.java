@@ -7,12 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
 import ru.yandex.qatools.camelot.common.PluginLoader;
-import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.config.PluginContext;
-import ru.yandex.qatools.camelot.config.PluginWeb;
-import ru.yandex.qatools.camelot.config.PluginWebContext;
-import ru.yandex.qatools.camelot.config.PluginsConfig;
-import ru.yandex.qatools.camelot.config.PluginsSource;
+import ru.yandex.qatools.camelot.config.*;
 import ru.yandex.qatools.camelot.core.impl.GenericPluginsEngine;
 import ru.yandex.qatools.camelot.core.impl.IncomingMessagesQueueProcessor;
 import ru.yandex.qatools.camelot.web.ApiResource;
@@ -22,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static ru.yandex.qatools.camelot.util.ContextUtils.autowireFields;
 import static ru.yandex.qatools.camelot.util.NameUtil.routeId;
 import static ru.yandex.qatools.camelot.util.ServiceUtil.gracefullyRemoveEndpoints;
@@ -32,9 +26,6 @@ import static ru.yandex.qatools.camelot.util.ServiceUtil.gracefullyRemoveRoute;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public class WebfrontEngineImpl extends GenericPluginsEngine implements WebfrontEngine, ApplicationContextAware {
-
-    public static final String CAMELOT_TMPBUFFER_URI_PROP = "camelot.tmpbuffer.uri";
-    public static final String CAMELOT_NOTIFY_URI_PROP = "camelot.notify.uri";
 
     private ApplicationContext applicationContext;
 
@@ -176,16 +167,14 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
      * Returns the temporary buffer queue uri
      */
     protected String tmpBufferUri() {
-        String res = getAppConfig().getProperty(CAMELOT_TMPBUFFER_URI_PROP);
-        return (!isEmpty(res)) ? res : getUriBuilder().tmpInputBufferUri();
+        return getUriBuilder().tmpInputBufferUri();
     }
 
     /**
      * Returns the client notify queue or topic uri
      */
-    protected String clientNotifyUri() {
-        String res = getAppConfig().getProperty(CAMELOT_NOTIFY_URI_PROP);
-        return (!isEmpty(res)) ? res : getUriBuilder().frontendBroadcastUri();
+    protected String frontendNotifyUri() {
+        return getUriBuilder().frontendBroadcastUri();
     }
 
     /**
@@ -196,7 +185,7 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
                                      PluginContext context, ClassLoader classLoader) throws Exception { //NOSONAR
         super.initPluginContext(source, plugin, context, classLoader);
         context.setTmpBufferUri(tmpBufferUri());
-        context.setClientNotifyUri(clientNotifyUri());
+        context.setFrontendNotifyUri(frontendNotifyUri());
     }
 
     /**
@@ -207,8 +196,8 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
      * Stop the additional processors
      */
     private void stopAdditionalProcessors() throws Exception { //NOSONAR
-        gracefullyRemoveRoute(camelContext, clientNotifyUri());
-        gracefullyRemoveEndpoints(camelContext, clientNotifyUri());
+        gracefullyRemoveRoute(camelContext, frontendNotifyUri());
+        gracefullyRemoveEndpoints(camelContext, frontendNotifyUri());
         gracefullyRemoveRoute(camelContext, tmpBufferUri());
         gracefullyRemoveEndpoints(camelContext, tmpBufferUri());
     }
@@ -217,7 +206,7 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
      * Initialize the additional processors
      */
     private void initAdditionalProcessors() throws Exception { //NOSONAR
-        initLocalClientNotifier();
+        initLocalFrontendNotifier();
         initTmpInputQueueProcessor();
     }
 
@@ -238,13 +227,13 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
     /**
      * Initialize the local notifier processor
      */
-    private void initLocalClientNotifier() throws Exception { //NOSONAR
+    private void initLocalFrontendNotifier() throws Exception { //NOSONAR
         camelContext.addRoutes(new RouteBuilder() {
             @Override
             public void configure() throws Exception {
-                final LocalPluginClientNotifier processor = new LocalPluginClientNotifier(getMessagesSerializer());
+                final LocalPluginFrontendNotifier processor = new LocalPluginFrontendNotifier(getMessagesSerializer());
                 autowireFields(processor, applicationContext, camelContext);
-                addInterimRoute(from(clientNotifyUri()).process(processor)).stop().routeId(routeId(clientNotifyUri(), getEngineName()));
+                addInterimRoute(from(frontendNotifyUri()).process(processor)).stop().routeId(routeId(frontendNotifyUri(), getEngineName()));
             }
         });
     }
