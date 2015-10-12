@@ -12,7 +12,7 @@
 
     <import resource="file:${originalAppContextFile}"/>
 
-    <bean id="configurationProperties" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
+    <bean id="camelot-config" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
                 <value>classpath*:camelot-default.properties</value>
@@ -28,7 +28,7 @@
         <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
     </bean>
 
-    <bean id="LOADER-PLUGIN" class="ru.yandex.qatools.camelot.maven.service.PluginPluginLoader">
+    <bean id="camelot-loader-plugin" class="ru.yandex.qatools.camelot.maven.service.PluginPluginLoader">
         <constructor-arg name="srcResDir" value="${srcResDir}"/>
         <constructor-arg name="testSrcResDir" value="${testSrcResDir}"/>
     </bean>

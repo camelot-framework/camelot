@@ -1,12 +1,15 @@
-package ru.yandex.qatools.camelot.core.impl;
+package ru.yandex.qatools.camelot.loader;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.qatools.clay.aether.Aether;
 import ru.qatools.clay.maven.settings.FluentProfileBuilder;
 import ru.qatools.clay.maven.settings.FluentRepositoryPolicyBuilder;
+import ru.yandex.qatools.camelot.common.CamelotUrlClassloader;
 import ru.yandex.qatools.camelot.common.PluginLoader;
 import ru.yandex.qatools.camelot.config.PluginsSource;
+import ru.yandex.qatools.camelot.util.FileUtil;
 
 import java.io.File;
 import java.io.InputStream;
@@ -18,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.System.identityHashCode;
 import static java.util.Arrays.copyOf;
-import static jodd.util.StringUtil.isEmpty;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.apache.commons.lang3.ArrayUtils.nullToEmpty;
 import static org.codehaus.plexus.util.FileUtils.copyFile;
@@ -29,7 +31,6 @@ import static ru.qatools.clay.maven.settings.FluentProfileBuilder.newProfile;
 import static ru.qatools.clay.maven.settings.FluentRepositoryBuilder.newRepository;
 import static ru.qatools.clay.maven.settings.FluentRepositoryPolicyBuilder.newRepositoryPolicy;
 import static ru.qatools.clay.maven.settings.FluentSettingsBuilder.newSettings;
-import static ru.yandex.qatools.camelot.core.util.FileUtil.createTempDirectory;
 
 /**
  * Plugins loader from the remote maven repository (using Eclipse Aether)
@@ -109,12 +110,12 @@ public class MavenRepositoryPluginLoader implements PluginLoader {
         final String id = id(source);
         clearClassLoader(id);
 
-        if (isEmpty(source.getArtifact())) {
+        if (StringUtils.isEmpty(source.getArtifact())) {
             return Thread.currentThread().getContextClassLoader();
         }
         URL[] urls = aether.resolve(source.getArtifact()).getAsUrls();
         List<URL> tempUrls = new ArrayList<>();
-        File tempDir = createTempDirectory();
+        File tempDir = FileUtil.createTempDirectory();
         for (URL url : urls) {
             File origin = new File(url.toURI());
             File temp = createTempFile(origin.getName(), ".jar", tempDir);

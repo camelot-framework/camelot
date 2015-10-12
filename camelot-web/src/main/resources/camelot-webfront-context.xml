@@ -8,23 +8,23 @@
             http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
 
-    <bean id="appConfig" class="ru.yandex.qatools.camelot.core.impl.AppConfigSpringProperties"/>
-    <bean id="interimProcessor" class="ru.yandex.qatools.camelot.core.impl.DefaultInterimProcessor"/>
-    <bean id="resourceBuilder" class="ru.yandex.qatools.camelot.core.builders.SpringPluginResourceBuilder"/>
-    <bean id="contextInjector" class="ru.yandex.qatools.camelot.common.PluginContextInjectorImpl"/>
-    <bean id="webfrontEngine" class="ru.yandex.qatools.camelot.web.core.WebfrontEngineImpl" init-method="init">
+    <bean id="camelot-app-config" class="ru.yandex.qatools.camelot.core.impl.AppConfigSpringProperties"/>
+    <bean id="camelot-interim-processor" class="ru.yandex.qatools.camelot.core.impl.DefaultInterimProcessor"/>
+    <bean id="camelot-resource-builder" class="ru.yandex.qatools.camelot.core.builders.SpringPluginResourceBuilder"/>
+    <bean id="camelot-context-injector" class="ru.yandex.qatools.camelot.common.PluginContextInjectorImpl"/>
+    <bean id="camelot-webfront-engine" class="ru.yandex.qatools.camelot.web.core.WebfrontEngineImpl" init-method="init">
         <constructor-arg name="configResources" value="${plugins.config.path}"/>
-        <constructor-arg name="camelContext" ref="camelotCamelContext"/>
+        <constructor-arg name="camelContext" ref="camelot-camel-context"/>
         <constructor-arg name="pluginLoader" ref="${camelot.pluginLoader}"/>
         <constructor-arg name="inputUri" value="ref:events.input"/>
         <constructor-arg name="outputUri" value="ref:events.output"/>
         <property name="buildersFactory" ref="${camelot.factory}"/>
-        <property name="contextInjector" ref="contextInjector"/>
-        <property name="resourceBuilder" ref="resourceBuilder"/>
-        <property name="appConfig" ref="appConfig"/>
-        <property name="uriBuilder" ref="uriBuilder"/>
-        <property name="messagesSerializer" ref="messagesSerializer"/>
-        <property name="interimProcessor" ref="interimProcessor"/>
+        <property name="contextInjector" ref="camelot-context-injector"/>
+        <property name="resourceBuilder" ref="camelot-resource-builder"/>
+        <property name="appConfig" ref="camelot-app-config"/>
+        <property name="uriBuilder" ref="${camelot.uribuilder}"/>
+        <property name="messagesSerializer" ref="${camelot.serializer}"/>
+        <property name="interimProcessor" ref="camelot-interim-processor"/>
     </bean>
 
 </beans>

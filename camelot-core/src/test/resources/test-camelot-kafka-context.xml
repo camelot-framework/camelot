@@ -22,7 +22,7 @@
         <constructor-arg name="port" value="#{T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort()}"/>
     </bean>
 
-    <bean id="configurationProperties" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
+    <bean id="camelot-config" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
                 <value>classpath*:camelot-default.properties</value>
@@ -37,17 +37,16 @@
         </property>
     </bean>
 
-    <import resource="classpath:camelot-loaders-context.xml"/>
+    <import resource="classpath:camelot-basic-context.xml"/>
     <import resource="classpath:camelot-camel-context.xml"/>
     <import resource="classpath:camelot-processing-context.xml"/>
 
-    <bean id="uriBuilder" class="ru.yandex.qatools.camelot.kafka.KafkaPluginUriBuilder">
+    <bean id="kafka-plugin-uri-builder" class="ru.yandex.qatools.camelot.kafka.KafkaPluginUriBuilder">
         <constructor-arg name="kafkaHosts" value="localhost:#{kafka.port}"/>
         <constructor-arg name="zkHosts" value="#{zookeeper.hosts}"/>
         <constructor-arg name="defaultConfig" value=""/>
     </bean>
 
-    <bean id="messagesSerializer" class="ru.yandex.qatools.camelot.kafka.KafkaMessagesSerializer"/>
-    <bean id="interimProcessor" class="ru.yandex.qatools.camelot.kafka.KafkaInterimProcessor"/>
+    <bean id="camelot-interim-processor" class="ru.yandex.qatools.camelot.kafka.KafkaInterimProcessor"/>
 
 </beans>

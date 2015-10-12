@@ -6,13 +6,12 @@
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
              http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <bean id="uriBuilder" class="ru.yandex.qatools.camelot.kafka.KafkaPluginUriBuilder">
+    <bean id="camelot-kafka-uribuilder" class="ru.yandex.qatools.camelot.kafka.KafkaPluginUriBuilder">
         <constructor-arg name="kafkaHosts" value="${kafka.hosts}"/>
         <constructor-arg name="zkHosts" value="${zookeeper.hosts}"/>
         <constructor-arg name="defaultConfig" value="${kafka.defaultConfig}"/>
     </bean>
 
-    <bean id="messagesSerializer" class="ru.yandex.qatools.camelot.kafka.KafkaMessagesSerializer"/>
-    <bean id="interimProcessor" class="ru.yandex.qatools.camelot.kafka.KafkaInterimProcessor"/>
+    <bean id="camelot-interim-processor" class="ru.yandex.qatools.camelot.kafka.KafkaInterimProcessor"/>
 
 </beans>

@@ -17,7 +17,7 @@
     </bean>
 
     <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory"
-          depends-on="camelotCamelContext" init-method="start" destroy-method="stop">
+          depends-on="camelot-camel-context" init-method="start" destroy-method="stop">
         <property name="timeBetweenExpirationCheckMillis" value="${activemq.pool.timeBetweenExpirationCheckMillis}"/>
         <property name="idleTimeout" value="${activemq.pool.idleTimeout}"/>
         <property name="maxConnections" value="${activemq.pool.maxConnections}"/>
@@ -38,6 +38,5 @@
         <property name="testConnectionOnStartup" value="${activemq.connect.on.startup}"/>
     </bean>
 
-    <bean id="uriBuilder" class="ru.yandex.qatools.camelot.activemq.ActivemqPluginUriBuilder"/>
-    <bean id="messagesSerializer" class="ru.yandex.qatools.camelot.activemq.ActivemqMessagesSerializer"/>
+    <bean id="camelot-uribuilder-activemq" class="ru.yandex.qatools.camelot.activemq.ActivemqPluginUriBuilder"/>
 </beans>

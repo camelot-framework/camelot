@@ -5,6 +5,6 @@
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <!-- Builders Factories -->
-    <bean id="FACTORY-MEM" class="ru.yandex.qatools.camelot.core.builders.UnreachableFactory">
+    <bean id="camelot-factory-memory" class="ru.yandex.qatools.camelot.core.builders.UnreachableFactory">
     </bean>
 </beans>
