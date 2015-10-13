@@ -10,17 +10,7 @@
     <context:annotation-config/>
     <context:component-scan base-package="ru.yandex.qatools.camelot,ru.yandex.qatools.camelot.web,ru.yandex.qatools.camelot.core"/>
 
-    <bean id="camelot-config" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
-        <property name="locations">
-            <list>
-                <value>classpath*:camelot-default.properties</value>
-                <value>classpath*:camelot.properties</value>
-            </list>
-        </property>
-        <property name="ignoreResourceNotFound" value="true"/>
-        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
-    </bean>
-
+    <import resource="classpath:camelot-properties-context.xml"/>
     <import resource="classpath:camelot-basic-context.xml"/>
     <import resource="classpath:camelot-camel-context.xml"/>
     <import resource="classpath:camelot-processing-context.xml"/>
