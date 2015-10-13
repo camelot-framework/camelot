@@ -11,8 +11,11 @@
         <module>camelot-activemq</module>
         <module>camelot-kafka</module>
         <module>camelot-hazelcast</module>
+        <module>camelot-loader-maven</module>
+        <module>camelot-serialize-fst</module>
     </modules>
 
+    <name>Camelot Extensions</name>
     <artifactId>camelot-ext</artifactId>
 
     <dependencies>

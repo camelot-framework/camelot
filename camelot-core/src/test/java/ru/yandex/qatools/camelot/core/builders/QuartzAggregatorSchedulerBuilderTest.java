@@ -12,11 +12,11 @@ import org.quartz.Scheduler;
 import ru.yandex.qatools.camelot.api.AggregatorRepository;
 import ru.yandex.qatools.camelot.api.annotations.OnTimer;
 import ru.yandex.qatools.camelot.api.annotations.Repository;
+import ru.yandex.qatools.camelot.common.BasicMessagesSerializer;
 import ru.yandex.qatools.camelot.common.builders.QuartzAggregatorSchedulerBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
 import ru.yandex.qatools.camelot.common.PluginContextInjectorImpl;
-import ru.yandex.qatools.camelot.activemq.ActivemqMessagesSerializer;
 
 import java.util.HashMap;
 
@@ -32,7 +32,7 @@ public class QuartzAggregatorSchedulerBuilderTest {
     private CamelContext camelContext;
     private Scheduler scheduler;
     private Plugin plugin;
-    private ActivemqMessagesSerializer serializer;
+    private BasicMessagesSerializer serializer;
 
     public static class TestClass {
         @Repository
@@ -59,7 +59,7 @@ public class QuartzAggregatorSchedulerBuilderTest {
 
     @Before
     public void init() {
-        serializer = new ActivemqMessagesSerializer();
+        serializer = new BasicMessagesSerializer();
         camelContext = mock(CamelContext.class);
         Exchange exchange1 = exchange("test1");
         Exchange exchange2 = exchange("test2");

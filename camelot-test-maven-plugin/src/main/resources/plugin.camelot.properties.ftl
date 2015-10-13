@@ -1,5 +1,5 @@
 # suppress inspection "UnusedProperty" for whole file
-camelot.pluginLoader=LOADER-PLUGIN
+camelot.pluginLoader=camelot-loader-plugin
 testSrcResDir=${testSrcResDir}
 srcResDir=${srcResDir}
 

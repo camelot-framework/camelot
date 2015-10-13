@@ -9,11 +9,28 @@
             http://camel.apache.org/schema/spring/camel-spring.xsd
             http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context-3.0.xsd">
-    <bean id="uriBuilder" class="ru.yandex.qatools.camelot.common.builders.BasicPluginUriBuilder"/>
-    <bean id="messagesSerializer" class="ru.yandex.qatools.camelot.common.BasicMessagesSerializer"/>
+
+    <!-- ThreadPool profiles -->
+    <bean id="camelotDefaultProfile" class="org.apache.camel.spi.ThreadPoolProfile">
+        <property name="id" value="camelotDefaultProfile"/>
+        <property name="defaultProfile" value="true"/>
+        <property name="timeUnit" value="MILLISECONDS"/>
+        <property name="keepAliveTime" value="${camelot.threadpool.default.keepAliveMillis}"/>
+        <property name="poolSize" value="${camelot.threadpool.default.size}"/>
+        <property name="maxPoolSize" value="${camelot.threadpool.default.maxSize}"/>
+    </bean>
+
+    <bean id="camelotMulticastProfile" class="org.apache.camel.spi.ThreadPoolProfile">
+        <property name="id" value="camelotMulticastProfile"/>
+        <property name="defaultProfile" value="false"/>
+        <property name="timeUnit" value="MILLISECONDS"/>
+        <property name="keepAliveTime" value="${camelot.threadpool.multicast.keepAliveMillis}"/>
+        <property name="poolSize" value="${camelot.threadpool.multicast.size}"/>
+        <property name="maxPoolSize" value="${camelot.threadpool.multicast.maxSize}"/>
+    </bean>
 
     <!-- Routes -->
-    <camelContext id="camelotCamelContext" xmlns="http://camel.apache.org/schema/spring">
+    <camelContext id="camelot-camel-context" xmlns="http://camel.apache.org/schema/spring">
         <jmxAgent id="agent" disabled="true"/>
 
         <endpoint id="events.input" uri="${camelot.input.uri}"/>

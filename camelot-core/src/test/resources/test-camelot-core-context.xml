@@ -30,7 +30,7 @@
     </bean>
 
     <!-- Beans -->
-    <bean id="configurationProperties" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
+    <bean id="camelot-config" class="ru.yandex.qatools.camelot.spring.ListablePropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
                 <value>classpath*:camelot-default.properties</value>
@@ -48,13 +48,10 @@
 
     <bean id="testAggregator" class="ru.yandex.qatools.camelot.common.FSMAggregationStrategy">
         <constructor-arg name="fsmClass" value="ru.yandex.qatools.camelot.core.impl.TestStateMachine"/>
-        <constructor-arg name="serializer" ref="messagesSerializer"/>
+        <constructor-arg name="serializer" ref="${camelot.serializer}"/>
     </bean>
 
-    <bean id="uriBuilder" class="ru.yandex.qatools.camelot.activemq.ActivemqPluginUriBuilder"/>
-    <bean id="messagesSerializer" class="ru.yandex.qatools.camelot.activemq.ActivemqMessagesSerializer"/>
-
-    <camelContext id="camelotCamelContext" xmlns="http://camel.apache.org/schema/spring">
+    <camelContext id="camelot-camel-context" xmlns="http://camel.apache.org/schema/spring">
         <jmxAgent id="agent" disabled="true"/>
         <threadPoolProfile id="camelotDefaultProfile" defaultProfile="true" maxPoolSize="64"/>
         <endpoint id="events.input" uri="${camelot.input.uri}"/>

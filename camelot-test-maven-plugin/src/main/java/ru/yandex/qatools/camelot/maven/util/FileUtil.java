@@ -15,9 +15,12 @@ import java.util.Map;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public class FileUtil {
+public abstract class FileUtil {
 
     public static final String UTF_8 = "UTF-8";
+
+    FileUtil() {
+    }
 
     /**
      * Replace all replaces in given file

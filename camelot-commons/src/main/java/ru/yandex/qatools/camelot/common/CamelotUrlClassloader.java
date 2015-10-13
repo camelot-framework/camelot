@@ -1,4 +1,4 @@
-package ru.yandex.qatools.camelot.core.impl;
+package ru.yandex.qatools.camelot.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import static jodd.util.StringUtil.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)

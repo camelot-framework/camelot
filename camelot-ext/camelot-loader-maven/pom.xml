@@ -7,24 +7,13 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Camelot Kafka Broker Extension</name>
-    <artifactId>camelot-kafka</artifactId>
+    <name>Camelot Loader Maven Extension</name>
+    <artifactId>camelot-loader-maven</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-kafka</artifactId>
-            <version>${camel.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka_2.10</artifactId>
-            <version>0.8.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
-            <version>3.4.6</version>
+            <groupId>ru.yandex.qatools.clay</groupId>
+            <artifactId>clay-aether</artifactId>
         </dependency>
     </dependencies>
 

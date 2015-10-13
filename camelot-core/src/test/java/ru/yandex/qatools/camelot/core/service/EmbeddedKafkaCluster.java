@@ -29,7 +29,7 @@ import java.util.Properties;
 
 import static java.lang.String.format;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
-import static ru.yandex.qatools.camelot.core.util.FileUtil.createTempDirectory;
+import static ru.yandex.qatools.camelot.util.FileUtil.createTempDirectory;
 
 public class EmbeddedKafkaCluster {
     private final int port;

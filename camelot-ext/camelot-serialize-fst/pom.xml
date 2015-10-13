@@ -7,24 +7,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Camelot Kafka Broker Extension</name>
-    <artifactId>camelot-kafka</artifactId>
+    <artifactId>camelot-serialize-fst</artifactId>
 
+    <name>Camelot Fast Serializer Extension</name>
     <dependencies>
         <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-kafka</artifactId>
-            <version>${camel.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka_2.10</artifactId>
-            <version>0.8.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.zookeeper</groupId>
-            <artifactId>zookeeper</artifactId>
-            <version>3.4.6</version>
+            <groupId>de.ruedigermoeller</groupId>
+            <artifactId>fst</artifactId>
+            <version>1.63</version>
         </dependency>
     </dependencies>
 

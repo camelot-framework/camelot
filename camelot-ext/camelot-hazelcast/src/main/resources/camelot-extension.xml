@@ -45,12 +45,12 @@
         </hz:config>
     </hz:hazelcast>
 
-    <bean id="pluginInitializer" class="ru.yandex.qatools.camelot.hazelcast.HazelcastPluginInitializer">
+    <bean id="camelot-plugin-initializer" class="ru.yandex.qatools.camelot.hazelcast.HazelcastPluginInitializer">
         <constructor-arg name="hazelcastInstance" ref="hazelcastInstance"/>
     </bean>
 
     <!-- Builders Factories -->
-    <bean id="FACTORY-HZ" class="ru.yandex.qatools.camelot.hazelcast.BuildersFactoryWithHazelcastImpl">
+    <bean id="camelot-factory-hazelcast" class="ru.yandex.qatools.camelot.hazelcast.BuildersFactoryWithHazelcastImpl">
         <constructor-arg name="hazelcastInstance" ref="hazelcastInstance"/>
         <property name="waitForLockSec" value="${camelot.hazelcast.waitForLockSec}"/>
         <property name="lockWaitHeartBeatSec" value="${camelot.hazelcast.lockWaitHeartBeatSec}"/>

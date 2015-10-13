@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+            http://camel.apache.org/schema/spring
+            http://camel.apache.org/schema/spring/camel-spring.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <bean id="camelot-loader-maven" class="ru.yandex.qatools.camelot.loader.MavenRepositoryPluginLoader">
+        <constructor-arg name="localRepository" value="${loader.maven.local.repository}"/>
+        <constructor-arg name="remoteRepositories" value="${loader.maven.remote.repositories}"/>
+        <constructor-arg name="updatePolicy" value="${loader.maven.config.updatePolicy}"/>
+        <constructor-arg name="checksumPolicy" value="${loader.maven.config.checksumPolicy}"/>
+    </bean>
+</beans>

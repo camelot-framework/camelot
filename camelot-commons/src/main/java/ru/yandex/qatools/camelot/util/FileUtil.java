@@ -1,4 +1,4 @@
-package ru.yandex.qatools.camelot.core.util;
+package ru.yandex.qatools.camelot.util;
 
 import java.io.File;
 import java.io.IOException;

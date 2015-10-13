@@ -31,11 +31,6 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>ru.yandex.qatools.clay</groupId>
-            <artifactId>clay-aether</artifactId>
-        </dependency>
-
         <!-- UTILS -->
         <dependency>
             <groupId>org.jodd</groupId>
@@ -55,6 +50,10 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
 
         <!-- Spring -->
@@ -131,12 +130,6 @@
             <version>2.5</version>
         </dependency>
 
-        <!-- Serialization -->
-        <dependency>
-            <groupId>de.ruedigermoeller</groupId>
-            <artifactId>fst</artifactId>
-            <version>1.63</version>
-        </dependency>
 
         <!-- TESTING -->
         <dependency>
@@ -175,7 +168,6 @@
         </dependency>
 
         <!-- Testing -->
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>camelot-kafka</artifactId>
