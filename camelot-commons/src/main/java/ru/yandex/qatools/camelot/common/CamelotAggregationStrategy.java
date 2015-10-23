@@ -43,7 +43,7 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
         final Exchange originalMessage = message.copy();
         final String resentId = (String) message.getIn().getHeader(MESSAGE_RESENT_ID_HEADER);
         if (resentId != null) {
-            logger.info("Handling previously resent message for plugin '{}' with id '{}'", context.getId(), resentId);
+            logger.debug("Handling previously resent message for plugin '{}' with id '{}'", context.getId(), resentId);
         }
 
         final String key = (String) message.getIn().getHeader(CORRELATION_KEY);
@@ -122,7 +122,7 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
         }
         message.getIn().setHeader(MESSAGE_RESENT_ID_HEADER, message.getExchangeId());
         retryProducer.send(message);
-        logger.info("Successfully resent message for plugin '{}' with id '{}'",
+        logger.debug("Successfully resent message for plugin '{}' with id '{}'",
                 context.getId(), message.getExchangeId());
     }
 
