@@ -6,6 +6,7 @@ import com.fasterxml.uuid.impl.TimeBasedGenerator;
 import com.hazelcast.client.HazelcastClientNotActiveException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.OperationTimeoutException;
 import com.hazelcast.quorum.QuorumException;
 import com.hazelcast.spi.exception.TargetDisconnectedException;
 import org.apache.camel.CamelContext;
@@ -65,7 +66,7 @@ public class HazelcastAggregationRepository extends ServiceSupport
                 debug("Successfully locked the key '{}', (read)", key);
                 return toExchange(camelContext, map.get(key));
             }
-        } catch (QuorumException | TargetDisconnectedException | HazelcastClientNotActiveException e) {
+        } catch (QuorumException | TargetDisconnectedException | HazelcastClientNotActiveException | OperationTimeoutException e) {
             throw new RepositoryUnreachableException(e);
         } catch (InterruptedException e) {
             throw new RepositoryFailureException(format(
@@ -117,7 +118,7 @@ public class HazelcastAggregationRepository extends ServiceSupport
             if (tryLock(key)) {
                 return;
             }
-        } catch (QuorumException | TargetDisconnectedException | HazelcastClientNotActiveException e) {
+        } catch (QuorumException | TargetDisconnectedException | HazelcastClientNotActiveException | OperationTimeoutException e) {
             throw new RepositoryUnreachableException(e);
         } catch (InterruptedException e) {
             throw new RepositoryFailureException(format(
@@ -184,7 +185,7 @@ public class HazelcastAggregationRepository extends ServiceSupport
                     return perform.call();
                 }
             }
-        } catch (QuorumException | TargetDisconnectedException | HazelcastClientNotActiveException e) {
+        } catch (QuorumException | TargetDisconnectedException | HazelcastClientNotActiveException | OperationTimeoutException e) {
             throw new RepositoryUnreachableException(e);
         } catch (Exception e) {
             error("Failed to update map for key '{}'", key, e);
