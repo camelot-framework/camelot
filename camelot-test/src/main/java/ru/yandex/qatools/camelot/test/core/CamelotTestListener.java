@@ -3,12 +3,16 @@ package ru.yandex.qatools.camelot.test.core;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.component.seda.SedaComponent;
 import org.apache.camel.spi.AggregationRepository;
 import org.slf4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
-import ru.yandex.qatools.camelot.api.*;
+import ru.yandex.qatools.camelot.api.AppConfig;
+import ru.yandex.qatools.camelot.api.ClientMessageSender;
+import ru.yandex.qatools.camelot.api.ClientSendersProvider;
+import ru.yandex.qatools.camelot.api.PluginEndpoints;
 import ru.yandex.qatools.camelot.common.AnnotatedFieldListener;
 import ru.yandex.qatools.camelot.common.ProcessingEngine;
 import ru.yandex.qatools.camelot.common.builders.QuartzInitializer;
@@ -152,6 +156,24 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
         if (engine != null && clientInitializer != null) {
             final TestBuildersFactory factory = ((TestBuildersFactory) engine.getBuildersFactory());
             final CamelContext camelContext = engine.getCamelContext();
+            try {
+                SedaComponent seda = camelContext.getComponent("seda", SedaComponent.class);
+                for(String queue : seda.getQueues().keySet()){
+                    seda.getQueues().get(queue).getQueue().clear();
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to clear the seda queue", e);
+            }
+            for (Plugin plugin : engine.getPluginsMap().values()) {
+                final PluginContext context = plugin.getContext();
+                final AggregationRepository repo = context.getAggregationRepo();
+                if (repo != null) {
+                    for (String key : repo.getKeys()) {
+                        final Exchange exchange = repo.get(camelContext, key);
+                        repo.remove(camelContext, key, exchange);
+                    }
+                }
+            }
             for (Plugin plugin : engine.getPluginsMap().values()) {
                 if (engine.pluginCanConsume(plugin)) {
                     final Object mock = factory.getMocksStorage().get(plugin.getId());
@@ -165,16 +187,8 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
                 }
             }
             for (Plugin plugin : engine.getPluginsMap().values()) {
-                final PluginContext context = plugin.getContext();
-                final AggregationRepository repo = context.getAggregationRepo();
-                if (repo != null) {
-                    for (String key : repo.getKeys()) {
-                        final Exchange exchange = repo.get(camelContext, key);
-                        repo.remove(camelContext, key, exchange);
-                    }
-                    // we need to reinitialize the plugin as we have cleared it's state
-                    engine.getPluginInitializer().init(plugin);
-                }
+                // we need to reinitialize the plugin as we have cleared it's state
+                engine.getPluginInitializer().init(plugin);
             }
         } else {
             logger.warn("Failed to clear the test context: could not get the ProcessingEngine from the context!");
