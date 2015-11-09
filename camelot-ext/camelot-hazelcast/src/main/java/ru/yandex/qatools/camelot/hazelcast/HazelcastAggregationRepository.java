@@ -3,12 +3,9 @@ package ru.yandex.qatools.camelot.hazelcast;
 import com.fasterxml.uuid.EthernetAddress;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.impl.TimeBasedGenerator;
-import com.hazelcast.client.HazelcastClientNotActiveException;
+import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import com.hazelcast.core.OperationTimeoutException;
-import com.hazelcast.quorum.QuorumException;
-import com.hazelcast.spi.exception.TargetDisconnectedException;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultExchange;
@@ -18,10 +15,7 @@ import org.apache.camel.spi.OptimisticLockingAggregationRepository;
 import org.apache.camel.support.ServiceSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.yandex.qatools.camelot.api.error.RepositoryDirtyWriteAttemptException;
-import ru.yandex.qatools.camelot.api.error.RepositoryFailureException;
-import ru.yandex.qatools.camelot.api.error.RepositoryLockWaitException;
-import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
+import ru.yandex.qatools.camelot.api.error.*;
 import ru.yandex.qatools.camelot.common.AggregationRepositoryWithLocks;
 
 import java.util.Collections;
@@ -66,7 +60,10 @@ public class HazelcastAggregationRepository extends ServiceSupport
                 debug("Successfully locked the key '{}', (read)", key);
                 return toExchange(camelContext, map.get(key));
             }
-        } catch (QuorumException | TargetDisconnectedException | HazelcastClientNotActiveException | OperationTimeoutException e) {
+        } catch (IllegalStateException e) {
+            error("Hazelcast is in invalid state while processing key '{}'", key, e);
+            throw new RepositoryNeedRestartException(e);
+        } catch (HazelcastException e) {
             throw new RepositoryUnreachableException(e);
         } catch (InterruptedException e) {
             throw new RepositoryFailureException(format(
@@ -118,7 +115,10 @@ public class HazelcastAggregationRepository extends ServiceSupport
             if (tryLock(key)) {
                 return;
             }
-        } catch (QuorumException | TargetDisconnectedException | HazelcastClientNotActiveException | OperationTimeoutException e) {
+        } catch (IllegalStateException e) {
+            error("Hazelcast is in invalid state while processing key '{}'", key, e);
+            throw new RepositoryNeedRestartException(e);
+        } catch (HazelcastException e) {
             throw new RepositoryUnreachableException(e);
         } catch (InterruptedException e) {
             throw new RepositoryFailureException(format(
@@ -185,7 +185,10 @@ public class HazelcastAggregationRepository extends ServiceSupport
                     return perform.call();
                 }
             }
-        } catch (QuorumException | TargetDisconnectedException | HazelcastClientNotActiveException | OperationTimeoutException e) {
+        } catch (IllegalStateException e) {
+            error("Hazelcast is in invalid state while processing key '{}'", key, e);
+            throw new RepositoryNeedRestartException(e);
+        } catch (HazelcastException e) {
             throw new RepositoryUnreachableException(e);
         } catch (Exception e) {
             error("Failed to update map for key '{}'", key, e);
