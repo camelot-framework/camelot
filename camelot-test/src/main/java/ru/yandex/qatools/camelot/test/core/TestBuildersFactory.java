@@ -6,7 +6,6 @@ import org.springframework.context.ApplicationContext;
 import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.common.builders.*;
 import ru.yandex.qatools.camelot.config.Plugin;
-import ru.yandex.qatools.camelot.common.builders.BuildersFactoryImpl;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +26,11 @@ public class TestBuildersFactory extends BuildersFactoryImpl {
     public TestBuildersFactory(BuildersFactory originalBuildersFactory, ApplicationContext applicationContext) {
         this.originalBuildersFactory = originalBuildersFactory;
         this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public AggregationRepositoryBuilder newRepositoryBuilder(CamelContext camelContext) throws Exception {
+        return originalBuildersFactory.newRepositoryBuilder(camelContext);
     }
 
     @Override

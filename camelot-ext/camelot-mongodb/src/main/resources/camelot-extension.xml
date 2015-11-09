@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+            http://www.springframework.org/schema/data/mongo
+            http://www.springframework.org/schema/data/mongo/spring-mongo-1.8.xsd">
+
+    <mongo:mongo-client id="camelot-mongodb-client"
+                        replica-set="${camelot.mongodb.replicaset}"
+                        credentials="#{ !'${camelot.mongodb.username}'.isEmpty() ? '${camelot.mongodb.username}:${camelot.mongodb.password}@${camelot.mongodb.dbname}' : null}">
+        <mongo:client-options
+                connections-per-host="${camelot.mongodb.connections.per.host}"
+                threads-allowed-to-block-for-connection-multiplier="${camelot.mongodb.threads.connection.mult}"
+                connect-timeout="${camelot.mongodb.connect.timeout}"
+                write-concern="${camelot.mongodb.writeconcern}"
+                heartbeat-connect-timeout="${camelot.mongodb.heartbeat.timeout}"
+                heartbeat-frequency="${camelot.mongodb.heartbeat.frequency}"
+                heartbeat-socket-timeout="${camelot.mongodb.heartbeat.socket.timeout}"
+                read-preference="${camelot.mongodb.readpreference}"
+                socket-timeout="${camelot.mongodb.socket.timeout}"/>
+    </mongo:mongo-client>
+    <bean id="camelot-plugin-initializer" class="ru.yandex.qatools.camelot.mongodb.MongodbPluginInitializer">
+        <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
+        <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
+    </bean>
+
+    <!-- Builders Factories -->
+    <bean id="camelot-factory-mongodb" class="ru.yandex.qatools.camelot.mongodb.BuildersFactoryWithMongodbImpl">
+        <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
+        <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
+        <property name="waitForLockSec" value="${camelot.mongodb.waitForLockSec}"/>
+        <property name="lockPollMaxIntervalMs" value="${camelot.mongodb.lockPollMaxIntervalMs}"/>
+    </bean>
+
+</beans>

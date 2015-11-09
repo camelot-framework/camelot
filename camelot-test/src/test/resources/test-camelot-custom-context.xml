@@ -18,6 +18,7 @@
                 <value>classpath*:camelot-default.properties</value>
                 <value>classpath*:camelot.properties</value>
                 <value>classpath:/camelot-test-config.properties</value>
+                <value>classpath*:camelot-test.properties</value>
             </list>
         </property>
     </bean>
