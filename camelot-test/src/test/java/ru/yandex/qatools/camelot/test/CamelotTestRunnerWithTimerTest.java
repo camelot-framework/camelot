@@ -22,7 +22,7 @@ import static ru.yandex.qatools.matchers.decorators.TimeoutWaiter.timeoutHasExpi
  * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 @RunWith(CamelotTestRunner.class)
-@UseProperties("camelot-test.properties")
+@UseProperties("camelot-test-custom.properties")
 @DisableTimers
 public class CamelotTestRunnerWithTimerTest {
 

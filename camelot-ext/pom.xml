@@ -13,6 +13,7 @@
         <module>camelot-hazelcast</module>
         <module>camelot-loader-maven</module>
         <module>camelot-serialize-fst</module>
+        <module>camelot-mongodb</module>
     </modules>
 
     <name>Camelot Extensions</name>

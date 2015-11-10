@@ -5,10 +5,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.spi.AggregationRepository;
-import ru.yandex.qatools.camelot.api.error.RepositoryDirtyWriteAttemptException;
-import ru.yandex.qatools.camelot.api.error.RepositoryFailureException;
-import ru.yandex.qatools.camelot.api.error.RepositoryLockWaitException;
-import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
+import ru.yandex.qatools.camelot.api.error.*;
 import ru.yandex.qatools.camelot.config.PluginContext;
 
 import java.lang.reflect.InvocationTargetException;
@@ -67,7 +64,7 @@ public class CamelotAggregationStrategy extends FSMAggregationStrategy implement
                     context.getId(), key, e.getMessage());
             repo.confirm(camelContext, key);
             resendWithDelay(originalMessage);
-        } catch (RepositoryUnreachableException | RepositoryDirtyWriteAttemptException e) { //NOSONAR
+        } catch (RepositoryUnreachableException | RepositoryNeedRestartException | RepositoryDirtyWriteAttemptException e) { //NOSONAR
             // resend with delay
             logger.warn("Repository is unreachable/dirty write, resending message "
                     + "for plugin '{}' with key '{}', because of: {}", context.getId(), key, e.getMessage());

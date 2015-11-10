@@ -20,7 +20,7 @@ import static ru.yandex.qatools.matchers.decorators.MatcherDecorators.timeoutHas
  * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 @RunWith(CamelotTestRunner.class)
-@UseProperties("camelot-test.properties")
+@UseProperties("camelot-test-custom.properties")
 @DisableTimers
 @CamelotTestConfig(components = {
         @OverrideComponent(from = SomeComponent.class, to = AnotherComponent.class),

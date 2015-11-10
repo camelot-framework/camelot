@@ -10,6 +10,7 @@
             http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
+    <import resource="classpath*:camelot-extension.xml"/>
     <import resource="classpath*:camelot-extensions.xml"/>
     <bean id="testHelper" class="ru.yandex.qatools.camelot.test.service.TestHelperImpl" depends-on="testBuildersFactoryInitializer"/>
     <bean id="testBuildersFactoryInitializer" class="ru.yandex.qatools.camelot.test.service.TestBuildersFactoryInitializer" />
@@ -23,6 +24,7 @@
                 <value>classpath*:camelot-default.properties</value>
                 <value>classpath*:camelot.properties</value>
                 <value>classpath:/camelot-test-config.properties</value>
+                <value>classpath*:camelot-test.properties</value>
             </list>
         </property>
     </bean>
