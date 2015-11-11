@@ -17,37 +17,47 @@ import static ru.yandex.qatools.camelot.util.DateUtil.isTimePassedSince;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
- * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
+ * @author Innokenty Shuvalov innokenty@yandex-team.ru
  */
-public class QuartzInitializerImpl implements QuartzInitializer {
+public abstract class AbstractQuartzInitializer<T extends Lock> implements QuartzInitializer {
 
     public static final String HEARTBEAT_TIMEOUT = "camelot.quartz.master.heartBeatTimeout";
     public static final String HEARTBEAT_INTERVAL = "camelot.quartz.master.heartBeatInterval";
-    private volatile long lastHeartBeatTime = 0;
 
-    private final ExecutorService singleThread = newSingleThreadExecutor();
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass()); //NOSONAR
+
     protected final Scheduler scheduler;
+
     protected final long heartBeatTimeout;
     protected final long heartBeatInterval;
 
-    protected Lock lock;
+    private final ExecutorService singleThread = newSingleThreadExecutor();
 
-    public QuartzInitializerImpl(Scheduler scheduler, AppConfig config) {
+    protected T lock;
+
+    private volatile long lastHeartBeatTime = 0;
+
+    public AbstractQuartzInitializer(Scheduler scheduler, AppConfig config) {
         this.scheduler = scheduler;
         this.heartBeatTimeout = config.getLong(HEARTBEAT_TIMEOUT);
         this.heartBeatInterval = config.getLong(HEARTBEAT_INTERVAL);
     }
 
-    protected synchronized Lock getLock() {
+    /**
+     * Returns the Quartz lock within HazelCast
+     */
+    protected final synchronized T getLock() {
         if (lock == null) {
-            lock = new ReentrantLock();
+            lock = initLock();
         }
         return lock;
     }
 
+    protected abstract T initLock();
+
     /**
-     * Returns the Quartz lock within HazelCast
+     * Tries to obtain the lock within the given heartbeat timeout
+     * and returns the result of the operation
      */
     @Override
     public boolean lock() throws InterruptedException {
@@ -59,12 +69,9 @@ public class QuartzInitializerImpl implements QuartzInitializer {
      */
     @Override
     public synchronized void start() {
-        singleThread.submit(new Runnable() {
-            @Override
-            public void run() {
-                waitForTheMasterLock();
-                startMasterLoop();
-            }
+        singleThread.submit((Runnable) () -> {
+            waitForTheMasterLock();
+            startMasterLoop();
         });
     }
 
@@ -121,7 +128,6 @@ public class QuartzInitializerImpl implements QuartzInitializer {
         return lastHeartBeatTime;
     }
 
-
     private void waitForTheMasterLock() {
         while (true) {
             if (lockAndStartScheduler()) {
@@ -136,24 +142,21 @@ public class QuartzInitializerImpl implements QuartzInitializer {
     }
 
     private void startMasterLoop() {
-        singleThread.submit(new Runnable() { //NOSONAR
-            @Override
-            public void run() {
-                logger.info("Starting master Quartz heartbeat loop!");
-                while (true) {
-                    logger.debug("Updating master Quartz heartbeat loop...");
-                    updateHeartBeat();
-                    try {
-                        sleep(heartBeatInterval);
-                        if (!isMaster()) {
-                            throw new RuntimeException("Lock is not held by me anymore, need to " + //NOSONAR
-                                    "restart scheduler!");
-                        }
-                    } catch (Exception e) {
-                        logger.error("Failed to update heartbeat interval! Restarting scheduler...", e);
-                        restart();
-                        break;
+        singleThread.submit((Runnable) () -> {
+            logger.info("Starting master Quartz heartbeat loop!");
+            while (true) {
+                logger.debug("Updating master Quartz heartbeat loop...");
+                updateHeartBeat();
+                try {
+                    sleep(heartBeatInterval);
+                    if (!isMaster()) {
+                        throw new RuntimeException("Lock is not held by me anymore, need to " + //NOSONAR
+                                "restart scheduler!");
                     }
+                } catch (Exception e) {
+                    logger.error("Failed to update heartbeat interval! Restarting scheduler...", e);
+                    restart();
+                    break;
                 }
             }
         });
@@ -172,5 +175,4 @@ public class QuartzInitializerImpl implements QuartzInitializer {
         }
         return false;
     }
-
 }

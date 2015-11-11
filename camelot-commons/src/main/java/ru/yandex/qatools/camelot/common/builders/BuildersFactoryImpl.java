@@ -32,7 +32,7 @@ public class BuildersFactoryImpl implements BuildersFactory {
 
     @Override
     public QuartzInitializer newQuartzInitializer(Scheduler scheduler, AppConfig config) throws Exception { //NOSONAR
-        return new QuartzInitializerImpl(scheduler, config);
+        return new QuartzMemoryInitializer(scheduler, config);
     }
 
     @Override

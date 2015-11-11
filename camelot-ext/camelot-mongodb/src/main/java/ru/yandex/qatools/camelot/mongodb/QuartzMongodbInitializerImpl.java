@@ -6,17 +6,20 @@ import ru.qatools.mongodb.MongoPessimisticLock;
 import ru.qatools.mongodb.MongoPessimisticLocking;
 import ru.qatools.mongodb.MongoPessimisticRepo;
 import ru.yandex.qatools.camelot.api.AppConfig;
-import ru.yandex.qatools.camelot.common.builders.QuartzInitializerImpl;
+import ru.yandex.qatools.camelot.common.builders.AbstractQuartzInitializer;
 
 import static java.lang.System.currentTimeMillis;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
-public class QuartzMongodbInitializerImpl extends QuartzInitializerImpl {
+public class QuartzMongodbInitializerImpl extends AbstractQuartzInitializer<MongoPessimisticLock> {
+
     public static final String HEARTBEAT_LAST_TIME = "defaultQuartzHeartBeatTime";
     public static final String INITIALIZER_KS = "_quartz_";
     public static final int MAX_CHECK_INTERVAL_MS = 20000;
+
     private final MongoPessimisticRepo repo;
 
     public QuartzMongodbInitializerImpl(MongoClient mongoClient, String dbName, Scheduler scheduler, AppConfig config) {
@@ -28,20 +31,9 @@ public class QuartzMongodbInitializerImpl extends QuartzInitializerImpl {
         );
     }
 
-    /**
-     * Returns the Quartz lock within HazelCast
-     */
     @Override
-    public synchronized MongoPessimisticLock getLock() {
-        if (lock == null) {
-            lock = new MongoPessimisticLock(repo.getLock());
-        }
-        return (MongoPessimisticLock) lock;
-    }
-
-    @Override
-    public void unlock() {
-        getLock().unlock();
+    protected MongoPessimisticLock initLock() {
+        return new MongoPessimisticLock(repo.getLock());
     }
 
     @Override
@@ -57,6 +49,6 @@ public class QuartzMongodbInitializerImpl extends QuartzInitializerImpl {
 
     @Override
     public boolean isMaster() {
-        return getLock().isLockedByCurrentThread();
+        return super.getLock().isLockedByCurrentThread();
     }
 }
