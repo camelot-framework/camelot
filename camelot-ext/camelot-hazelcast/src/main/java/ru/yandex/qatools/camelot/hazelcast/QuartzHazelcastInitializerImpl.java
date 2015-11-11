@@ -5,14 +5,15 @@ import com.hazelcast.core.IAtomicLong;
 import com.hazelcast.core.ILock;
 import org.quartz.Scheduler;
 import ru.yandex.qatools.camelot.api.AppConfig;
-import ru.yandex.qatools.camelot.common.builders.QuartzInitializerImpl;
+import ru.yandex.qatools.camelot.common.builders.AbstractQuartzInitializer;
 
 import static java.lang.System.currentTimeMillis;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
-public class QuartzHazelcastInitializerImpl extends QuartzInitializerImpl {
+public class QuartzHazelcastInitializerImpl extends AbstractQuartzInitializer<ILock> {
 
     public static final String DEFAULT_QUARTZ_LOCK = "defaultQuartzLock";
     public static final String HEARTBEAT_LAST_TIME = "defaultQuartzHeartBeatTime";
@@ -26,15 +27,9 @@ public class QuartzHazelcastInitializerImpl extends QuartzInitializerImpl {
         this.lastHeartBeatTime = hazelcastInstance.getAtomicLong(HEARTBEAT_LAST_TIME);
     }
 
-    /**
-     * Returns the Quartz lock within HazelCast
-     */
     @Override
-    public synchronized ILock getLock() {
-        if (lock == null) {
-            lock = hazelcastInstance.getLock(DEFAULT_QUARTZ_LOCK);
-        }
-        return (ILock) lock;
+    protected ILock initLock() {
+        return hazelcastInstance.getLock(DEFAULT_QUARTZ_LOCK);
     }
 
     @Override
