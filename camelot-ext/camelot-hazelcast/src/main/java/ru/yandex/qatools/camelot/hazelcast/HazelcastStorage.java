@@ -3,18 +3,20 @@ package ru.yandex.qatools.camelot.hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.camelot.api.Storage;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public class HazelcastStorage<T> implements Storage<T> {
-    private final Logger logger = getLogger(getClass());
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastStorage.class);
+
     protected final IMap<String, T> map;
 
     public HazelcastStorage(HazelcastInstance hazelcastInstance, String repo) {
@@ -46,7 +48,7 @@ public class HazelcastStorage<T> implements Storage<T> {
         try {
             return map.tryLock(key, timeout, ofUnit);
         } catch (Exception e) {
-            logger.warn(String.format("Failed to lock storage by key %s", key), e);
+            LOGGER.warn(String.format("Failed to lock storage by key %s", key), e);
         }
         return false;
     }
@@ -56,7 +58,7 @@ public class HazelcastStorage<T> implements Storage<T> {
         try {
             map.unlock(key);
         } catch (Exception e) {
-            logger.warn(String.format("Failed to lock storage by key %s", key), e);
+            LOGGER.warn(String.format("Failed to lock storage by key %s", key), e);
         }
     }
 }

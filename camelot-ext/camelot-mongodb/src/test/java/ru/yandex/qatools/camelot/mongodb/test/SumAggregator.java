@@ -14,10 +14,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Aggregate
 @FSM(start = AtomicInteger.class)
 @Transitions(@Transit(on = Integer.class))
-public class Summator {
+public class SumAggregator {
 
     @OnTransit
-    public void onSum(AtomicInteger result, Integer value) {
+    public void onInteger(AtomicInteger result, Integer value) {
         result.set(result.get() + value);
     }
 }

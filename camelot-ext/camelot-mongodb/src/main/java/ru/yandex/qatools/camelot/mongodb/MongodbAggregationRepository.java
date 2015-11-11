@@ -18,8 +18,11 @@ import ru.yandex.qatools.camelot.api.error.RepositoryFailureException;
 import ru.yandex.qatools.camelot.api.error.RepositoryLockWaitException;
 import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.common.AggregationRepositoryWithLocks;
+import ru.yandex.qatools.camelot.common.AggregationRepositoryWithValuesMap;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -34,7 +37,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class MongodbAggregationRepository extends ServiceSupport
         implements AggregationRepository,
         OptimisticLockingAggregationRepository,
-        AggregationRepositoryWithLocks {
+        AggregationRepositoryWithLocks,
+        AggregationRepositoryWithValuesMap {
     private static final Logger LOGGER = LoggerFactory.getLogger(MongodbAggregationRepository.class);
 
     private MongoPessimisticRepo<DefaultExchangeHolder> mongoRepo;
@@ -221,5 +225,15 @@ public class MongodbAggregationRepository extends ServiceSupport
 
     private void error(String message, String key, Exception e) {
         LOGGER.error("[{}] " + message, repoName, key, e);
+    }
+
+    @Override
+    public Map<String, Exchange> values(CamelContext camelContext) {
+        Map<String, DefaultExchangeHolder> holderMap = mongoRepo.keyValueMap();
+        Map<String, Exchange> result = new HashMap<>(holderMap.size(), 1);
+        for (Map.Entry<String, DefaultExchangeHolder> entry : holderMap.entrySet()) {
+            result.put(entry.getKey()   , toExchange(camelContext, entry.getValue()));
+        }
+        return result;
     }
 }

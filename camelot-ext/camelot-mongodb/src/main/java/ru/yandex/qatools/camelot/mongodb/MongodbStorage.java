@@ -12,6 +12,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
 public class MongodbStorage<T extends Serializable> implements Storage<T> {
     private static final Logger LOGGER = getLogger(MongodbStorage.class);
@@ -28,11 +29,6 @@ public class MongodbStorage<T extends Serializable> implements Storage<T> {
 
     @Override
     public Set<String> keys() {
-        return mongoRepo.keySet();
-    }
-
-    @Override
-    public Set<String> localKeys() {
         return mongoRepo.keySet();
     }
 

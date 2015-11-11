@@ -2,7 +2,10 @@
 <plugins-config xmlns="urn:config.camelot.qatools.yandex.ru">
     <source>
         <plugin>
-            <aggregator>ru.yandex.qatools.camelot.mongodb.test.Summator</aggregator>
+            <aggregator>ru.yandex.qatools.camelot.mongodb.test.SumAggregator</aggregator>
+        </plugin>
+        <plugin>
+            <aggregator>ru.yandex.qatools.camelot.mongodb.test.SaveAggregator</aggregator>
         </plugin>
     </source>
 </plugins-config>
