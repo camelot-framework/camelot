@@ -1,6 +1,7 @@
 package ru.yandex.qatools.camelot.common;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.camelot.api.Storage;
 
 import java.util.HashMap;
@@ -10,15 +11,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public class LocalMemoryStorage<T> implements Storage<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalMemoryStorage.class);
+
     private Map<String, T> storage = new HashMap<>();
     private Map<String, ReentrantLock> locks = new ConcurrentHashMap<>();
-    private final Logger logger = getLogger(getClass());
 
     public LocalMemoryStorage() {
     }
@@ -43,8 +44,8 @@ public class LocalMemoryStorage<T> implements Storage<T> {
     }
 
     @Override
-    public Set<String> localKeys() {
-        return keys();
+    public Map<String, T> valuesMap() {
+        return storage;
     }
 
     @Override
@@ -52,7 +53,7 @@ public class LocalMemoryStorage<T> implements Storage<T> {
         try {
             return getLock(key).tryLock(timeout, ofUnit);
         } catch (Exception e) {
-            logger.warn(String.format("Failed to lock storage by key %s", key), e);
+            LOGGER.warn(String.format("Failed to lock storage by key %s", key), e);
         }
         return false;
     }
@@ -62,7 +63,7 @@ public class LocalMemoryStorage<T> implements Storage<T> {
         try {
             getLock(key).unlock();
         } catch (Exception e) {
-            logger.warn(String.format("Failed to unlock storage by key %s", key), e);
+            LOGGER.warn(String.format("Failed to unlock storage by key %s", key), e);
         }
     }
 
