@@ -16,6 +16,8 @@ import static java.lang.System.currentTimeMillis;
  */
 public class QuartzMongodbInitializerImpl extends AbstractQuartzInitializer<MongoPessimisticLock> {
 
+    public static final String DEFAULT_QUARTZ_LOCK = "defaultQuartzLock";
+
     public static final String HEARTBEAT_LAST_TIME = "defaultQuartzHeartBeatTime";
     public static final String INITIALIZER_KS = "_quartz_";
     public static final int MAX_CHECK_INTERVAL_MS = 20000;
@@ -33,7 +35,7 @@ public class QuartzMongodbInitializerImpl extends AbstractQuartzInitializer<Mong
 
     @Override
     protected MongoPessimisticLock initLock() {
-        return new MongoPessimisticLock(repo.getLock());
+        return new MongoPessimisticLock(repo.getLock(), DEFAULT_QUARTZ_LOCK);
     }
 
     @Override
