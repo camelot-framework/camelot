@@ -133,7 +133,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     }
 
     @Override
-    public void prepareShutdown(boolean forced) {
+    public void prepareShutdown(boolean suspendOnly, boolean forced) {
         for (Plugin plugin : getPluginsMap().values()) {
             try {
                 unInitPlugin(plugin);
