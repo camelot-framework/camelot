@@ -39,6 +39,11 @@ public class QuartzMongodbInitializerImpl extends AbstractQuartzInitializer<Mong
     }
 
     @Override
+    public void unlock() {
+        getLock().forceUnlock();
+    }
+
+    @Override
     public long getLastHeartbeat() {
         final Object val = repo.get(HEARTBEAT_LAST_TIME);
         return (val != null) ? (long) val : 0L;
@@ -51,6 +56,6 @@ public class QuartzMongodbInitializerImpl extends AbstractQuartzInitializer<Mong
 
     @Override
     public boolean isMaster() {
-        return super.getLock().isLockedByCurrentThread();
+        return super.getLock().isLockedByMe();
     }
 }
