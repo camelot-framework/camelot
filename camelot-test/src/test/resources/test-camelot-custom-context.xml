@@ -44,13 +44,8 @@
     <!-- Routes -->
     <camelContext id="camelotCamelContext" xmlns="http://camel.apache.org/schema/spring">
         <jmxAgent id="agent" disabled="true"/>
-        <threadPoolProfile id="camelotDefaultProfile" defaultProfile="true" keepAliveTime="30000" maxPoolSize="50" poolSize="1">
-            <timeUnit>MILLISECONDS</timeUnit>
-        </threadPoolProfile>
-
-        <threadPoolProfile id="camelotMulticastProfile" keepAliveTime="30000" poolSize="1" maxPoolSize="5">
-            <timeUnit>MILLISECONDS</timeUnit>
-        </threadPoolProfile>
+        <threadPoolProfile id="camelotDefaultProfile" defaultProfile="true" keepAliveTime="30000" maxPoolSize="50" poolSize="1" timeUnit="MILLISECONDS"/>
+        <threadPoolProfile id="camelotMulticastProfile" keepAliveTime="30000" poolSize="1" maxPoolSize="5" timeUnit="MILLISECONDS"/>
 
         <endpoint id="events.input" uri="seda:events.input"/>
         <endpoint id="events.output" uri="seda:events.output"/>
