@@ -5,6 +5,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 import ru.yandex.qatools.camelot.common.PluginsService;
 import ru.yandex.qatools.camelot.test.core.TestBuildersFactory;
 import ru.yandex.qatools.camelot.test.core.TestContextInjector;
@@ -12,7 +13,7 @@ import ru.yandex.qatools.camelot.test.core.TestContextInjector;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public class TestBuildersFactoryInitializer implements ApplicationContextAware, BeanPostProcessor, Ordered {
+public class TestBuildersFactoryInitializer implements ApplicationContextAware, BeanPostProcessor, PriorityOrdered {
 
     private ApplicationContext applicationContext;
 
