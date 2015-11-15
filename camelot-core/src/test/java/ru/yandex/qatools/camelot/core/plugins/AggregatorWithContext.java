@@ -8,6 +8,7 @@ import ru.yandex.qatools.camelot.core.beans.TestStarted;
 import ru.yandex.qatools.camelot.core.impl.InjectableComponent;
 import ru.yandex.qatools.camelot.core.impl.InjectableInterface;
 import ru.yandex.qatools.camelot.core.impl.InjectableInterfaceImpl;
+import ru.yandex.qatools.camelot.core.service.TestBeanWithContext;
 import ru.yandex.qatools.fsm.annotations.FSM;
 import ru.yandex.qatools.fsm.annotations.Transit;
 import ru.yandex.qatools.fsm.annotations.Transitions;
@@ -26,7 +27,7 @@ import static ru.yandex.qatools.camelot.api.Constants.Headers.UUID;
         @Transit(on = TestStarted.class),
         @Transit(stop = true, on = StopAggregatorWithTimer.class),
 })
-public class AggregatorWithContext {
+public class AggregatorWithContext extends TestBeanWithContext {
     @InjectHeader(UUID)
     public String uuid;
 
@@ -34,58 +35,22 @@ public class AggregatorWithContext {
     public Map<String, Object> headers;
 
     @Repository
-    public AggregatorRepository repo1;
-
-    @Repository(AllSkippedAggregator.class)
-    public AggregatorRepository repo2;
-
-    @Repository(id = "all-skipped")
-    public AggregatorRepository repo3;
-
-    @Config
-    public AppConfig config;
+    public AggregatorRepository repo;
 
     @PluginStorage
     public Storage storage;
 
-    @PluginStorage(AllSkippedAggregator.class)
-    public Storage storage1;
-
-    @PluginStorage(id = "all-skipped")
-    public Storage storage2;
-
     @Input
-    public EventProducer input1;
-
-    @Input(AllSkippedAggregator.class)
-    public EventProducer input2;
-
-    @Input(id = "all-skipped")
-    public EventProducer input3;
+    public EventProducer input;
 
     @Output
-    public EventProducer output1;
-
-    @Output(AllSkippedAggregator.class)
-    public EventProducer output2;
-
-    @Output(id = "all-skipped")
-    public EventProducer output3;
+    public EventProducer output;
 
     @ClientSender
     public ClientMessageSender clientSender;
 
     @Plugins
     public PluginsInterop plugins;
-
-    @Plugin(AllSkippedAggregator.class)
-    public PluginInterop plugin1;
-
-    @Plugin(id = "all-skipped")
-    public PluginInterop plugin2;
-
-    @ConfigValue("custom.plugin.stringValue")
-    public String configValue;
 
     @PluginComponent
     public InjectableComponent injectableComponent;

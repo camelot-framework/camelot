@@ -13,6 +13,7 @@ import ru.yandex.qatools.camelot.api.AggregatorRepository;
 import ru.yandex.qatools.camelot.api.annotations.OnTimer;
 import ru.yandex.qatools.camelot.api.annotations.Repository;
 import ru.yandex.qatools.camelot.common.BasicMessagesSerializer;
+import ru.yandex.qatools.camelot.common.PluginsService;
 import ru.yandex.qatools.camelot.common.builders.QuartzAggregatorSchedulerBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
@@ -30,6 +31,7 @@ public class QuartzAggregatorSchedulerBuilderTest {
 
     final static TestClass mock = mock(TestClass.class);
     private CamelContext camelContext;
+    private PluginsService pluginsService;
     private Scheduler scheduler;
     private Plugin plugin;
     private BasicMessagesSerializer serializer;
@@ -61,6 +63,7 @@ public class QuartzAggregatorSchedulerBuilderTest {
     public void init() {
         serializer = new BasicMessagesSerializer();
         camelContext = mock(CamelContext.class);
+        pluginsService = mock(PluginsService.class);
         Exchange exchange1 = exchange("test1");
         Exchange exchange2 = exchange("test2");
         scheduler = mock(Scheduler.class);
@@ -68,6 +71,7 @@ public class QuartzAggregatorSchedulerBuilderTest {
         plugin.setId("test-plugin");
         plugin.setAggregator(TestClass.class.getName());
         plugin.setContext(new PluginContext());
+        plugin.getContext().setPluginsService(pluginsService);
         plugin.getContext().setClassLoader(getClass().getClassLoader());
         plugin.getContext().setPluginClass(TestClass.class.getName());
         plugin.getContext().setInjector(new PluginContextInjectorImpl());

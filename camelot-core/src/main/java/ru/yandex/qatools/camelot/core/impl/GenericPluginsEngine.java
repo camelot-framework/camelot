@@ -478,6 +478,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
      */
     protected void initPluginContext(PluginsSource source, final Plugin plugin,
                                      PluginContext context, ClassLoader classLoader) throws Exception { //NOSONAR
+        context.setPluginsService(this);
         context.setSource(source);
         plugin.setContext(context);
         if (pluginCanConsume(plugin)) {

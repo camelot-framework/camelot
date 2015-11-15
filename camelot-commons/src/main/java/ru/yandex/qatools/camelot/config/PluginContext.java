@@ -13,6 +13,7 @@ import ru.yandex.qatools.camelot.api.*;
 import ru.yandex.qatools.camelot.common.InterimProcessor;
 import ru.yandex.qatools.camelot.common.MessagesSerializer;
 import ru.yandex.qatools.camelot.common.PluginContextInjector;
+import ru.yandex.qatools.camelot.common.PluginsService;
 import ru.yandex.qatools.camelot.common.builders.SchedulerBuilder;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -71,6 +72,7 @@ public class PluginContext
     protected transient SchedulerBuilder schedulerBuilder;
     protected transient MessagesSerializer messagesSerializer;
     protected transient InterimProcessor interimProcessor;
+    protected transient PluginsService pluginsService;
 
     /**
      * Gets the value of the id property.
@@ -541,5 +543,13 @@ public class PluginContext
 
     public void setInterimProcessor(InterimProcessor interimProcessor) {
         this.interimProcessor = interimProcessor;
+    }
+
+    public PluginsService getPluginsService() {
+        return pluginsService;
+    }
+
+    public void setPluginsService(PluginsService pluginsService) {
+        this.pluginsService = pluginsService;
     }
 }

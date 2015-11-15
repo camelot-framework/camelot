@@ -15,8 +15,19 @@ public interface PluginContextInjector<P> {
     void inject(final P pluginObj, final PluginContext pluginContext);
 
     /**
+     * Inject the context into the plugin instance when exchange is not available
+     */
+    void inject(final P pluginObj, final PluginsService service, final PluginContext pluginContext);
+
+    /**
      * Inject the context into the plugin instance
      */
     void inject(final P pluginObj, final PluginContext pluginContext, final Exchange exchange);
+
+    /**
+     * Inject the context into the plugin instance
+     */
+    void inject(final P pluginObj, final PluginsService service,
+                final PluginContext pluginContext, final Exchange exchange);
 
 }

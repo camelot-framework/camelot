@@ -10,10 +10,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import ru.yandex.qatools.camelot.api.AppConfig;
-import ru.yandex.qatools.camelot.api.ClientMessageSender;
 import ru.yandex.qatools.camelot.api.ClientSendersProvider;
 import ru.yandex.qatools.camelot.api.PluginEndpoints;
-import ru.yandex.qatools.camelot.common.AnnotatedFieldListener;
 import ru.yandex.qatools.camelot.common.ProcessingEngine;
 import ru.yandex.qatools.camelot.common.builders.QuartzInitializer;
 import ru.yandex.qatools.camelot.config.Plugin;
@@ -80,12 +78,12 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
             // reset context injector
             ((TestContextInjector) engine.getContextInjector()).reset();
 
+            if (engine.getAppConfig() instanceof WrappedAppConfig) {
+                engine.setAppConfig(((WrappedAppConfig) engine.getAppConfig()).getOriginal());
+            }
             // return the original app config to each plugin
             for (Plugin plugin : engine.getPluginsMap().values()) {
-                final PluginContext context = plugin.getContext();
-                if (context.getAppConfig() instanceof WrappedAppConfig) {
-                    context.setAppConfig(((WrappedAppConfig) context.getAppConfig()).getOriginal());
-                }
+                plugin.getContext().setAppConfig(engine.getAppConfig());
             }
         }
     }
@@ -108,9 +106,11 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
                             properties.load(readResource(path.getURL()));
                         }
                     }
+                    final AppConfig originConfig = engine.getAppConfig();
+                    final WrappedAppConfig wrappedAppConfig = new WrappedAppConfig(originConfig, properties);
                     for (Plugin plugin : engine.getPluginsMap().values()) {
-                        final AppConfig originConfig = plugin.getContext().getAppConfig();
-                        plugin.getContext().setAppConfig(new WrappedAppConfig(originConfig, properties));
+                        engine.setAppConfig(wrappedAppConfig);
+                        plugin.getContext().setAppConfig(wrappedAppConfig);
                     }
                 } catch (Exception e) {
                     throw new RuntimeException("Could not use @UseProperties along with your test.", e);
@@ -158,7 +158,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
             final CamelContext camelContext = engine.getCamelContext();
             try {
                 SedaComponent seda = camelContext.getComponent("seda", SedaComponent.class);
-                for(String queue : seda.getQueues().keySet()){
+                for (String queue : seda.getQueues().keySet()) {
                     seda.getQueues().get(queue).getQueue().clear();
                 }
             } catch (Exception e) {
@@ -261,107 +261,81 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
         final TestBuildersFactory factory = (TestBuildersFactory) engine.getBuildersFactory();
         final MockedClientSenderInitializer clientSenders = applicationContext.getBean(MockedClientSenderInitializer.class);
 
-        injectAnnotatedField(clazz, instance, TestComponent.class, new AnnotatedFieldListener<Object, TestComponent>() {
-            @Override
-            public Object found(Field field, TestComponent annotation) throws Exception {
-                Class fieldType = field.getType();
-                Object value = fieldType.newInstance();
-                injectTestContextToInstance(fieldType, value, applicationContext);
-                return value;
+        injectAnnotatedField(clazz, instance, TestComponent.class, (field, annotation) -> {
+            Class fieldType = field.getType();
+            Object value = fieldType.newInstance();
+            injectTestContextToInstance(fieldType, value, applicationContext);
+            return value;
+        });
+
+        injectAnnotatedField(clazz, instance, ClientSenderMock.class, (field, annotation) -> {
+            final String pluginId = calcPluginId(field, engine, ClientSenderMock.class);
+            try {
+                final String topic = (String) getAnnotationValue(annotation, "topic");
+                final ClientSendersProvider provider = clientSenders.getClientSenders().get(pluginId);
+                if (provider == null) {
+                    throw new RuntimeException("Senders provider not found!");
+                }
+                return provider.getSender(topic);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to inject client sender for plugin " + pluginId, e);
             }
         });
 
-        injectAnnotatedField(clazz, instance, ClientSenderMock.class, new AnnotatedFieldListener<ClientMessageSender, ClientSenderMock>() {
-            @Override
-            public ClientMessageSender found(Field field, ClientSenderMock annotation) throws Exception {
-                final String pluginId = calcPluginId(field, engine, ClientSenderMock.class);
-                try {
-                    final String topic = (String) getAnnotationValue(annotation, "topic");
-                    final ClientSendersProvider provider = clientSenders.getClientSenders().get(pluginId);
-                    if (provider == null) {
-                        throw new RuntimeException("Senders provider not found!");
-                    }
-                    return provider.getSender(topic);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to inject client sender for plugin " + pluginId, e);
-                }
+        injectAnnotatedField(clazz, instance, EndpointPluginInput.class, (field, annotation) -> {
+            final String pluginId = calcPluginId(field, engine, EndpointPluginInput.class);
+            final PluginContext plugin = engine.getPluginContext(pluginId);
+            try {
+                return getPluginMockEndpoint(camelContext, plugin.getEndpoints().getInputUri());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to inject plugin mock for plugin " + pluginId, e);
             }
         });
 
-        injectAnnotatedField(clazz, instance, EndpointPluginInput.class, new AnnotatedFieldListener<MockEndpoint, EndpointPluginInput>() {
-            @Override
-            public MockEndpoint found(Field field, EndpointPluginInput annotation) throws Exception {
-                final String pluginId = calcPluginId(field, engine, EndpointPluginInput.class);
-                final PluginContext plugin = engine.getPluginContext(pluginId);
-                try {
-                    return getPluginMockEndpoint(camelContext, plugin.getEndpoints().getInputUri());
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to inject plugin mock for plugin " + pluginId, e);
-                }
+        injectAnnotatedField(clazz, instance, EndpointPluginOutput.class, (field, annotation) -> {
+            final String pluginId = calcPluginId(field, engine, EndpointPluginOutput.class);
+            final PluginContext plugin = engine.getPluginContext(pluginId);
+            try {
+                return getPluginMockEndpoint(camelContext, plugin.getEndpoints().getOutputUri());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to inject plugin mock for plugin " + pluginId, e);
             }
         });
 
-        injectAnnotatedField(clazz, instance, EndpointPluginOutput.class, new AnnotatedFieldListener<MockEndpoint, EndpointPluginOutput>() {
-            @Override
-            public MockEndpoint found(Field field, EndpointPluginOutput annotation) throws Exception {
-                final String pluginId = calcPluginId(field, engine, EndpointPluginOutput.class);
-                final PluginContext plugin = engine.getPluginContext(pluginId);
-                try {
-                    return getPluginMockEndpoint(camelContext, plugin.getEndpoints().getOutputUri());
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to inject plugin mock for plugin " + pluginId, e);
-                }
+        injectAnnotatedField(clazz, instance, PluginMock.class, (field, annotation) -> {
+            final String pluginId = calcPluginId(field, engine, PluginMock.class);
+            try {
+                return factory.getMocksStorage().get(pluginId);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to inject plugin mock for plugin " + pluginId, e);
             }
         });
+        injectAnnotatedField(clazz, instance, AggregatorState.class, (field, annotation) -> {
+            final String pluginId = calcPluginId(field, engine, AggregatorState.class);
+            try {
+                final PluginContext pluginContext = engine.getPluginContext(pluginId);
+                if (pluginContext == null) {
+                    throw new RuntimeException("Plugin context not found!");
+                }
+                return new AggregatorStateStorageImpl(pluginContext);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to inject aggregator state for plugin " + pluginId, e);
+            }
 
-        injectAnnotatedField(clazz, instance, PluginMock.class, new AnnotatedFieldListener<Object, PluginMock>() {
-            @Override
-            public Object found(Field field, PluginMock annotation) throws Exception {
-                final String pluginId = calcPluginId(field, engine, PluginMock.class);
-                try {
-                    return factory.getMocksStorage().get(pluginId);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to inject plugin mock for plugin " + pluginId, e);
-                }
-            }
         });
-        injectAnnotatedField(clazz, instance, AggregatorState.class, new AnnotatedFieldListener<AggregatorStateStorageImpl, AggregatorState>() {
-            @Override
-            public AggregatorStateStorageImpl found(Field field, AggregatorState annotation) throws Exception {
-                final String pluginId = calcPluginId(field, engine, AggregatorState.class);
-                try {
-                    final PluginContext pluginContext = engine.getPluginContext(pluginId);
-                    if (pluginContext == null) {
-                        throw new RuntimeException("Plugin context not found!");
-                    }
-                    return new AggregatorStateStorageImpl(pluginContext);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to inject aggregator state for plugin " + pluginId, e);
+        injectAnnotatedField(clazz, instance, Helper.class, (field, annotation) -> applicationContext.getBean(TestHelperImpl.class));
+        injectAnnotatedField(clazz, instance, Resource.class, (field, annotation) -> {
+            final String pluginId = calcPluginId(field, engine, Resource.class);
+            try {
+                final Plugin plugin = engine.getPlugin(pluginId);
+                if (plugin.getResource() != null) {
+                    Object res = Class.forName(plugin.getResource()).newInstance();
+                    plugin.getContext().getInjector().inject(res, plugin.getContext(), null);
+                    return res;
                 }
-
-            }
-        });
-        injectAnnotatedField(clazz, instance, Helper.class, new AnnotatedFieldListener<TestHelperImpl, Helper>() {
-            @Override
-            public TestHelperImpl found(Field field, Helper annotation) throws Exception {
-                return applicationContext.getBean(TestHelperImpl.class);
-            }
-        });
-        injectAnnotatedField(clazz, instance, Resource.class, new AnnotatedFieldListener<Object, Resource>() {
-            @Override
-            public Object found(Field field, Resource annotation) throws Exception {
-                final String pluginId = calcPluginId(field, engine, Resource.class);
-                try {
-                    final Plugin plugin = engine.getPlugin(pluginId);
-                    if (plugin.getResource() != null) {
-                        Object res = Class.forName(plugin.getResource()).newInstance();
-                        plugin.getContext().getInjector().inject(res, plugin.getContext(), null);
-                        return res;
-                    }
-                    return null;
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to inject resource for plugin " + pluginId, e);
-                }
+                return null;
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to inject resource for plugin " + pluginId, e);
             }
         });
         autowireFields(instance, applicationContext, camelContext);

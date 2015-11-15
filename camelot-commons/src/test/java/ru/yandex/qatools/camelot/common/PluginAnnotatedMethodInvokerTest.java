@@ -22,7 +22,7 @@ public class PluginAnnotatedMethodInvokerTest {
     public static class TestState implements Serializable {
     }
 
-    public static interface TestAggregator {
+    public interface TestAggregator {
         @OnInit
         void onInit1();
 
@@ -65,6 +65,8 @@ public class PluginAnnotatedMethodInvokerTest {
         pluginContext.setInjector(new PluginContextInjectorImpl());
         plugin.setAggregator(TestAggregatorImpl.class.getName());
         plugin.setContext(pluginContext);
+        pluginContext.setPluginsService(mock(PluginsService.class));
+        when(pluginContext.getPluginsService().getAppConfig()).thenReturn(appConfig);
 
         PluginMethodInvoker invoker = new PluginAnnotatedMethodInvoker(plugin, OnClientMessage.class).process();
         invoker.invoke();

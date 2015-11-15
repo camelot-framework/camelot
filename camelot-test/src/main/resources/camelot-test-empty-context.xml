@@ -13,7 +13,7 @@
     <import resource="classpath*:camelot-extension.xml"/>
     <import resource="classpath*:camelot-extensions.xml"/>
     <bean id="testHelper" class="ru.yandex.qatools.camelot.test.service.TestHelperImpl" depends-on="testBuildersFactoryInitializer"/>
-    <bean id="testBuildersFactoryInitializer" class="ru.yandex.qatools.camelot.test.service.TestBuildersFactoryInitializer" />
+    <bean id="testBuildersFactoryInitializer" class="ru.yandex.qatools.camelot.test.service.TestBuildersFactoryBeanPostProcessor" />
 
     <context:annotation-config/>
     <context:component-scan base-package="ru.yandex.qatools.camelot.test"/>

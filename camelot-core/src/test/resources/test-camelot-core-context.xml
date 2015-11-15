@@ -20,6 +20,8 @@
 
     <amq:connectionFactory id="jmsFactory" brokerURL="vm://${activemq.embedded.bind}"/>
 
+    <bean class="ru.yandex.qatools.camelot.core.service.TestBeanWithContext"/>
+
     <bean id="jmsConfig" class="org.apache.camel.component.jms.JmsConfiguration">
         <property name="connectionFactory" ref="jmsFactory"/>
         <property name="transacted" value="false"/>
@@ -39,8 +41,11 @@
         </property>
         <property name="properties">
             <util:properties>
-                <prop key="activemq.embedded.bind">localhost:#{T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort()}</prop>
-                <prop key="hazelcast.port">#{new String(T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort())}</prop>
+                <prop key="activemq.embedded.bind">
+                    localhost:#{T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort()}
+                </prop>
+                <prop key="hazelcast.port">#{new String(T(ru.yandex.qatools.camelot.util.SocketUtil).findFreePort())}
+                </prop>
                 <prop key="hazelcast.port.auto.increment">false</prop>
             </util:properties>
         </property>
