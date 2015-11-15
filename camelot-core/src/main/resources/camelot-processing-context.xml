@@ -7,7 +7,10 @@
     <!-- Beans -->
 
     <bean id="camelot-context-injector" class="ru.yandex.qatools.camelot.common.PluginContextInjectorImpl"/>
-    <bean id="camelot-beans-context-injector" class="ru.yandex.qatools.camelot.core.impl.PluginsContextIntoBeansInjector"/>
+    <bean id="camelot-beans-context-injector"
+          class="ru.yandex.qatools.camelot.core.impl.PluginsContextIntoBeansInjector" >
+        <constructor-arg ref="camelot-processing-engine" name="pluginsService"/>
+    </bean>
     <bean id="camelot-resource-builder" class="ru.yandex.qatools.camelot.core.builders.SpringPluginResourceBuilder"/>
     <bean id="camelot-app-config" class="ru.yandex.qatools.camelot.core.impl.AppConfigSpringProperties"/>
     <bean id="camelot-plugin-initializer" class="ru.yandex.qatools.camelot.core.impl.PluginInitializerImpl"/>
@@ -16,7 +19,8 @@
     <bean id="camelot-scheduler-factory" class="org.quartz.impl.StdSchedulerFactory"/>
     <bean id="camelot-scheduler" factory-bean="camelot-scheduler-factory" factory-method="getScheduler"/>
 
-    <bean id="camelot-processing-engine" class="ru.yandex.qatools.camelot.core.impl.ProcessingEngineImpl" init-method="init">
+    <bean id="camelot-processing-engine" class="ru.yandex.qatools.camelot.core.impl.ProcessingEngineImpl"
+          init-method="init">
         <constructor-arg name="configResources" value="${plugins.config.path}"/>
         <constructor-arg name="camelContext" ref="camelot-camel-context"/>
         <constructor-arg name="pluginLoader" ref="${camelot.pluginLoader}"/>
