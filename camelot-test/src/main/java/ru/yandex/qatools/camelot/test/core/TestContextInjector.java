@@ -3,10 +3,10 @@ package ru.yandex.qatools.camelot.test.core;
 import org.apache.camel.Exchange;
 import ru.yandex.qatools.camelot.api.annotations.PluginComponent;
 import ru.yandex.qatools.camelot.common.PluginContextInjector;
-import ru.yandex.qatools.camelot.config.PluginContext;
 import ru.yandex.qatools.camelot.common.PluginContextInjectorImpl;
+import ru.yandex.qatools.camelot.common.PluginsService;
+import ru.yandex.qatools.camelot.config.PluginContext;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,46 +23,44 @@ public class TestContextInjector<P> extends PluginContextInjectorImpl<P> impleme
     }
 
     @Override
-    public void inject(P pluginObj, PluginContext context) {
-        injectComponents(pluginObj, context, null);
+    public void inject(P pluginObj, PluginsService service, PluginContext context) {
+        injectComponents(pluginObj, service, context, null);
     }
 
     @Override
-    public void inject(P pluginObj, PluginContext context, Exchange exchange) {
-        injectComponents(pluginObj, context, exchange);
+    public void inject(P pluginObj, PluginsService service, PluginContext context, Exchange exchange) {
+        injectComponents(pluginObj, service, context, exchange);
     }
 
-    private void injectComponents(P pluginObj, final PluginContext context, final Exchange exchange){
-        original.inject(pluginObj, context, exchange);
-        injectOverriddenComponents(pluginObj, context, exchange);
+    private void injectComponents(P pluginObj, PluginsService service, PluginContext context, Exchange exchange) {
+        original.inject(pluginObj, service, context, exchange);
+        injectOverriddenComponents(pluginObj, service, context, exchange);
     }
 
-    private void injectOverriddenComponents(final Object pluginObj, final PluginContext context, final Exchange exchange) {
+    private void injectOverriddenComponents(Object pluginObj, PluginsService service,
+                                            PluginContext context, Exchange exchange) {
         try {
             final Map<Class, Object> components = new HashMap<>();
-            injectField(pluginObj.getClass(), PluginComponent.class, pluginObj, new FieldListener<Object>() {
-                @Override
-                public Object found(Field field, AnnotationInfo info) throws Exception { //NOSONAR
+            injectField(pluginObj.getClass(), PluginComponent.class, pluginObj, (field, info) -> { //NOSONAR
 
-                    @SuppressWarnings("unchecked")
-                    final Class<P> type = (Class<P>) overriddenComponents.get(field.getType());
-                    if (type == null) {
-                        return field.get(pluginObj);
-                    }
-
-                    if (!components.containsKey(type)) {
-                        try {
-                            final P instance = type.newInstance();
-                            injectComponents(instance, context, exchange);
-                            components.put(type, instance);
-                        } catch (Exception e) {
-                            LOGGER.warn(String.format("Failed to inject plugin component into field %s!",
-                                    field.getName()), e);
-                            return null;
-                        }
-                    }
-                    return components.get(type);
+                @SuppressWarnings("unchecked")
+                final Class<P> type = (Class<P>) overriddenComponents.get(field.getType());
+                if (type == null) {
+                    return field.get(pluginObj);
                 }
+
+                if (!components.containsKey(type)) {
+                    try {
+                        final P instance = type.newInstance();
+                        injectComponents(instance, service, context, exchange);
+                        components.put(type, instance);
+                    } catch (Exception e) {
+                        LOGGER.warn(String.format("Failed to inject plugin component into field %s!",
+                                field.getName()), e);
+                        return null;
+                    }
+                }
+                return components.get(type);
             });
         } catch (Exception e) {
             LOGGER.warn(String.format("Failed to inject context of plugin %s!", context.getId()), e);

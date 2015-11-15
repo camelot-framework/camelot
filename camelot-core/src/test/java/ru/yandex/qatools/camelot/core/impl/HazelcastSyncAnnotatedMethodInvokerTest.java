@@ -13,6 +13,7 @@ import ru.yandex.qatools.camelot.api.annotations.OnInit;
 import ru.yandex.qatools.camelot.common.FoundMethodProcessor;
 import ru.yandex.qatools.camelot.common.PluginContextInjectorImpl;
 import ru.yandex.qatools.camelot.common.PluginMethodInvoker;
+import ru.yandex.qatools.camelot.common.PluginsService;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
 import ru.yandex.qatools.camelot.hazelcast.HazelcastSyncAnnotatedMethodInvoker;
@@ -61,7 +62,8 @@ public class HazelcastSyncAnnotatedMethodInvokerTest {
         context.setPluginClass(TestPlugin.class.getName());
         context.setInjector(new PluginContextInjectorImpl<TestPlugin>() {
             @Override
-            public void inject(TestPlugin pluginObj, PluginContext pluginContext, Exchange exchange) {
+            public void inject(TestPlugin pluginObj, PluginsService service,
+                               PluginContext pluginContext, Exchange exchange) {
                 pluginObj.setCounter(count);
             }
         });

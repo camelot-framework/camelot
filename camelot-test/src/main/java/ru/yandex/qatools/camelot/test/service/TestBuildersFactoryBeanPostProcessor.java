@@ -13,7 +13,10 @@ import ru.yandex.qatools.camelot.test.core.TestContextInjector;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public class TestBuildersFactoryInitializer implements ApplicationContextAware, BeanPostProcessor, PriorityOrdered {
+public class TestBuildersFactoryBeanPostProcessor implements ApplicationContextAware, BeanPostProcessor, PriorityOrdered {
+
+    // Not nice solution, but we'll have 10000 chances to overwrite the changes made by this bean later (if it's required)
+    public static final int PRECEDENCE = Ordered.LOWEST_PRECEDENCE - 10000;
 
     private ApplicationContext applicationContext;
 
@@ -35,7 +38,7 @@ public class TestBuildersFactoryInitializer implements ApplicationContextAware, 
 
     @Override
     public int getOrder() {
-        return Ordered.LOWEST_PRECEDENCE;
+        return PRECEDENCE;
     }
 
     @Override
