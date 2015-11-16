@@ -133,7 +133,7 @@ public abstract class AbstractQuartzInitializer<T extends Lock> implements Quart
             if (lockAndStartScheduler()) {
                 break;
             }
-            logger.debug("Checking if master Quartz is dead...");
+            logger.debug("Checking if master Quartz is dead");
             if (isTimePassedSince(heartBeatTimeout, getLastHeartbeat())) {
                 logger.warn("Last master Quartz heartbeat timeout reached! Unlocking the Quartz lock!");
                 unlock();
@@ -143,18 +143,17 @@ public abstract class AbstractQuartzInitializer<T extends Lock> implements Quart
 
     private void startMasterLoop() {
         singleThread.submit((Runnable) () -> {
-            logger.info("Starting master Quartz heartbeat loop!");
+            logger.info("Starting master Quartz heartbeat loop");
             while (true) {
-                logger.debug("Updating master Quartz heartbeat loop...");
+                logger.debug("Updating master Quartz heartbeat loop");
                 updateHeartBeat();
                 try {
                     sleep(heartBeatInterval);
                     if (!isMaster()) {
-                        throw new RuntimeException("Lock is not held by me anymore, need to " + //NOSONAR
-                                "restart scheduler!");
+                        throw new RuntimeException("Lock is not held by me anymore, need to restart scheduler!"); //NOSONAR
                     }
                 } catch (Exception e) {
-                    logger.error("Failed to update heartbeat interval! Restarting scheduler...", e);
+                    logger.error("Failed to update heartbeat interval! Restarting scheduler", e);
                     restart();
                     break;
                 }
