@@ -13,7 +13,7 @@ import static java.lang.System.currentTimeMillis;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
-public class QuartzHazelcastInitializerImpl extends AbstractQuartzInitializer<ILock> {
+public class QuartzHazelcastInitializer extends AbstractQuartzInitializer<ILock> {
 
     public static final String DEFAULT_QUARTZ_LOCK = "defaultQuartzLock";
     public static final String HEARTBEAT_LAST_TIME = "defaultQuartzHeartBeatTime";
@@ -21,7 +21,7 @@ public class QuartzHazelcastInitializerImpl extends AbstractQuartzInitializer<IL
     private final IAtomicLong lastHeartBeatTime;
     private final HazelcastInstance hazelcastInstance;
 
-    public QuartzHazelcastInitializerImpl(HazelcastInstance hazelcastInstance, Scheduler scheduler, AppConfig config) {
+    public QuartzHazelcastInitializer(HazelcastInstance hazelcastInstance, Scheduler scheduler, AppConfig config) {
         super(scheduler, config);
         this.hazelcastInstance = hazelcastInstance;
         this.lastHeartBeatTime = hazelcastInstance.getAtomicLong(HEARTBEAT_LAST_TIME);
