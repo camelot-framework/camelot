@@ -60,7 +60,6 @@ public class MongodbAggregationRepository extends ServiceSupport
                     "Failed to acquire the lock for the key '%s' within timeout of %ds",
                     key, waitForLockSec), e);
         } catch (PessimisticException | MongoException e) {
-            LOGGER.warn("Failed to get the key: ", e);
             throw new RepositoryUnreachableException(e);
         }
     }
