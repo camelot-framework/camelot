@@ -37,10 +37,8 @@ public class MongodbAggregationRepositoryBuilder extends MemoryAggregationReposi
     public AggregationRepository initWritable(Plugin plugin) throws Exception { //NOSONAR
         final MongoPessimisticLocking locking = initLocking(plugin.getId());
         final MongodbAggregationRepository repo = new MongodbAggregationRepository(
-                locking, waitForLockSec
+                plugin.getId(), locking, waitForLockSec
         );
-        repo.setRepoName(plugin.getId());
-        repo.setWaitForLockSec(waitForLockSec);
         repo.doStart();
         return repo;
     }

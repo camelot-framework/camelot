@@ -31,6 +31,6 @@ public class BuildersFactoryWithHazelcastImpl extends BuildersFactoryImpl {
 
     @Override
     public QuartzInitializer newQuartzInitializer(Scheduler scheduler, AppConfig config) throws Exception { //NOSONAR
-        return new QuartzHazelcastInitializerImpl(hazelcastInstance, scheduler, config);
+        return new QuartzHazelcastInitializer(hazelcastInstance, scheduler, config);
     }
 }

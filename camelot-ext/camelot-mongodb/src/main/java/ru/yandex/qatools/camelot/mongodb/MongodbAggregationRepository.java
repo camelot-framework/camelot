@@ -20,13 +20,16 @@ import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.common.AggregationRepositoryWithLocks;
 import ru.yandex.qatools.camelot.common.AggregationRepositoryWithValuesMap;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
-import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -38,14 +41,17 @@ public class MongodbAggregationRepository extends ServiceSupport
         OptimisticLockingAggregationRepository,
         AggregationRepositoryWithLocks,
         AggregationRepositoryWithValuesMap {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MongodbAggregationRepository.class);
 
-    private MongoPessimisticRepo<DefaultExchangeHolder> mongoRepo;
-    private MongoPessimisticLocking mongoLocking;
-    private String repoName;
-    private long waitForLockSec = MINUTES.toSeconds(5);
+    private final String repoName;
+    private final MongoPessimisticLocking mongoLocking;
+    private final long waitForLockSec;
 
-    public MongodbAggregationRepository(MongoPessimisticLocking mongoLocking, long waitForLockSec) {
+    private MongoPessimisticRepo<DefaultExchangeHolder> mongoRepo;
+
+    public MongodbAggregationRepository(String repoName, MongoPessimisticLocking mongoLocking, long waitForLockSec) {
+        this.repoName = repoName;
         this.mongoLocking = mongoLocking;
         this.waitForLockSec = waitForLockSec;
     }
@@ -60,7 +66,6 @@ public class MongodbAggregationRepository extends ServiceSupport
                     "Failed to acquire the lock for the key '%s' within timeout of %ds",
                     key, waitForLockSec), e);
         } catch (PessimisticException | MongoException e) {
-            LOGGER.warn("Failed to get the key: ", e);
             throw new RepositoryUnreachableException(e);
         }
     }
@@ -164,26 +169,6 @@ public class MongodbAggregationRepository extends ServiceSupport
             error("Failed to update map for key '{}'", key, e);
             throw new RepositoryFailureException(format("Failed to get exchange for key '%s'", key), e);
         }
-    }
-
-    public MongoPessimisticRepo getMongoRepo() {
-        return mongoRepo;
-    }
-
-    public void setMongoRepo(MongoPessimisticRepo mongoRepo) {
-        this.mongoRepo = mongoRepo;
-    }
-
-    public void setWaitForLockSec(long waitForLockSec) {
-        this.waitForLockSec = waitForLockSec;
-    }
-
-    public String getRepoName() {
-        return repoName;
-    }
-
-    public void setRepoName(String repoName) {
-        this.repoName = repoName;
     }
 
     private Exchange toExchange(CamelContext camelContext, DefaultExchangeHolder holder) {

@@ -34,6 +34,6 @@ public class BuildersFactoryWithMongodbImpl extends BuildersFactoryImpl {
 
     @Override
     public QuartzInitializer newQuartzInitializer(Scheduler scheduler, AppConfig config) throws Exception { //NOSONAR
-        return new QuartzMongodbInitializerImpl(mongoClient, dbName, scheduler, config);
+        return new QuartzMongodbInitializer(mongoClient, dbName, scheduler, config);
     }
 }
