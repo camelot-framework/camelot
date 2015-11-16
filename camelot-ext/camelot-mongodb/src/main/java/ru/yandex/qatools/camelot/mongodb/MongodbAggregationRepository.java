@@ -72,24 +72,18 @@ public class MongodbAggregationRepository extends ServiceSupport
 
     @Override
     public Exchange add(final CamelContext camelContext, final String key, final Exchange exchange) {
-        return writeAttempt(key, new Callable<Exchange>() {
-            @Override
-            public Exchange call() throws Exception {
-                DefaultExchangeHolder holder = DefaultExchangeHolder.marshal(exchange);
-                mongoRepo.putAndUnlock(key, holder);
-                return toExchange(camelContext, holder);
-            }
+        return writeAttempt(key, () -> {
+            DefaultExchangeHolder holder = DefaultExchangeHolder.marshal(exchange);
+            mongoRepo.putAndUnlock(key, holder);
+            return toExchange(camelContext, holder);
         });
     }
 
     @Override
     public void remove(CamelContext camelContext, final String key, final Exchange exchange) {
-        writeAttempt(key, new Callable<Exchange>() {
-            @Override
-            public Exchange call() throws Exception {
-                mongoRepo.removeAndUnlock(key);
-                return exchange;
-            }
+        writeAttempt(key, () -> {
+            mongoRepo.removeAndUnlock(key);
+            return exchange;
         });
     }
 
