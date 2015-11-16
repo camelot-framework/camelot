@@ -20,13 +20,12 @@ import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.common.AggregationRepositoryWithLocks;
 import ru.yandex.qatools.camelot.common.AggregationRepositoryWithValuesMap;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import static java.lang.String.format;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -144,7 +143,7 @@ public class MongodbAggregationRepository extends ServiceSupport
 
     @Override
     public Set<String> getKeys() {
-        return Collections.unmodifiableSet(mongoRepo.keySet());
+        return unmodifiableSet(new LinkedHashSet<>(mongoRepo.keySet()));
     }
 
     @Override
@@ -229,11 +228,11 @@ public class MongodbAggregationRepository extends ServiceSupport
 
     @Override
     public Map<String, Exchange> values(CamelContext camelContext) {
-        Map<String, DefaultExchangeHolder> holderMap = mongoRepo.keyValueMap();
+        Map<String, DefaultExchangeHolder> holderMap = new LinkedHashMap<>(mongoRepo.keyValueMap());
         Map<String, Exchange> result = new HashMap<>(holderMap.size(), 1);
         for (Map.Entry<String, DefaultExchangeHolder> entry : holderMap.entrySet()) {
             result.put(entry.getKey()   , toExchange(camelContext, entry.getValue()));
         }
-        return result;
+        return unmodifiableMap(result);
     }
 }
