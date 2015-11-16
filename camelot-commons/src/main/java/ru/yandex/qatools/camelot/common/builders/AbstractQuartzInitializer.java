@@ -1,6 +1,7 @@
 package ru.yandex.qatools.camelot.common.builders;
 
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.camelot.api.AppConfig;
@@ -130,14 +131,32 @@ public abstract class AbstractQuartzInitializer<T extends Lock> implements Quart
 
     private void waitForTheMasterLock() {
         while (true) {
-            if (lockAndStartScheduler()) {
-                break;
+            try {
+                if (becomeMaster()) {
+                    break;
+                }
+                checkMasterIsAlive();
+            } catch (Exception e) {
+                standby();
+                logger.warn("Unable to start scheduler", e);
             }
-            logger.debug("Checking if master Quartz is dead");
-            if (isTimePassedSince(heartBeatTimeout, getLastHeartbeat())) {
-                logger.warn("Last master Quartz heartbeat timeout reached! Unlocking the Quartz lock!");
-                unlock();
-            }
+        }
+    }
+
+    private boolean becomeMaster() throws InterruptedException, SchedulerException {
+        if (lock()) {
+            scheduler.start();
+            logger.warn("This node is now the master Quartz!");
+            return true;
+        }
+        return false;
+    }
+
+    private void checkMasterIsAlive() {
+        logger.debug("Checking if master Quartz is dead");
+        if (isTimePassedSince(heartBeatTimeout, getLastHeartbeat())) {
+            logger.warn("Last master Quartz heartbeat timeout reached! Unlocking the Quartz lock!");
+            unlock();
         }
     }
 
@@ -145,9 +164,9 @@ public abstract class AbstractQuartzInitializer<T extends Lock> implements Quart
         singleThread.submit((Runnable) () -> {
             logger.info("Starting master Quartz heartbeat loop");
             while (true) {
-                logger.debug("Updating master Quartz heartbeat loop");
-                updateHeartBeat();
                 try {
+                    logger.debug("Updating master Quartz heartbeat loop");
+                    updateHeartBeat();
                     sleep(heartBeatInterval);
                     if (!isMaster()) {
                         throw new RuntimeException("Lock is not held by me anymore, need to restart scheduler!"); //NOSONAR
@@ -159,19 +178,5 @@ public abstract class AbstractQuartzInitializer<T extends Lock> implements Quart
                 }
             }
         });
-    }
-
-    private boolean lockAndStartScheduler() {
-        try {
-            if (lock()) {
-                scheduler.start();
-                logger.warn("This node is now the master Quartz!");
-                return true;
-            }
-        } catch (Exception e) {
-            standby();
-            logger.warn("Unable to start scheduler", e);
-        }
-        return false;
     }
 }
