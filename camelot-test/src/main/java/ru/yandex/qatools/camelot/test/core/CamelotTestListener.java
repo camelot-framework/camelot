@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Properties;
 
 import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static org.apache.camel.util.CamelContextHelper.getEndpointInjection;
 import static org.apache.camel.util.ObjectHelper.isEmpty;
 import static org.mockito.Mockito.reset;
@@ -47,6 +48,7 @@ import static ru.yandex.qatools.camelot.util.ServiceUtil.injectAnnotatedField;
 public class CamelotTestListener extends AbstractTestExecutionListener {
     public static final String PROCESSING_ENGINE = "CamelotProcessingEngine";
     public static final String CLIENT_INITIALIZER = "CamelotMockedClientInitializer";
+    public static final int MAX_INFLIGHT_WAIT_MS = 5000;
     final Logger logger = getLogger(getClass());
 
     @Override
@@ -156,6 +158,13 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
         if (engine != null && clientInitializer != null) {
             final TestBuildersFactory factory = ((TestBuildersFactory) engine.getBuildersFactory());
             final CamelContext camelContext = engine.getCamelContext();
+            long waitStartedTime = currentTimeMillis();
+            while (camelContext.getInflightRepository().browse().isEmpty() &&
+                    currentTimeMillis() - waitStartedTime < MAX_INFLIGHT_WAIT_MS) {
+                camelContext.getInflightRepository().browse().forEach(e ->
+                        logger.warn("Wait until inflight exchange {} for route {} is being processed...",
+                                e.getExchange().getExchangeId(), e.getRouteId()));
+            }
             try {
                 SedaComponent seda = camelContext.getComponent("seda", SedaComponent.class);
                 for (String queue : seda.getQueues().keySet()) {
