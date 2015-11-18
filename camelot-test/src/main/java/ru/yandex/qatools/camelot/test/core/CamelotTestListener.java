@@ -159,7 +159,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
             final TestBuildersFactory factory = ((TestBuildersFactory) engine.getBuildersFactory());
             final CamelContext camelContext = engine.getCamelContext();
             long waitStartedTime = currentTimeMillis();
-            while (!camelContext.getInflightRepository().browse().isEmpty() &&
+            while (camelContext.getInflightRepository().browse().isEmpty() &&
                     currentTimeMillis() - waitStartedTime < MAX_INFLIGHT_WAIT_MS) {
                 camelContext.getInflightRepository().browse().forEach(e ->
                         logger.warn("Wait until inflight exchange {} for route {} is being processed...",
