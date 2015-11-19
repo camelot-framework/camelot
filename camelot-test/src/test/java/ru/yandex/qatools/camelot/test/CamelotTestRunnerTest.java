@@ -6,6 +6,7 @@ import ru.yandex.qatools.camelot.api.ClientMessageSender;
 
 import static ch.lambdaj.Lambda.having;
 import static ch.lambdaj.Lambda.on;
+import static java.util.stream.IntStream.rangeClosed;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Matchers.any;
@@ -76,5 +77,6 @@ public class CamelotTestRunnerTest {
         helper.send("test2", UUID, "uuid3");
         verify(prcMock, timeout(TIMEOUT).times(1)).onEvent(eq("test2"));
         verify(aggMock, timeout(TIMEOUT).times(1)).onEvent(any(TestState.class), eq("test2-processed-test-value"));
+        rangeClosed(1, 100).forEach(value -> helper.send("test2", UUID, "uuid1"));
     }
 }
