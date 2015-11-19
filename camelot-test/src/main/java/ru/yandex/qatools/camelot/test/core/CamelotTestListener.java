@@ -27,6 +27,7 @@ import java.util.Properties;
 
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
+import static java.util.stream.Collectors.toList;
 import static org.apache.camel.util.CamelContextHelper.getEndpointInjection;
 import static org.apache.camel.util.ObjectHelper.isEmpty;
 import static org.mockito.Mockito.reset;
@@ -159,11 +160,13 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
             final TestBuildersFactory factory = ((TestBuildersFactory) engine.getBuildersFactory());
             final CamelContext camelContext = engine.getCamelContext();
             long waitStartedTime = currentTimeMillis();
-            while (camelContext.getInflightRepository().browse().isEmpty() &&
+            while (!camelContext.getInflightRepository().browse().isEmpty() &&
                     currentTimeMillis() - waitStartedTime < MAX_INFLIGHT_WAIT_MS) {
-                camelContext.getInflightRepository().browse().forEach(e ->
-                        logger.warn("Wait until inflight exchange {} for route {} is being processed...",
-                                e.getExchange().getExchangeId(), e.getRouteId()));
+                camelContext.getInflightRepository().browse().stream().collect(toList()).forEach(e -> {
+                    camelContext.getInflightRepository().remove(e.getExchange());
+                    logger.warn("Removing inflight exchange {} for route {}",
+                            e.getExchange().getExchangeId(), e.getRouteId());
+                });
             }
             try {
                 SedaComponent seda = camelContext.getComponent("seda", SedaComponent.class);
