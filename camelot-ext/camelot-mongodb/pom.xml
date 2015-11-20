@@ -10,7 +10,7 @@
     <name>Camelot MongoDB Extension</name>
     <artifactId>camelot-mongodb</artifactId>
     <properties>
-        <pessimistic-mongodb.version>1.2</pessimistic-mongodb.version>
+        <pessimistic-mongodb.version>1.3</pessimistic-mongodb.version>
     </properties>
 
     <dependencies>
