@@ -27,6 +27,7 @@ import java.util.Properties;
 
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.sleep;
 import static java.util.stream.Collectors.toList;
 import static org.apache.camel.util.CamelContextHelper.getEndpointInjection;
 import static org.apache.camel.util.ObjectHelper.isEmpty;
@@ -163,9 +164,14 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
             while (!camelContext.getInflightRepository().browse().isEmpty() &&
                     currentTimeMillis() - waitStartedTime < MAX_INFLIGHT_WAIT_MS) {
                 camelContext.getInflightRepository().browse().stream().collect(toList()).forEach(e -> {
-                    camelContext.getInflightRepository().remove(e.getExchange());
-                    logger.warn("Removing inflight exchange {} for route {}",
-                            e.getExchange().getExchangeId(), e.getRouteId());
+                    try {
+                        camelContext.getInflightRepository().remove(e.getExchange());
+                        logger.warn("Removing inflight exchange {} for route {}",
+                                e.getExchange().getExchangeId(), e.getRouteId());
+                        sleep(20); // Giving some time for camel to fetch new inflights
+                    } catch (InterruptedException ignored) {
+                        throw new RuntimeException(ignored);
+                    }
                 });
             }
             try {
