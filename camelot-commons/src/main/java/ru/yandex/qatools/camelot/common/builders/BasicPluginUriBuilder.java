@@ -11,11 +11,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 public class BasicPluginUriBuilder implements PluginUriBuilder {
 
     @Override
-    public String broadcastUri(String pluginId, String suffix) {
-        return localUri(pluginId, suffix);
-    }
-
-    @Override
     public String localUri(String pluginId, String suffix) {
         return "direct:plugin." + pluginId + (isEmpty(suffix) ? "" : "." + suffix);
     }

@@ -29,11 +29,6 @@ public class KafkaPluginUriBuilder extends BasicPluginUriBuilder {
     }
 
     @Override
-    public String broadcastUri(String pluginId, String suffix) {
-        return kafkaTopicUri(kafkaBaseUri(), pluginId + (isEmpty(suffix) ? "" : "." + suffix), "");
-    }
-
-    @Override
     public String tmpInputBufferUri() {
         return kafkaTopicUri(kafkaBaseUri(), "all.tmp.input.buffer", "");
     }

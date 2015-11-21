@@ -7,11 +7,6 @@ import ru.yandex.qatools.camelot.config.Plugin;
  */
 public interface PluginUriBuilder {
     /**
-     * Generates broadcast uri (topic)
-     */
-    String broadcastUri(String pluginId, String suffix);
-
-    /**
      * Generates local plugin uri with id and suffix (without queue)
      */
     String localUri(String pluginId, String suffix);

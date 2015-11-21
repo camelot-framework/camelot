@@ -18,11 +18,6 @@ public class ActivemqPluginUriBuilder extends BasicPluginUriBuilder implements P
             "&destination.consumer.dispatchAsync=true";
 
     @Override
-    public String broadcastUri(String pluginId, String suffix) {
-        return "activemq:topic:" + pluginId + ((isEmpty(suffix)) ? "" : "." + suffix) + BROADCAST_CONFIG;
-    }
-
-    @Override
     public String pluginUri(Plugin plugin, String suffix, String brokerConfig) {
         return plugin.getBaseInputUri() + "." + plugin.getId()
                 + (isEmpty(suffix) ? "" : "." + suffix)
