@@ -26,7 +26,8 @@ import java.util.*;
 import static java.lang.String.format;
 import static jodd.util.StringUtil.isEmpty;
 import static ru.yandex.qatools.camelot.core.util.IOUtils.readResource;
-import static ru.yandex.qatools.camelot.core.util.ServiceUtil.*;
+import static ru.yandex.qatools.camelot.core.util.ServiceUtil.initEventProducer;
+import static ru.yandex.qatools.camelot.core.util.ServiceUtil.initPluginAppConfig;
 import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 import static ru.yandex.qatools.camelot.util.NameUtil.defaultPluginId;
 
@@ -439,7 +440,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
 
     }
 
-    protected  <T extends ProcessorDefinition> T addInterimRoute(T route) {
+    protected <T extends ProcessorDefinition> T addInterimRoute(T route) {
         if (getInterimProcessor() != null) {
             route.process(getInterimProcessor());
         }
@@ -543,10 +544,10 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
         for (PluginsConfig config : configs) {
             for (final PluginsSource source : config.getSources()) {
                 for (final Plugin plugin : source.getPlugins()) {
-                    Class pluginClass = plugin.getContext().getClassLoader().loadClass(
-                            plugin.getContext().getPluginClass()
-                    );
-                    result.put(pluginClass.getName(), plugin);
+                    result.put(plugin.getContext().getPluginClass(), plugin);
+                    if (!isEmpty(plugin.getResource())) {
+                        result.put(plugin.getResource(), plugin);
+                    }
                 }
             }
         }
