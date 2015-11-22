@@ -29,13 +29,13 @@ public class PluginsContextIntoBeansInjector implements ApplicationListener, App
 
     private Object performInjection(Object bean) {
         if (pluginsService != null) {
-            PluginContext context = null;
+            PluginContext plusginContext = null;
             try {
-                context = pluginsService.getPlugin(bean.getClass()).getContext();
+                plusginContext = pluginsService.getPlugin(bean.getClass()).getContext();
             } catch (Exception e) { //NOSONAR
-                LOGGER.debug("Could not find plugin context for {}, using defaults", bean.getClass());
+                LOGGER.debug("Could not find plugin plusginContext for {}, using defaults", bean.getClass());
             }
-            springInjector.inject(bean, pluginsService, context);
+            springInjector.inject(bean, pluginsService, plusginContext);
         }
         return bean;
     }

@@ -542,10 +542,10 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     private Map<String, Plugin> buildPluginsByClassMap(final List<PluginsConfig> configs) throws ClassNotFoundException {
         Map<String, Plugin> result = new HashMap<>();
         for (PluginsConfig config : configs) {
-            for (final PluginsSource source : config.getSources()) {
-                for (final Plugin plugin : source.getPlugins()) {
+            for (PluginsSource source : config.getSources()) {
+                for (Plugin plugin : source.getPlugins()) {
                     result.put(plugin.getContext().getPluginClass(), plugin);
-                    if (!isEmpty(plugin.getResource())) {
+                    if (!isEmpty(plugin.getResource())) { //NOSONAR
                         result.put(plugin.getResource(), plugin);
                     }
                 }

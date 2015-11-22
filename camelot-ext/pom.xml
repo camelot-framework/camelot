@@ -14,6 +14,7 @@
         <module>camelot-loader-maven</module>
         <module>camelot-serialize-fst</module>
         <module>camelot-mongodb</module>
+        <module>camelot-rabbitmq</module>
     </modules>
 
     <name>Camelot Extensions</name>
