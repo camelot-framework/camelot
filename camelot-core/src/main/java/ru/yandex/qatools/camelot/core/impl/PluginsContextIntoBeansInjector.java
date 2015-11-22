@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.AbstractApplicationContext;
 import ru.yandex.qatools.camelot.common.PluginsService;
+import ru.yandex.qatools.camelot.config.PluginContext;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -18,10 +19,9 @@ import ru.yandex.qatools.camelot.common.PluginsService;
 @SuppressWarnings("unchecked")
 public class PluginsContextIntoBeansInjector implements ApplicationListener, ApplicationContextAware {
     protected final static Logger LOGGER = LoggerFactory.getLogger(PluginsContextIntoBeansInjector.class);
-
+    private final PluginsService pluginsService;
     private ApplicationContext context;
     private SpringContextInjector springInjector = new SpringContextInjector();
-    private final PluginsService pluginsService;
 
     public PluginsContextIntoBeansInjector(PluginsService pluginsService) {
         this.pluginsService = pluginsService;
@@ -29,7 +29,13 @@ public class PluginsContextIntoBeansInjector implements ApplicationListener, App
 
     private Object performInjection(Object bean) {
         if (pluginsService != null) {
-            springInjector.inject(bean, pluginsService, null);
+            PluginContext plusginContext = null;
+            try {
+                plusginContext = pluginsService.getPlugin(bean.getClass()).getContext();
+            } catch (Exception e) { //NOSONAR
+                LOGGER.debug("Could not find plugin plusginContext for {}, using defaults", bean.getClass());
+            }
+            springInjector.inject(bean, pluginsService, plusginContext);
         }
         return bean;
     }
@@ -48,7 +54,7 @@ public class PluginsContextIntoBeansInjector implements ApplicationListener, App
             ConfigurableListableBeanFactory clbf = ((AbstractApplicationContext) context).getBeanFactory();
             for (String name : context.getBeanDefinitionNames()) {
                 final Object singleton = clbf.getSingleton(name);
-                if(singleton != null) {
+                if (singleton != null) {
                     performInjection(singleton);
                 }
             }
