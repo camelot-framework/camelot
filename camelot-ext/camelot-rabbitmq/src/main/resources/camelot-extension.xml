@@ -6,6 +6,8 @@
 
     <bean id="camelot-rabbitmq-uribuilder" class="ru.yandex.qatools.camelot.rabbitmq.RabbitmqPluginUriBuilder">
         <constructor-arg name="rabbitmqHosts" value="${camelot.rabbitmq.hosts}"/>
+        <constructor-arg name="username" value="${camelot.rabbitmq.username}"/>
+        <constructor-arg name="password" value="${camelot.rabbitmq.password}"/>
         <constructor-arg name="defaultConfig" value="${camelot.rabbitmq.defaultConfig}"/>
     </bean>
     <bean id="camelot-interim-processor" class="ru.yandex.qatools.camelot.rabbitmq.RabbitmqInterimProcessor"/>
