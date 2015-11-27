@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugins-config xmlns="urn:config.camelot.qatools.yandex.ru">
+    <source>
+        <plugin>
+            <aggregator>ru.yandex.qatools.camelot.qpid.plugins.SumAggregator</aggregator>
+        </plugin>
+    </source>
+</plugins-config>

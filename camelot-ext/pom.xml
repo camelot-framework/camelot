@@ -9,6 +9,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>camelot-activemq</module>
+        <module>camelot-qpid</module>
         <module>camelot-kafka</module>
         <module>camelot-hazelcast</module>
         <module>camelot-loader-maven</module>
