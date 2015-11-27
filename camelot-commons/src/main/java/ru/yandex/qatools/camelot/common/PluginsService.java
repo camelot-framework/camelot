@@ -5,6 +5,7 @@ import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.api.EventProducer;
 import ru.yandex.qatools.camelot.api.PluginsInterop;
 import ru.yandex.qatools.camelot.common.builders.BuildersFactory;
+import ru.yandex.qatools.camelot.common.builders.QuartzInitializerFactory;
 import ru.yandex.qatools.camelot.common.builders.ResourceBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.config.PluginContext;
@@ -128,7 +129,17 @@ public interface PluginsService {
 
     MessagesSerializer getMessagesSerializer();
 
+    /**
+     * Set the default messages serializer
+     */
     void setMessagesSerializer(MessagesSerializer messagesSerializer);
+
+    /**
+     * Set the quartz initializer
+     */
+    void setQuartzFactory(QuartzInitializerFactory quartzInitializer);
+
+    QuartzInitializerFactory getQuartzFactory();
 
     /**
      * Returns true if plugin has aggregator or processor

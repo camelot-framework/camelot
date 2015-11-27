@@ -14,7 +14,7 @@ import static java.lang.System.currentTimeMillis;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
-public class QuartzMongodbInitializer extends AbstractQuartzInitializer<MongoPessimisticLock> {
+public class MongodbQuartzInitializer extends AbstractQuartzInitializer<MongoPessimisticLock> {
 
     public static final String DEFAULT_QUARTZ_LOCK = "defaultQuartzLock";
 
@@ -24,7 +24,7 @@ public class QuartzMongodbInitializer extends AbstractQuartzInitializer<MongoPes
 
     private final MongoPessimisticRepo repo;
 
-    public QuartzMongodbInitializer(MongoClient mongoClient, String dbName, Scheduler scheduler, AppConfig config) {
+    public MongodbQuartzInitializer(MongoClient mongoClient, String dbName, Scheduler scheduler, AppConfig config) {
         super(scheduler, config);
         this.repo = new MongoPessimisticRepo(
                 new MongoPessimisticLocking(

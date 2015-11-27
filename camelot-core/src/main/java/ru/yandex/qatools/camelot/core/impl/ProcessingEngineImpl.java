@@ -21,11 +21,7 @@ import ru.yandex.qatools.camelot.config.PluginsConfig;
 import ru.yandex.qatools.camelot.config.PluginsSource;
 import ru.yandex.qatools.camelot.core.builders.NoSchedulerBuildersFactory;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.String.format;
 import static org.apache.camel.LoggingLevel.DEBUG;
@@ -75,7 +71,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
 
         try {
             if (getScheduler() != null) {
-                this.quartzInitializer = getBuildersFactory().newQuartzInitializer(scheduler, getAppConfig());
+                this.quartzInitializer = getQuartzFactory().newQuartzInitilizer(scheduler, getAppConfig());
                 this.quartzInitializer.start();
             }
         } catch (Exception e) {

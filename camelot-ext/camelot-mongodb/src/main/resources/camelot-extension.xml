@@ -27,11 +27,16 @@
     </bean>
 
     <!-- Builders Factories -->
-    <bean id="camelot-factory-mongodb" class="ru.yandex.qatools.camelot.mongodb.BuildersFactoryWithMongodbImpl">
+    <bean id="camelot-factory-mongodb" class="ru.yandex.qatools.camelot.mongodb.MongodbBuildersFactoryImpl">
         <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
         <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
         <property name="waitForLockSec" value="${camelot.mongodb.waitForLockSec}"/>
         <property name="lockPollMaxIntervalMs" value="${camelot.mongodb.lockPollMaxIntervalMs}"/>
+    </bean>
+
+    <bean id="camelot-quartz-factory-mongodb" class="ru.yandex.qatools.camelot.mongodb.MongodbQuartzInitializerFactory">
+        <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
+        <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
     </bean>
 
 </beans>

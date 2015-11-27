@@ -9,9 +9,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
-public class QuartzMemoryInitializer extends AbstractQuartzInitializer<ReentrantLock> {
+public class BasicQuartzInitializer extends AbstractQuartzInitializer<ReentrantLock> {
 
-    public QuartzMemoryInitializer(Scheduler scheduler, AppConfig config) {
+    public BasicQuartzInitializer(Scheduler scheduler, AppConfig config) {
         super(scheduler, config);
     }
 

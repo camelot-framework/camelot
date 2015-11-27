@@ -25,8 +25,10 @@ public class TestBuildersFactoryBeanPostProcessor implements ApplicationContextA
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof PluginsService) {
             final PluginsService service = (PluginsService) bean;
-            service.setBuildersFactory(new TestBuildersFactory(service.getBuildersFactory(), applicationContext));
+            final TestBuildersFactory factory = new TestBuildersFactory(service.getBuildersFactory(), applicationContext);
+            service.setBuildersFactory(factory);
             service.setContextInjector(new TestContextInjector(service.getContextInjector()));
+            service.setQuartzFactory(factory);
         }
         return bean;
     }

@@ -17,7 +17,7 @@ import static ru.yandex.qatools.camelot.test.core.TestUtil.pluginMock;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public class TestBuildersFactory extends BuildersFactoryImpl {
+public class TestBuildersFactory extends BuildersFactoryImpl implements QuartzInitializerFactory {
     final BuildersFactory originalBuildersFactory;
     final ApplicationContext applicationContext;
     final Set<QuartzInitializer> quartzInitializers = new HashSet<>();
@@ -60,17 +60,16 @@ public class TestBuildersFactory extends BuildersFactoryImpl {
     }
 
     @Override
-    public QuartzInitializer newQuartzInitializer(Scheduler scheduler, AppConfig config) throws Exception { //NOSONAR
-        final QuartzInitializer initializer = originalBuildersFactory.newQuartzInitializer(scheduler,
-                applicationContext.getBean(AppConfig.class));
-        quartzInitializers.add(initializer);
-        return initializer;
-    }
-
-    @Override
     public SchedulerBuildersFactory newSchedulerBuildersFactory(Scheduler scheduler, CamelContext camelContext) {
         return new TestSchedulerBuildersFactory(super.newSchedulerBuildersFactory(scheduler, camelContext),
                 camelContext, mocksStorage);
+    }
+
+    @Override
+    public QuartzInitializer newQuartzInitilizer(Scheduler scheduler, AppConfig config) {
+        final BasicQuartzInitializer initializer = new BasicQuartzInitializer(scheduler, config);
+        quartzInitializers.add(initializer);
+        return initializer;
     }
 
     public Map<String, Object> getMocksStorage() {

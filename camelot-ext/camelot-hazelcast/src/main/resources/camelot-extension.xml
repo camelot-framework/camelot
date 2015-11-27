@@ -2,22 +2,21 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:hz="http://www.hazelcast.com/schema/spring"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="
-            http://www.springframework.org/schema/beans
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
             http://www.hazelcast.com/schema/spring
-            http://www.hazelcast.com/schema/spring/hazelcast-spring-3.4.xsd
-            http://www.springframework.org/schema/context
-            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+            http://www.hazelcast.com/schema/spring/hazelcast-spring-3.4.xsd">
 
     <hz:hazelcast id="hazelcastInstance">
         <hz:config>
             <hz:group name="${hazelcast.group.name}" password="${hazelcast.group.password}"/>
             <hz:properties>
-                <hz:property name="hazelcast.merge.first.run.delay.seconds">${hazelcast.merge.first.run.delay.seconds}</hz:property>
-                <hz:property name="hazelcast.merge.next.run.delay.seconds">${hazelcast.merge.next.run.delay.seconds}</hz:property>
-                <hz:property name="hazelcast.max.no.heartbeat.seconds">${hazelcast.max.no.heartbeat.seconds}</hz:property>
+                <hz:property name="hazelcast.merge.first.run.delay.seconds">${hazelcast.merge.first.run.delay.seconds}
+                </hz:property>
+                <hz:property name="hazelcast.merge.next.run.delay.seconds">${hazelcast.merge.next.run.delay.seconds}
+                </hz:property>
+                <hz:property name="hazelcast.max.no.heartbeat.seconds">${hazelcast.max.no.heartbeat.seconds}
+                </hz:property>
                 <hz:property name="hazelcast.logging.type">${hazelcast.logging.type}</hz:property>
                 <hz:property name="hazelcast.prefer.ipv4.stack">${hazelcast.prefer.ipv4.stack}</hz:property>
             </hz:properties>
@@ -50,10 +49,15 @@
     </bean>
 
     <!-- Builders Factories -->
-    <bean id="camelot-factory-hazelcast" class="ru.yandex.qatools.camelot.hazelcast.BuildersFactoryWithHazelcastImpl">
+    <bean id="camelot-factory-hazelcast" class="ru.yandex.qatools.camelot.hazelcast.HazelcastBuildersFactoryImpl">
         <constructor-arg name="hazelcastInstance" ref="hazelcastInstance"/>
         <property name="waitForLockSec" value="${camelot.hazelcast.waitForLockSec}"/>
         <property name="lockWaitHeartBeatSec" value="${camelot.hazelcast.lockWaitHeartBeatSec}"/>
+    </bean>
+
+    <bean id="camelot-quartz-factory-hazelcast"
+          class="ru.yandex.qatools.camelot.hazelcast.HazelcastQuartzInitializerFactory">
+        <constructor-arg name="hazelcastInstance" ref="hazelcastInstance"/>
     </bean>
 
 </beans>

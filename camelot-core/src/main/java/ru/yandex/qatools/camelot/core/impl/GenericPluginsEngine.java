@@ -56,6 +56,7 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     private EventProducer mainInput;
     private PluginUriBuilder uriBuilder;
     private MessagesSerializer messagesSerializer;
+    private QuartzInitializerFactory quartzFactory;
     private InterimProcessor interimProcessor = null;
 
     public GenericPluginsEngine(Resource[] configResources, PluginLoader pluginLoader, CamelContext camelContext,
@@ -325,6 +326,16 @@ public abstract class GenericPluginsEngine implements PluginsService, Reloadable
     @Override
     public void setMessagesSerializer(MessagesSerializer messagesSerializer) {
         this.messagesSerializer = messagesSerializer;
+    }
+
+    @Override
+    public void setQuartzFactory(QuartzInitializerFactory quartzFactory) {
+        this.quartzFactory = quartzFactory;
+    }
+
+    @Override
+    public QuartzInitializerFactory getQuartzFactory() {
+        return quartzFactory;
     }
 
     public InterimProcessor getInterimProcessor() {
