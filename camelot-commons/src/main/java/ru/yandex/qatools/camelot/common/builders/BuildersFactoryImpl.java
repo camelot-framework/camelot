@@ -2,7 +2,6 @@ package ru.yandex.qatools.camelot.common.builders;
 
 import org.apache.camel.CamelContext;
 import org.quartz.Scheduler;
-import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.config.Plugin;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -28,11 +27,6 @@ public class BuildersFactoryImpl implements BuildersFactory {
     @Override
     public AggregationRepositoryBuilder newRepositoryBuilder(CamelContext camelContext) throws Exception { //NOSONAR
         return new MemoryAggregationRepositoryBuilder(camelContext, waitForLockSec);
-    }
-
-    @Override
-    public QuartzInitializer newQuartzInitializer(Scheduler scheduler, AppConfig config) throws Exception { //NOSONAR
-        return new QuartzMemoryInitializer(scheduler, config);
     }
 
     @Override

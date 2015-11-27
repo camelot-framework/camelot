@@ -8,7 +8,7 @@
 
     <bean id="camelot-context-injector" class="ru.yandex.qatools.camelot.common.PluginContextInjectorImpl"/>
     <bean id="camelot-beans-context-injector"
-          class="ru.yandex.qatools.camelot.core.impl.PluginsContextIntoBeansInjector" >
+          class="ru.yandex.qatools.camelot.core.impl.PluginsContextIntoBeansInjector">
         <constructor-arg ref="camelot-processing-engine" name="pluginsService"/>
     </bean>
     <bean id="camelot-resource-builder" class="ru.yandex.qatools.camelot.core.builders.SpringPluginResourceBuilder"/>
@@ -18,6 +18,9 @@
 
     <bean id="camelot-scheduler-factory" class="org.quartz.impl.StdSchedulerFactory"/>
     <bean id="camelot-scheduler" factory-bean="camelot-scheduler-factory" factory-method="getScheduler"/>
+
+    <bean id="camelot-quartz-factory-basic"
+          class="ru.yandex.qatools.camelot.common.builders.BasicQuartzInitializerFactory"/>
 
     <bean id="camelot-processing-engine" class="ru.yandex.qatools.camelot.core.impl.ProcessingEngineImpl"
           init-method="init">
@@ -34,6 +37,7 @@
         <property name="pluginInitializer" ref="camelot-plugin-initializer"/>
         <property name="uriBuilder" ref="${camelot.uribuilder}"/>
         <property name="messagesSerializer" ref="${camelot.serializer}"/>
+        <property name="quartzFactory" ref="${camelot.quartzFactory}"/>
         <property name="interimProcessor" ref="camelot-interim-processor"/>
     </bean>
 </beans>
