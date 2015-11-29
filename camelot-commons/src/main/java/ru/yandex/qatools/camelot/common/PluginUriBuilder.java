@@ -17,17 +17,12 @@ public interface PluginUriBuilder {
     String pluginUri(Plugin plugin, String suffix, String brokerConfig);
 
     /**
-     * Generates uri for tmp buffer
+     * Generates the default basic input uri (for all plugins)
      */
-    String tmpInputBufferUri();
+    String basePluginUri();
 
     /**
      * Generates the frontend broadcast uri (for all plugins)
      */
     String frontendBroadcastUri();
-
-    /**
-     * Generates the default basic input uri (for all plugins)
-     */
-    String basePluginUri();
 }

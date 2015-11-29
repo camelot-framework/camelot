@@ -14,35 +14,24 @@ import static ru.yandex.qatools.camelot.core.util.ServiceUtil.initEventSender;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public class ClientSendersProviderImpl implements ClientSendersProvider {
+public class BasicClientSendersProvider implements ClientSendersProvider {
+    final Map<String, ClientMessageSender> sendersCache = new ConcurrentHashMap<>();
     private final CamelContext camelContext;
-    private final String clientSendUri;
     private final MessagesSerializer serializer;
 
-    final Map<String, ClientMessageSender> sendersCache = new ConcurrentHashMap<>();
-
-    public ClientSendersProviderImpl(CamelContext camelContext, String clientSendUri, MessagesSerializer serializer) {
+    public BasicClientSendersProvider(CamelContext camelContext, MessagesSerializer serializer) {
         this.camelContext = camelContext;
-        this.clientSendUri = clientSendUri;
         this.serializer = serializer;
-    }
-
-    /**
-     * Init new client sender without topic (default sender)
-     */
-    @Override
-    public ClientMessageSender getSender() {
-        return getSender("");
     }
 
     /**
      * Init new client sender with topic
      */
     @Override
-    public ClientMessageSender getSender(String topic) {
+    public ClientMessageSender getSender(String topic, String pluginId, String feSendUri) {
         if (!sendersCache.containsKey(topic)) {
             try {
-                sendersCache.put(topic, initEventSender(camelContext, clientSendUri, topic, serializer));
+                sendersCache.put(topic, initEventSender(camelContext, feSendUri, topic, serializer));
             } catch (Exception e) {
                 throw new PluginsSystemException("Failed to initialize the client event sender: ", e);
             }

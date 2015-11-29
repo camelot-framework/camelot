@@ -2,6 +2,7 @@ package ru.yandex.qatools.camelot.common;
 
 import org.apache.camel.CamelContext;
 import ru.yandex.qatools.camelot.api.AppConfig;
+import ru.yandex.qatools.camelot.api.ClientSendersProvider;
 import ru.yandex.qatools.camelot.api.EventProducer;
 import ru.yandex.qatools.camelot.api.PluginsInterop;
 import ru.yandex.qatools.camelot.common.builders.BuildersFactory;
@@ -82,11 +83,6 @@ public interface PluginsService {
      */
     void setContextInjector(PluginContextInjector contextInjector);
 
-    /**
-     * Set the resource builder for the plugin
-     */
-    void setResourceBuilder(ResourceBuilder resourceBuilder);
-
     PluginUriBuilder getUriBuilder();
 
     void setUriBuilder(PluginUriBuilder uriBuilder);
@@ -97,9 +93,9 @@ public interface PluginsService {
     ResourceBuilder getResourceBuilder();
 
     /**
-     * Set application config
+     * Set the resource builder for the plugin
      */
-    void setAppConfig(AppConfig appConfig);
+    void setResourceBuilder(ResourceBuilder resourceBuilder);
 
     /**
      * Get application config
@@ -107,9 +103,19 @@ public interface PluginsService {
     AppConfig getAppConfig();
 
     /**
+     * Set application config
+     */
+    void setAppConfig(AppConfig appConfig);
+
+    /**
      * Get the CamelContext associated with this service
      */
     CamelContext getCamelContext();
+
+    /**
+     * Returns the engineName
+     */
+    String getEngineName();
 
     /**
      * Allows to redefine the engine name.
@@ -118,15 +124,13 @@ public interface PluginsService {
     void setEngineName(String engineName);
 
     /**
-     * Returns the engineName
-     */
-    String getEngineName();
-
-    /**
      * Returns the main event producer
      */
     EventProducer getMainInput();
 
+    /**
+     * Returns messages serialized
+     */
     MessagesSerializer getMessagesSerializer();
 
     /**
@@ -135,11 +139,24 @@ public interface PluginsService {
     void setMessagesSerializer(MessagesSerializer messagesSerializer);
 
     /**
+     * Returns quartz initialization factory
+     */
+    QuartzInitializerFactory getQuartzFactory();
+
+    /**
      * Set the quartz initializer
      */
     void setQuartzFactory(QuartzInitializerFactory quartzInitializer);
 
-    QuartzInitializerFactory getQuartzFactory();
+    /**
+     * Returns the current configured provider for client senders retrieval
+     */
+    ClientSendersProvider getClientSendersProvider();
+
+    /**
+     * Setups the client senders provider
+     */
+    void setClientSendersProvider(ClientSendersProvider clientSendersProvider);
 
     /**
      * Returns true if plugin has aggregator or processor

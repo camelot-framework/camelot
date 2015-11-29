@@ -9,7 +9,9 @@ public interface ClientMessageSender {
     /**
      * Send the new event to the client via websockets
      */
-    void send(Object message);
+    default void send(Object message) {
+        send(null, message);
+    }
 
     /**
      * Send the new event to the client via websockets using topic

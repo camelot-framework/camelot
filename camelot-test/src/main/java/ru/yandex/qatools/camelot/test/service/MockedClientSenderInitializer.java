@@ -44,16 +44,11 @@ public class MockedClientSenderInitializer {
         }
 
         @Override
-        public synchronized ClientMessageSender getSender(String topic) {
+        public synchronized ClientMessageSender getSender(String topic, String pluginId, String feUrl) {
             if (!clientSenders.containsKey(topic)) {
                 clientSenders.put(topic, mock(ClientMessageSender.class));
             }
             return clientSenders.get(topic);
-        }
-
-        @Override
-        public ClientMessageSender getSender() {
-            return getSender("");
         }
 
         public Map<String, ClientMessageSender> getClientSenders() {

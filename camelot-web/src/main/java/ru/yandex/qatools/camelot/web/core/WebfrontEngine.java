@@ -2,7 +2,6 @@ package ru.yandex.qatools.camelot.web.core;
 
 import org.atmosphere.cpr.Broadcaster;
 import ru.yandex.qatools.camelot.common.PluginsService;
-import ru.yandex.qatools.camelot.common.ReloadableService;
 import ru.yandex.qatools.camelot.config.PluginWeb;
 import ru.yandex.qatools.camelot.config.PluginWebContext;
 
@@ -11,7 +10,7 @@ import java.util.Collection;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public interface WebfrontEngine extends PluginsService, ReloadableService {
+public interface WebfrontEngine extends PluginsService {
     /**
      * Creates/gets the broadcaster for the plugin
      */

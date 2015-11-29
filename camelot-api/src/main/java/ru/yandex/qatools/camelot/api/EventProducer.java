@@ -20,9 +20,4 @@ public interface EventProducer {
      * Produce the event for the defined queue with the header value
      */
     void produce(Object event, String header, Object headerValue);
-
-    /**
-     * Stop the producer
-     */
-    void stop();
 }
