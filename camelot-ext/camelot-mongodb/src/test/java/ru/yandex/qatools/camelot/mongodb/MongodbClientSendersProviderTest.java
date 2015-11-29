@@ -39,7 +39,7 @@ public class MongodbClientSendersProviderTest {
     public void testMessagesAreSentFromQueueFrontend() throws Exception {
         final Plugin plugin = pluginsService.getPlugin(SaveAggregator.class);
         final PluginContext ctx = plugin.getContext();
-        final ClientMessageSender sender = provider.getSender("topic", plugin.getId(), ctx.getFrontendNotifyUri());
+        final ClientMessageSender sender = provider.getSender("topic", plugin.getId(), ctx.getEndpoints().getFrontendSendUri());
 
         feNotify.expectedMessageCount(10);
         feNotify.expectedHeaderReceived(TOPIC, "topic");

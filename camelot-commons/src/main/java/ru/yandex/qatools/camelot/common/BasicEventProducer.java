@@ -16,7 +16,7 @@ import static ru.yandex.qatools.camelot.util.SerializeUtil.serializeToBytes;
  * @author smecsia
  */
 public class BasicEventProducer implements EventProducer {
-    final protected Logger LOGGER = LoggerFactory.getLogger(getClass());
+    final protected Logger LOGGER = LoggerFactory.getLogger(getClass());//NOSONAR
     final ProducerTemplate producerTemplate;
 
     public BasicEventProducer(ProducerTemplate producerTemplate) {

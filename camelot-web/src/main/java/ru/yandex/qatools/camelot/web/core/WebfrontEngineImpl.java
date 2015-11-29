@@ -135,16 +135,6 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
     }
 
     /**
-     * Initializing the plugin context
-     */
-    @Override
-    protected void initPluginContext(PluginsSource source, Plugin plugin,
-                                     PluginContext context, ClassLoader classLoader) throws Exception { //NOSONAR
-        super.initPluginContext(source, plugin, context, classLoader);
-        context.setFrontendNotifyUri(frontendBroadcastUri());
-    }
-
-    /**
      * ------------------------------------------------------------- *
      */
 

@@ -53,7 +53,7 @@ public class MockedClientSenderInitializer implements CamelContextAware {
                 }
             });
         } catch (Exception e) {
-            throw new RuntimeException("Failed to add new routes to test context", e);
+            throw new RuntimeException("Failed to add new routes to test context", e);//NOSONAR
         }
     }
 
