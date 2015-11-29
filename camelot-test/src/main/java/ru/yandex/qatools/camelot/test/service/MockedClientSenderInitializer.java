@@ -1,5 +1,8 @@
 package ru.yandex.qatools.camelot.test.service;
 
+import org.apache.camel.CamelContext;
+import org.apache.camel.CamelContextAware;
+import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.qatools.camelot.api.ClientMessageSender;
@@ -17,9 +20,9 @@ import static org.mockito.Mockito.mock;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 @Component
-public class MockedClientSenderInitializer {
-    Map<String, Provider> clientSenders = new ConcurrentHashMap<>();
+public class MockedClientSenderInitializer implements CamelContextAware {
     final ProcessingEngine service;
+    Map<String, Provider> clientSenders = new ConcurrentHashMap<>();
 
     @Autowired
     MockedClientSenderInitializer(ProcessingEngine service) {
@@ -33,6 +36,29 @@ public class MockedClientSenderInitializer {
             clientSenders.put(plugin.getId(), provider);
             plugin.getContext().setClientSendersProvider(provider);
         }
+    }
+
+    @Override
+    public CamelContext getCamelContext() {
+        return null;
+    }
+
+    @Override
+    public void setCamelContext(CamelContext camelContext) {
+        try {
+            camelContext.addRoutes(new RouteBuilder() {
+                @Override
+                public void configure() throws Exception {
+                    from(service.getUriBuilder().frontendBroadcastUri()).stop();
+                }
+            });
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to add new routes to test context", e);
+        }
+    }
+
+    public Map<String, Provider> getClientSenders() {
+        return clientSenders;
     }
 
     public static class Provider implements ClientSendersProvider {
@@ -54,9 +80,5 @@ public class MockedClientSenderInitializer {
         public Map<String, ClientMessageSender> getClientSenders() {
             return clientSenders;
         }
-    }
-
-    public Map<String, Provider> getClientSenders() {
-        return clientSenders;
     }
 }

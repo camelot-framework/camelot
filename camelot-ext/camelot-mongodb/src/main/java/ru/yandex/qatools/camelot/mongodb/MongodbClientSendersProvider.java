@@ -44,6 +44,7 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
     public MongodbClientSendersProvider(MessagesSerializer serializer, PluginUriBuilder uriBuilder, int poolSize,
                                         MongoClient mongoClient, String dbName, String colName, long maxSize) {
         this.queue = new MongoTailingQueue<>(MongoQueueMessage.class, mongoClient, dbName, colName, maxSize);
+        queue.init();
         this.serializer = serializer;
         this.feBroadcastUri = uriBuilder.frontendBroadcastUri();
         this.senderPool = newFixedThreadPool(poolSize);
@@ -70,7 +71,7 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
 
     private void initRoutes(CamelContext camelContext) {
         try {
-            LOGGER.info("Initializing MongoDB queue poller routes");
+            LOGGER.info("Initializing MongoDB queue routes");
             camelContext.addRoutes(new RouteBuilder() {
                 @Override
                 public void configure() throws Exception {
