@@ -37,13 +37,13 @@ public class PluginsInteropService implements PluginsInterop {
     @Override
     public ClientMessageSender client(String pluginId) {
         final PluginContext ctx = pluginsService.getPluginContext(pluginId);
-        return ctx.getClientSendersProvider().getSender(pluginId, ctx.getEndpoints().getFrontendSendUri());
+        return ctx.getClientSendersProvider().getSender(pluginId, ctx.getFrontendNotifyUri());
     }
 
     @Override
     public ClientMessageSender client(String pluginId, String topic) {
         final PluginContext ctx = pluginsService.getPluginContext(pluginId);
-        return ctx.getClientSendersProvider().getSender(topic, pluginId, ctx.getEndpoints().getFrontendSendUri());
+        return ctx.getClientSendersProvider().getSender(topic, pluginId, ctx.getFrontendNotifyUri());
     }
 
     @Override
@@ -69,13 +69,13 @@ public class PluginsInteropService implements PluginsInterop {
     @Override
     public ClientMessageSender client(Class pluginClass) {
         final PluginContext ctx = pluginsService.getPluginContext(pluginClass);
-        return ctx.getClientSendersProvider().getSender(ctx.getId(), ctx.getEndpoints().getFrontendSendUri());
+        return ctx.getClientSendersProvider().getSender(ctx.getId(), ctx.getFrontendNotifyUri());
     }
 
     @Override
     public ClientMessageSender client(Class pluginClass, String topic) {
         final PluginContext ctx = pluginsService.getPluginContext(pluginClass);
-        return ctx.getClientSendersProvider().getSender(topic, ctx.getId(), ctx.getEndpoints().getFrontendSendUri());
+        return ctx.getClientSendersProvider().getSender(topic, ctx.getId(), ctx.getFrontendNotifyUri());
     }
 
     @Override

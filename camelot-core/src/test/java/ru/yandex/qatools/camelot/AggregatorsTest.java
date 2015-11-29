@@ -54,9 +54,12 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
 
         expectExchangeExists(endpointInitializableOutput,
                 "Must receive counter with 1",
-                exchange -> {
-                    CounterState first = getInput((Exchange) exchange, CounterState.class);
-                    return first != null && first.count == 1;
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = getInput((Exchange) exchange, CounterState.class);
+                        return first != null && first.count == 1;
+                    }
                 });
     }
 
@@ -67,11 +70,14 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
 
         expectExchangeExists(endpointInitializableOutput,
                 "Must receive counter with 1",
-                exchange -> {
-                    CounterState first = AggregatorsTest.this.getInput(exchange, CounterState.class);
-                    return first != null
-                            && first.count == 1
-                            && first.label.equals("test");
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = AggregatorsTest.this.getInput(exchange, CounterState.class);
+                        return first != null
+                                && first.count == 1
+                                && first.label.equals("test");
+                    }
                 });
     }
 
@@ -91,9 +97,12 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
 
         expectExchangeExists(endpointTestStartedOutput,
                 "Must receive counter with 2",
-                exchange -> {
-                    Object first = getInput((Exchange) exchange, CounterState.class);
-                    return first != null && ((CounterState) first).count == 2;
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        Object first = getInput((Exchange) exchange, CounterState.class);
+                        return first != null && ((CounterState) first).count == 2;
+                    }
                 });
     }
 
@@ -113,9 +122,12 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
 
         expectExchangeExists(endpointByMethodOutput,
                 "TestPassedState must exist!",
-                exchange -> {
-                    TestPassedState first = getInput(exchange, TestPassedState.class);
-                    return first != null;
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        TestPassedState first = getInput(exchange, TestPassedState.class);
+                        return first != null;
+                    }
                 });
     }
 
@@ -152,9 +164,12 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
 
         expectExchangeExists(endpointByHourOfDayOutput,
                 "Must receive one of the events with count 1!",
-                exchange -> {
-                    CounterState first = getInput(exchange, CounterState.class);
-                    return first != null && first.count == 1;
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = getInput(exchange, CounterState.class);
+                        return first != null && first.count == 1;
+                    }
                 });
     }
 
@@ -204,9 +219,12 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
         endpointAllSkippedOutput.assertIsSatisfied(4000);
         expectExchangeExists(endpointAllSkippedOutput,
                 "First counter must have 2",
-                exchange -> {
-                    CounterState first = getInput(exchange, CounterState.class);
-                    return first != null && first.count == 2;
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = getInput(exchange, CounterState.class);
+                        return first != null && first.count == 2;
+                    }
                 });
     }
 
@@ -248,9 +266,12 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
         endpointEventToStringOutput.assertIsSatisfied(2000);
         expectExchangeExists(endpointEventToStringOutput,
                 "Output must be string of class name",
-                exchange -> {
-                    String first = getInput(exchange, String.class);
-                    return first != null && TestBroken.class.getName().equals(first);
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        String first = getInput(exchange, String.class);
+                        return first != null && TestBroken.class.getName().equals(first);
+                    }
                 });
     }
 
@@ -266,14 +287,17 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
         endpointWithTimerOutput.assertIsSatisfied(2000);
         expectExchangeExists(endpointWithTimerOutput,
                 "Output must contain 1 <= count1 <= 10, 1 <= count2 <= 5",
-                exchange -> {
-                    CounterState first = getInput(exchange, CounterState.class);
-                    assertNotNull("First must not be null", first);
-                    assertThat(first.count2, greaterThanOrEqualTo(1));
-                    assertThat(first.count2, lessThanOrEqualTo(10));
-                    assertThat(first.count, greaterThanOrEqualTo(1));
-                    assertThat(first.count, lessThanOrEqualTo(5));
-                    return true;
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = getInput(exchange, CounterState.class);
+                        assertNotNull("First must not be null", first);
+                        assertThat(first.count2, greaterThanOrEqualTo(1));
+                        assertThat(first.count2, lessThanOrEqualTo(10));
+                        assertThat(first.count, greaterThanOrEqualTo(1));
+                        assertThat(first.count, lessThanOrEqualTo(5));
+                        return true;
+                    }
                 });
     }
 
@@ -294,21 +318,27 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
         endpointDependentOutput.assertIsSatisfied(2000);
         expectExchangeExists(endpointByCustomHeaderOutput,
                 "Output must contain test started",
-                exchange -> {
-                    CounterState first = getInput(exchange, CounterState.class);
-                    return first != null
-                            && first.count == 0
-                            && first.label.equals("1")
-                            && first.label2.equals(first.label);
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = getInput(exchange, CounterState.class);
+                        return first != null
+                                && first.count == 0
+                                && first.label.equals("1")
+                                && first.label2.equals(first.label);
+                    }
                 });
         expectExchangeExists(endpointByCustomHeaderOutput,
                 "Output must be test failed",
-                exchange -> {
-                    CounterState first = getInput(exchange, CounterState.class);
-                    return first != null
-                            && first.count == 1
-                            && first.label.equals("2")
-                            && first.label2.equals(first.label);
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CounterState first = getInput(exchange, CounterState.class);
+                        return first != null
+                                && first.count == 1
+                                && first.label.equals("2")
+                                && first.label2.equals(first.label);
+                    }
                 });
 
         Storage storage = processingEngine.getPlugin(ByCustomHeaderAggregator.class)
@@ -333,18 +363,24 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
         Thread.sleep(5000);
         expectExchangeExists(endpointFallenRaisedOutput,
                 "Output must contain testFailed ",
-                exchange -> {
-                    TestFailed msg = getInput(exchange, TestFailed.class);
-                    logger.info("Checking if " + msg + " is instance of TestFailed...");
-                    return msg != null && msg.getMethodname()
-                            .equals(testFailed.getMethodname());
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        TestFailed msg = getInput(exchange, TestFailed.class);
+                        logger.info("Checking if " + msg + " is instance of TestFailed...");
+                        return msg != null && msg.getMethodname()
+                                .equals(testFailed.getMethodname());
+                    }
                 });
         expectExchangeExists(endpointFallenRaisedOutput,
                 "Output must contain string with method name",
-                exchange -> {
-                    String msg = getInput(exchange, String.class);
-                    logger.info("Checking if " + msg + " is instance of String...");
-                    return msg != null && msg.equals(testFailed.getMethodname());
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        String msg = getInput(exchange, String.class);
+                        logger.info("Checking if " + msg + " is instance of String...");
+                        return msg != null && msg.equals(testFailed.getMethodname());
+                    }
                 });
     }
 
@@ -360,9 +396,12 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
         endpointCustomFilteredOutput.assertIsSatisfied(2000);
         expectExchangeExists(endpointCustomFilteredOutput,
                 "Output must contain just filtered event",
-                exchange -> {
-                    CollectEventsState state = getInput(exchange, CollectEventsState.class);
-                    return state != null && state.collected.size() == 1;
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CollectEventsState state = getInput(exchange, CollectEventsState.class);
+                        return state != null && state.collected.size() == 1;
+                    }
                 });
     }
 
@@ -378,9 +417,12 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
         endpointFilteredOutput.assertIsSatisfied(2000);
         expectExchangeExists(endpointFilteredOutput,
                 "Output must contain just filtered event",
-                exchange -> {
-                    CollectEventsState state = getInput(exchange, CollectEventsState.class);
-                    return state != null && state.collected.size() == 1;
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        CollectEventsState state = getInput(exchange, CollectEventsState.class);
+                        return state != null && state.collected.size() == 1;
+                    }
                 });
     }
 
@@ -395,12 +437,15 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
         endpointByCustomStrategyOutput.assertIsSatisfied(2000);
         expectExchangeExists(endpointByCustomStrategyOutput,
                 "Output must contain just one passed state",
-                exchange -> {
-                    TestPassedState state = getInput(exchange, TestPassedState.class);
-                    return state != null
-                            && state.getEvent()
-                            .getClassname()
-                            .equals(failed.getClassname());
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        TestPassedState state = getInput(exchange, TestPassedState.class);
+                        return state != null
+                                && state.getEvent()
+                                .getClassname()
+                                .equals(failed.getClassname());
+                    }
                 });
     }
 
@@ -417,7 +462,12 @@ public class AggregatorsTest extends ActivemqAggregatorsTest {
         endpointSendToOutput.assertIsSatisfied(2000);
         expectExchangeExists(endpointSendToOutput,
                 "upper level aggregator should stop",
-                exchange -> getInput(exchange, StopEvent.class) != null);
+                new Predicate() {
+                    @Override
+                    public boolean matches(Exchange exchange) {
+                        return getInput(exchange, StopEvent.class) != null;
+                    }
+                });
 
         sleep(2000);
         endpointBindToOutput.assertIsSatisfied();

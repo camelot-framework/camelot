@@ -181,8 +181,7 @@ public class PluginContextInjectorImpl<P> implements PluginContextInjector<P> {
 
             if (context != null) {
                 injectField(object.getClass(), ClientSender.class, object, (field, info) -> { //NOSONAR
-                    return context.getClientSendersProvider().getSender(info.topic, context.getId(),
-                            context.getEndpoints().getFrontendSendUri());
+                    return context.getClientSendersProvider().getSender(info.topic, context.getId(), context.getFrontendNotifyUri());
                 });
                 final Map<Class, Object> components = new HashMap<>();
                 injectField(object.getClass(), PluginComponent.class, object, (field, info) -> { //NOSONAR
