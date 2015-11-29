@@ -294,7 +294,7 @@ public class CamelotTestListener extends AbstractTestExecutionListener {
                 if (provider == null) {
                     throw new RuntimeException("Senders provider not found!");
                 }
-                return provider.getSender(topic);
+                return provider.getSender(topic, pluginId, null);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to inject client sender for plugin " + pluginId, e);
             }

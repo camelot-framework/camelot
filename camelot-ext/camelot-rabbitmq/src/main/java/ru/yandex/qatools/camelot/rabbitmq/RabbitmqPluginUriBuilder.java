@@ -37,13 +37,8 @@ public class RabbitmqPluginUriBuilder extends BasicPluginUriBuilder {
     }
 
     @Override
-    public String tmpInputBufferUri() {
-        return rabbitmqUri(rabbitmqBaseUri(), "all.tmp.input.buffer", "");
-    }
-
-    @Override
     public String frontendBroadcastUri() {
-        return rabbitmqUri(rabbitmqBaseUri(), "all.frontend.notify", "?exchangeType=topic");
+        return rabbitmqUri(rabbitmqBaseUri(), "frontend.notify", "?exchangeType=topic");
     }
 
     public String rabbitmqBaseUri() {

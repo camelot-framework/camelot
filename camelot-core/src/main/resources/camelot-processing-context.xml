@@ -22,6 +22,11 @@
     <bean id="camelot-quartz-factory-basic"
           class="ru.yandex.qatools.camelot.common.builders.BasicQuartzInitializerFactory"/>
 
+    <bean id="camelot-client-senders-basic" class="ru.yandex.qatools.camelot.core.impl.BasicClientSendersProvider">
+        <constructor-arg name="camelContext" ref="camelot-camel-context"/>
+        <constructor-arg name="serializer" ref="${camelot.serializer}"/>
+    </bean>
+
     <bean id="camelot-processing-engine" class="ru.yandex.qatools.camelot.core.impl.ProcessingEngineImpl"
           init-method="init">
         <constructor-arg name="configResources" value="${plugins.config.path}"/>
@@ -38,6 +43,7 @@
         <property name="uriBuilder" ref="${camelot.uribuilder}"/>
         <property name="messagesSerializer" ref="${camelot.serializer}"/>
         <property name="quartzFactory" ref="${camelot.quartzFactory}"/>
+        <property name="clientSendersProvider" ref="${camelot.clientSendersProvider}"/>
         <property name="interimProcessor" ref="camelot-interim-processor"/>
     </bean>
 </beans>

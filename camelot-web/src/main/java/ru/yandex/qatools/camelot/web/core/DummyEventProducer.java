@@ -29,9 +29,4 @@ public class DummyEventProducer implements EventProducer {
     public void produce(Object event, String header, Object headerValue) {
         produce(event, map(header, headerValue));
     }
-
-    @Override
-    public void stop() {
-        logger.info("Stopping the dummy producer...");
-    }
 }

@@ -1,25 +1,20 @@
 package ru.yandex.qatools.camelot.core.util;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.ProducerTemplate;
 import org.springframework.core.io.Resource;
 import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.api.ClientMessageSender;
 import ru.yandex.qatools.camelot.api.EventProducer;
 import ru.yandex.qatools.camelot.common.MessagesSerializer;
 import ru.yandex.qatools.camelot.core.impl.AppConfigSystemProperties;
-import ru.yandex.qatools.camelot.core.impl.BasicEventProducer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Map;
 import java.util.Properties;
 
-import static java.lang.ClassLoader.getSystemClassLoader;
-import static java.lang.Thread.currentThread;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.TOPIC;
 import static ru.yandex.qatools.camelot.core.util.ReflectUtil.resolveResourcesFromPattern;
-import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
+import static ru.yandex.qatools.camelot.util.ServiceUtil.initEventProducer;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -27,30 +22,6 @@ import static ru.yandex.qatools.camelot.util.ExceptionUtil.formatStackTrace;
 public abstract class ServiceUtil {
 
     ServiceUtil() {
-    }
-
-    /**
-     * Search for the annotated field within the procClass
-     * and initialize the Camel producer for the uri
-     */
-    public static EventProducer initEventProducer(CamelContext camelContext, final String uri, final MessagesSerializer serializer)
-            throws Exception { //NOSONAR
-        final ProducerTemplate producerTemplate = camelContext.createProducerTemplate();
-        producerTemplate.setDefaultEndpointUri(uri);
-        return new BasicEventProducer(producerTemplate) {
-            @Override
-            public void produce(Object event, Map<String, Object> headers) {
-                try {
-                    final ClassLoader eventCL = event.getClass().getClassLoader();
-                    final ClassLoader contextCL = currentThread().getContextClassLoader();
-                    final ClassLoader cl = (eventCL != null) ? eventCL : ((contextCL != null) ? contextCL : getSystemClassLoader());
-                    producerTemplate.sendBodyAndHeaders(
-                            serializer.processBodyAndHeadersBeforeSend(event, headers, cl), headers);
-                } catch (Exception e) {
-                    logger.error("Failed to produce message to the uri {}: {}", uri, formatStackTrace(e)); //NOSONAR
-                }
-            }
-        };
     }
 
     /**
