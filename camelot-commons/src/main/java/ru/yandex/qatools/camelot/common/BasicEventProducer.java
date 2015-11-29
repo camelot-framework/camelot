@@ -1,4 +1,4 @@
-package ru.yandex.qatools.camelot.core.impl;
+package ru.yandex.qatools.camelot.common;
 
 import org.apache.camel.ProducerTemplate;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import static ru.yandex.qatools.camelot.util.SerializeUtil.serializeToBytes;
  * @author smecsia
  */
 public class BasicEventProducer implements EventProducer {
-    final protected Logger logger = LoggerFactory.getLogger(getClass());
+    final protected Logger LOGGER = LoggerFactory.getLogger(getClass());//NOSONAR
     final ProducerTemplate producerTemplate;
 
     public BasicEventProducer(ProducerTemplate producerTemplate) {
@@ -31,20 +31,11 @@ public class BasicEventProducer implements EventProducer {
 
     @Override
     public void produce(Object event) {
-        produce(event, new HashMap<String, Object>());
+        produce(event, new HashMap<>());
     }
 
     @Override
     public void produce(Object event, String header, Object headerValue) {
         produce(event, map(header, headerValue));
-    }
-
-    @Override
-    public void stop() {
-        try {
-            producerTemplate.stop();
-        } catch (Exception e) {
-            logger.error("Failed to stop producer template for" + producerTemplate.getDefaultEndpoint(), e);
-        }
     }
 }

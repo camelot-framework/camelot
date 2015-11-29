@@ -39,4 +39,14 @@
         <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
     </bean>
 
+    <bean id="camelot-client-senders-mongodb" class="ru.yandex.qatools.camelot.mongodb.MongodbClientSendersProvider">
+        <constructor-arg  name="mongoClient" ref="camelot-mongodb-client"/>
+        <constructor-arg  name="serializer" ref="${camelot.serializer}"/>
+        <constructor-arg  name="uriBuilder" ref="${camelot.uribuilder}"/>
+        <constructor-arg  name="dbName" value="${camelot.mongodb.dbname}"/>
+        <constructor-arg  name="colName" value="${camelot.mongodb.frontend.queue.name}"/>
+        <constructor-arg  name="maxSize" value="${camelot.mongodb.frontend.queue.maxsize}"/>
+        <constructor-arg  name="poolSize" value="${camelot.mongodb.frontend.queue.poolsize}"/>
+    </bean>
+
 </beans>

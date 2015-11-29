@@ -1,7 +1,6 @@
 package ru.yandex.qatools.camelot.core.impl;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.StartupListener;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.spi.ShutdownPrepared;
 import org.apache.commons.collections4.CollectionUtils;
@@ -51,8 +50,6 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
     public synchronized void init() {
         super.init();
 
-        startLoading();
-
         this.schedulerBuildersFactory = (scheduler != null) ? getBuildersFactory().
                 newSchedulerBuildersFactory(scheduler, camelContext) : new NoSchedulerBuildersFactory();
         try {
@@ -78,54 +75,14 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
             logger.error("Could not start the scheduler", e);
         }
         try {
-            camelContext.addStartupListener(new StartupListener() {
-                @Override
-                public void onCamelContextStarted(CamelContext context,
-                                                  boolean alreadyStarted) throws Exception { //NOSONAR
-                    for (Plugin plugin : getPluginsMap().values()) {
-                        initPlugin(plugin);
-                    }
+            camelContext.addStartupListener((context, alreadyStarted) -> { //NOSONAR
+                for (Plugin plugin : getPluginsMap().values()) {
+                    initPlugin(plugin);
                 }
             });
         } catch (Exception e) {
             logger.error("Failed to add camel context listener", e);
         }
-        stopLoading();
-    }
-
-
-    @Override
-    public synchronized void stop() {
-        for (Plugin plugin : getPluginsMap().values()) {
-            try {
-                // stopping the endpoints for the plugin
-                plugin.getContext().getMainInput().stop();
-                plugin.getContext().getInput().stop();
-                plugin.getContext().getOutput().stop();
-                unInitPlugin(plugin);
-            } catch (Exception e) {
-                logger.error("Failed to stop route for plugin " + plugin.getId(), e);
-            }
-        }
-        super.stop();
-    }
-
-    @Override
-    public synchronized void reloadAndStart() {
-        super.reloadAndStart();
-        startLoading();
-        try {
-            for (Plugin plugin : getPluginsMap().values()) {
-                stopRoutes(plugin);
-            }
-            for (PluginsConfig config : getConfigs()) {
-                buildRoutes(config);
-            }
-            buildConsumersRoutes();
-        } catch (Exception e) {
-            logger.error("Failed to reload plugins!", e);
-        }
-        stopLoading();
     }
 
     @Override

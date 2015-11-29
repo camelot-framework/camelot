@@ -1,5 +1,8 @@
 package ru.yandex.qatools.camelot.test.service;
 
+import org.apache.camel.CamelContext;
+import org.apache.camel.CamelContextAware;
+import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.qatools.camelot.api.ClientMessageSender;
@@ -17,9 +20,9 @@ import static org.mockito.Mockito.mock;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 @Component
-public class MockedClientSenderInitializer {
-    Map<String, Provider> clientSenders = new ConcurrentHashMap<>();
+public class MockedClientSenderInitializer implements CamelContextAware {
     final ProcessingEngine service;
+    Map<String, Provider> clientSenders = new ConcurrentHashMap<>();
 
     @Autowired
     MockedClientSenderInitializer(ProcessingEngine service) {
@@ -35,6 +38,29 @@ public class MockedClientSenderInitializer {
         }
     }
 
+    @Override
+    public CamelContext getCamelContext() {
+        return null;
+    }
+
+    @Override
+    public void setCamelContext(CamelContext camelContext) {
+        try {
+            camelContext.addRoutes(new RouteBuilder() {
+                @Override
+                public void configure() throws Exception {
+                    from(service.getUriBuilder().frontendBroadcastUri()).stop();
+                }
+            });
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to add new routes to test context", e);//NOSONAR
+        }
+    }
+
+    public Map<String, Provider> getClientSenders() {
+        return clientSenders;
+    }
+
     public static class Provider implements ClientSendersProvider {
         final String pluginId;
         Map<String, ClientMessageSender> clientSenders = new ConcurrentHashMap<>();
@@ -44,24 +70,15 @@ public class MockedClientSenderInitializer {
         }
 
         @Override
-        public synchronized ClientMessageSender getSender(String topic) {
+        public synchronized ClientMessageSender getSender(String topic, String pluginId, String feUrl) {
             if (!clientSenders.containsKey(topic)) {
                 clientSenders.put(topic, mock(ClientMessageSender.class));
             }
             return clientSenders.get(topic);
         }
 
-        @Override
-        public ClientMessageSender getSender() {
-            return getSender("");
-        }
-
         public Map<String, ClientMessageSender> getClientSenders() {
             return clientSenders;
         }
-    }
-
-    public Map<String, Provider> getClientSenders() {
-        return clientSenders;
     }
 }

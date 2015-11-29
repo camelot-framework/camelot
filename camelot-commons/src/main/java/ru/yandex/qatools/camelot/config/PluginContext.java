@@ -36,8 +36,6 @@ import java.util.List;
         "resDirPath",
         "resPathMapping",
         "pluginClass",
-        "tmpBufferUri",
-        "frontendNotifyUri",
 })
 public class PluginContext
         implements Serializable {
@@ -51,8 +49,6 @@ public class PluginContext
     protected List<String> cssPaths;
     protected String resDirPath;
     protected String resPathMapping;
-    protected String tmpBufferUri;
-    protected String frontendNotifyUri;
     protected volatile boolean isShuttingDown = false;
     protected transient AggregatorRepository repository;
     protected transient Storage storage;
@@ -511,22 +507,6 @@ public class PluginContext
 
     public void setShuttingDown(boolean shuttingDown) {
         isShuttingDown = shuttingDown;
-    }
-
-    public String getTmpBufferUri() {
-        return tmpBufferUri;
-    }
-
-    public void setTmpBufferUri(String tmpBufferUri) {
-        this.tmpBufferUri = tmpBufferUri;
-    }
-
-    public String getFrontendNotifyUri() {
-        return frontendNotifyUri;
-    }
-
-    public void setFrontendNotifyUri(String frontendNotifyUri) {
-        this.frontendNotifyUri = frontendNotifyUri;
     }
 
     public MessagesSerializer getMessagesSerializer() {

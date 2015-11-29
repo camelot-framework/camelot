@@ -5,7 +5,7 @@ import org.quartz.Scheduler;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public interface ProcessingEngine extends PluginsService, ReloadableService, RoutingService {
+public interface ProcessingEngine extends PluginsService, RoutingService {
 
     /**
      * Set the scheduler for the engine

@@ -2,6 +2,7 @@ package ru.yandex.qatools.camelot.core.impl;
 
 import ru.yandex.qatools.camelot.api.*;
 import ru.yandex.qatools.camelot.common.PluginsService;
+import ru.yandex.qatools.camelot.config.PluginContext;
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -35,12 +36,14 @@ public class PluginsInteropService implements PluginsInterop {
 
     @Override
     public ClientMessageSender client(String pluginId) {
-        return pluginsService.getPluginContext(pluginId).getClientSendersProvider().getSender();
+        final PluginContext ctx = pluginsService.getPluginContext(pluginId);
+        return ctx.getClientSendersProvider().getSender(pluginId, ctx.getEndpoints().getFrontendSendUri());
     }
 
     @Override
     public ClientMessageSender client(String pluginId, String topic) {
-        return pluginsService.getPluginContext(pluginId).getClientSendersProvider().getSender(topic);
+        final PluginContext ctx = pluginsService.getPluginContext(pluginId);
+        return ctx.getClientSendersProvider().getSender(topic, pluginId, ctx.getEndpoints().getFrontendSendUri());
     }
 
     @Override
@@ -65,12 +68,14 @@ public class PluginsInteropService implements PluginsInterop {
 
     @Override
     public ClientMessageSender client(Class pluginClass) {
-        return pluginsService.getPluginContext(pluginClass).getClientSendersProvider().getSender();
+        final PluginContext ctx = pluginsService.getPluginContext(pluginClass);
+        return ctx.getClientSendersProvider().getSender(ctx.getId(), ctx.getEndpoints().getFrontendSendUri());
     }
 
     @Override
     public ClientMessageSender client(Class pluginClass, String topic) {
-        return pluginsService.getPluginContext(pluginClass).getClientSendersProvider().getSender(topic);
+        final PluginContext ctx = pluginsService.getPluginContext(pluginClass);
+        return ctx.getClientSendersProvider().getSender(topic, ctx.getId(), ctx.getEndpoints().getFrontendSendUri());
     }
 
     @Override
