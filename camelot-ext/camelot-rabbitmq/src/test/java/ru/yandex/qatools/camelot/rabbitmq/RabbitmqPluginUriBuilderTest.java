@@ -15,8 +15,8 @@ public class RabbitmqPluginUriBuilderTest {
         RabbitmqPluginUriBuilder builder = new RabbitmqPluginUriBuilder("localhost:1,localhost:2", "");
 
         assertThat(builder.basePluginUri(), is("rabbitmq://localhost:1/"));
-        assertThat(builder.frontendBroadcastUri(), is("rabbitmq://localhost:1/all.frontend.notify" +
-                "?queue=all.frontend.notify&addresses=localhost:1,localhost:2&exchangeType=topic"));
+        assertThat(builder.frontendBroadcastUri(), is("rabbitmq://localhost:1/frontend.notify" +
+                "?queue=frontend.notify&addresses=localhost:1,localhost:2&exchangeType=topic"));
         final Plugin plugin = new Plugin();
         plugin.setBaseInputUri(builder.basePluginUri());
         plugin.setId("plugin.id");

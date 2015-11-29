@@ -28,7 +28,7 @@ import static ru.yandex.qatools.camelot.util.ServiceUtil.initEventProducer;
  */
 public class MongodbClientSendersProvider implements ClientSendersProvider, CamelContextAware {
     private static final String MONGODB_FRONTEND_URI = "direct:mongodb.frontend.notify";
-    private final static Logger LOGGER = LoggerFactory.getLogger(MongodbClientSendersProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongodbClientSendersProvider.class);
     private static final int DEFAULT_POOL_SIZE = 10;
     private final ExecutorService senderPool;
     private final MongoTailingQueue<MongoQueueMessage> queue;
@@ -81,7 +81,7 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
                 }
             });
         } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize additional routes for MongoDB client notify support!", e);
+            throw new RuntimeException("Failed to initialize additional routes for MongoDB client notify support!", e); //NOSONAR
         }
     }
 
@@ -96,7 +96,7 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
                             PLUGIN_ID, m.pluginId
                     ))));
         } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize MongoDB poller for client notify support!", e);
+            throw new RuntimeException("Failed to initialize MongoDB poller for client notify support!", e);//NOSONAR
         }
     }
 
@@ -107,7 +107,7 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
 
         public MongoQueueMessage(String pluginId, Object object, String topic) {
             if (!(object instanceof Serializable)) {
-                throw new RuntimeException("Could not send message '" + object + "': it's not serializable!");
+                throw new RuntimeException("Could not send message '" + object + "': it's not serializable!");//NOSONAR
             }
             this.pluginId = pluginId;
             this.object = (Serializable) object;
