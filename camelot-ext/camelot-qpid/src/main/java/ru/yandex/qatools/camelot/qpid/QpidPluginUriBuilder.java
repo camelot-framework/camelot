@@ -24,11 +24,6 @@ public class QpidPluginUriBuilder extends BasicPluginUriBuilder implements Plugi
     }
 
     @Override
-    public String tmpInputBufferUri() {
-        return TMP_INPUT_BUFFER_URI;
-    }
-
-    @Override
     public String frontendBroadcastUri() {
         return CLIENT_NOTIFY_URI;
     }
