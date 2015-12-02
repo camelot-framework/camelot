@@ -40,11 +40,11 @@
         <hazelcast.version>3.5</hazelcast.version>
         <jackson.version>2.4.4</jackson.version>
         <jaxb.basics.version>0.6.5</jaxb.basics.version>
-        <jetty.version>9.3.0.RC0</jetty.version>
+        <jetty.version>9.3.6.v20151106</jetty.version>
         <jersey.version>2.17</jersey.version>
         <slf4j.version>1.7.12</slf4j.version>
         <atmosphere.version>2.3.1</atmosphere.version>
-        <spring.version>4.2.2.RELEASE</spring.version>
+        <spring.version>4.2.3.RELEASE</spring.version>
         <wro4j.version>1.7.8</wro4j.version>
         <yatomata.version>1.6</yatomata.version>
         <javax.rs-api.version>2.0.1</javax.rs-api.version>
@@ -285,6 +285,11 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-deploy</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-proxy</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
             <dependency>
