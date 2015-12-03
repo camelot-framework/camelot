@@ -80,7 +80,7 @@ public class AnnotatedMethodDispatcher {
 
     private Exception wrapThrowableIfRequired(Throwable e, Throwable cause) throws Exception { //NOSONAR
         if (cause == null) {
-            return wrapThrowableIfRequired(e, null);
+            return new Exception(e);
         }
         return (cause instanceof Exception) ? (Exception) cause : new Exception(cause);
     }

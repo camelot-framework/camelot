@@ -21,6 +21,7 @@
                 read-preference="${camelot.mongodb.readpreference}"
                 socket-timeout="${camelot.mongodb.socket.timeout}"/>
     </mongo:mongo-client>
+
     <bean id="camelot-plugin-initializer" class="ru.yandex.qatools.camelot.mongodb.MongodbPluginInitializer">
         <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
         <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
@@ -40,13 +41,21 @@
     </bean>
 
     <bean id="camelot-client-senders-mongodb" class="ru.yandex.qatools.camelot.mongodb.MongodbClientSendersProvider">
-        <constructor-arg  name="mongoClient" ref="camelot-mongodb-client"/>
-        <constructor-arg  name="serializer" ref="${camelot.serializer}"/>
-        <constructor-arg  name="uriBuilder" ref="${camelot.uribuilder}"/>
-        <constructor-arg  name="dbName" value="${camelot.mongodb.dbname}"/>
-        <constructor-arg  name="colName" value="${camelot.mongodb.frontend.queue.name}"/>
-        <constructor-arg  name="maxSize" value="${camelot.mongodb.frontend.queue.maxsize}"/>
-        <constructor-arg  name="poolSize" value="${camelot.mongodb.frontend.queue.poolsize}"/>
+        <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
+        <constructor-arg name="serializer" ref="${camelot.serializer}"/>
+        <constructor-arg name="uriBuilder" ref="${camelot.uribuilder}"/>
+        <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
+        <constructor-arg name="colName" value="${camelot.mongodb.frontend.queue.name}"/>
+        <constructor-arg name="maxSize" value="${camelot.mongodb.frontend.queue.maxsize}"/>
+        <constructor-arg name="poolSize" value="${camelot.mongodb.frontend.queue.poolsize}"/>
     </bean>
 
+    <bean id="camelot-mongodb-direct-routes-initializer"
+          class="ru.yandex.qatools.camelot.mongodb.MongodbDirectRoutesInitializer">
+        <constructor-arg name="pluginsService" ref="camelot-processing-engine"/>
+        <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
+        <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
+        <constructor-arg name="maxSize" value="${camelot.mongodb.direct.queue.maxsize}"/>
+        <constructor-arg name="poolSize" value="${camelot.mongodb.direct.queue.poolsize}"/>
+    </bean>
 </beans>
