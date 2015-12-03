@@ -10,7 +10,7 @@
 
     <groupId>ru.yandex.qatools.camelot</groupId>
     <artifactId>camelot</artifactId>
-    <version>2.4.9-20150103</version>
+    <version>2.4.9-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <modules>
