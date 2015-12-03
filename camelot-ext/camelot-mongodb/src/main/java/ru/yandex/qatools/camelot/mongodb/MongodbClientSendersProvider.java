@@ -14,7 +14,6 @@ import ru.yandex.qatools.camelot.api.EventProducer;
 import ru.yandex.qatools.camelot.common.MessagesSerializer;
 import ru.yandex.qatools.camelot.common.PluginUriBuilder;
 
-import java.io.Serializable;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -29,25 +28,25 @@ import static ru.yandex.qatools.camelot.util.ServiceUtil.initEventProducer;
 public class MongodbClientSendersProvider implements ClientSendersProvider, CamelContextAware {
     private static final String MONGODB_FRONTEND_URI = "direct:mongodb.frontend.notify";
     private static final Logger LOGGER = LoggerFactory.getLogger(MongodbClientSendersProvider.class);
-    private static final int DEFAULT_POOL_SIZE = 10;
     private final ExecutorService senderPool;
-    private final MongoTailingQueue<MongoQueueMessage> queue;
+    private final MongoClient mongoClient;
+    private final String dbName;
+    private final String colName;
+    private final long maxSize;
     private final MessagesSerializer serializer;
     private final String feBroadcastUri;
+    private MongoTailingQueue<MongoQueueMessage> queue;
     private CamelContext camelContext;
-
-    public MongodbClientSendersProvider(MessagesSerializer serializer, PluginUriBuilder uriBuilder,
-                                        MongoClient mongoClient, String dbName, String colName, long maxSize) {
-        this(serializer, uriBuilder, DEFAULT_POOL_SIZE, mongoClient, dbName, colName, maxSize);
-    }
 
     public MongodbClientSendersProvider(MessagesSerializer serializer, PluginUriBuilder uriBuilder, int poolSize,
                                         MongoClient mongoClient, String dbName, String colName, long maxSize) {
-        this.queue = new MongoTailingQueue<>(MongoQueueMessage.class, mongoClient, dbName, colName, maxSize);
-        queue.init();
         this.serializer = serializer;
         this.feBroadcastUri = uriBuilder.frontendBroadcastUri();
         this.senderPool = newFixedThreadPool(poolSize);
+        this.mongoClient = mongoClient;
+        this.dbName = dbName;
+        this.colName = colName;
+        this.maxSize = maxSize;
     }
 
     @Override
@@ -65,6 +64,8 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
     @Override
     public void setCamelContext(CamelContext camelContext) {
         this.camelContext = camelContext;
+        this.queue = new MongoTailingQueue<>(MongoQueueMessage.class, mongoClient, dbName, colName, maxSize);
+        queue.init();
         initPoller(camelContext);
         initRoutes(camelContext);
     }
@@ -77,7 +78,7 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
                 public void configure() throws Exception {
                     from(MONGODB_FRONTEND_URI).
                             log(LoggingLevel.DEBUG, "MongoDB frontend notify message {headers.bodyClass}")
-                            .to(feBroadcastUri);
+                            .to(feBroadcastUri).routeId(MONGODB_FRONTEND_URI);
                 }
             });
         } catch (Exception e) {
@@ -100,18 +101,4 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
         }
     }
 
-    public static class MongoQueueMessage implements Serializable {
-        final Serializable object;
-        final String topic;
-        final String pluginId;
-
-        public MongoQueueMessage(String pluginId, Object object, String topic) {
-            if (!(object instanceof Serializable)) {
-                throw new RuntimeException("Could not send message '" + object + "': it's not serializable!");//NOSONAR
-            }
-            this.pluginId = pluginId;
-            this.object = (Serializable) object;
-            this.topic = topic;
-        }
-    }
 }
