@@ -20,11 +20,7 @@ import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.common.AggregationRepositoryWithLocks;
 import ru.yandex.qatools.camelot.common.AggregationRepositoryWithValuesMap;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import static java.lang.String.format;
@@ -36,6 +32,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  * @author Innokenty Shuvalov (mailto: innokenty@yandex-team.ru)
  */
+@SuppressWarnings("unchecked")
 public class MongodbAggregationRepository extends ServiceSupport
         implements AggregationRepository,
         OptimisticLockingAggregationRepository,
@@ -47,13 +44,16 @@ public class MongodbAggregationRepository extends ServiceSupport
     private final String repoName;
     private final MongoPessimisticLocking mongoLocking;
     private final long waitForLockSec;
+    private final MongoSerializer serializer;
 
     private MongoPessimisticRepo<DefaultExchangeHolder> mongoRepo;
 
-    public MongodbAggregationRepository(String repoName, MongoPessimisticLocking mongoLocking, long waitForLockSec) {
+    public MongodbAggregationRepository(MongoSerializer serializer, String repoName,
+                                        MongoPessimisticLocking mongoLocking, long waitForLockSec) {
         this.repoName = repoName;
         this.mongoLocking = mongoLocking;
         this.waitForLockSec = waitForLockSec;
+        this.serializer = serializer;
     }
 
     @Override
@@ -122,6 +122,7 @@ public class MongodbAggregationRepository extends ServiceSupport
         }
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     public void unlock(String key) {
         try {
@@ -148,6 +149,8 @@ public class MongodbAggregationRepository extends ServiceSupport
     @Override
     public void doStart() throws Exception { //NOSONAR
         mongoRepo = new MongoPessimisticRepo<>(mongoLocking);
+        mongoRepo.setSerializer(serializer);
+        mongoRepo.setDeserializer(serializer);
     }
 
     @Override
@@ -210,7 +213,7 @@ public class MongodbAggregationRepository extends ServiceSupport
         Map<String, DefaultExchangeHolder> holderMap = new LinkedHashMap<>(mongoRepo.keyValueMap());
         Map<String, Exchange> result = new HashMap<>(holderMap.size(), 1);
         for (Map.Entry<String, DefaultExchangeHolder> entry : holderMap.entrySet()) {
-            result.put(entry.getKey()   , toExchange(camelContext, entry.getValue()));
+            result.put(entry.getKey(), toExchange(camelContext, entry.getValue()));
         }
         return unmodifiableMap(result);
     }

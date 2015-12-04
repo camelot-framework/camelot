@@ -38,6 +38,7 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
     private final String dbName;
     private final int poolSize;
     private final long maxSize;
+    private final MongoSerializer serializer;
     private CamelContext camelContext;
 
     public MongodbDirectRoutesInitializer(PluginsService pluginsService, MongoClient mongoClient,
@@ -47,6 +48,7 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
         this.dbName = dbName;
         this.maxSize = maxSize;
         this.poolSize = poolSize;
+        this.serializer = new MongoSerializer(pluginsService.getMessagesSerializer());
     }
 
     private static MongoQueueMessage msg(Object event, Plugin plugin) {
@@ -84,9 +86,7 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
             if (inputUri.startsWith(URI_PREFIX)) {
                 LOGGER.info("Initializing MongoDB direct route for {}", plugin.getId());
                 final String colName = calcColName(inputUri);
-                final MongoTailingQueue<MongoQueueMessage> queue = new MongoTailingQueue<>(
-                        MongoQueueMessage.class, mongoClient, dbName, colName, maxSize
-                );
+                final MongoTailingQueue<MongoQueueMessage> queue = initQueue(colName);
                 queue.init();
                 try {
                     addSaverRoute(camelContext, plugin, endpoints, colName, queue);
@@ -98,6 +98,15 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
 
             }
         });
+    }
+
+    private MongoTailingQueue<MongoQueueMessage> initQueue(String colName) {
+        final MongoTailingQueue<MongoQueueMessage> queue = new MongoTailingQueue<>(
+                MongoQueueMessage.class, mongoClient, dbName, colName, maxSize
+        );
+        queue.setDeserializer(serializer);
+        queue.setSerializer(serializer);
+        return queue;
     }
 
     private void initPoller(CamelContext camelContext, Plugin plugin, String inputUri, MongoTailingQueue<MongoQueueMessage> queue) {
