@@ -51,12 +51,13 @@
         <constructor-arg name="poolSize" value="${camelot.mongodb.frontend.queue.poolsize}"/>
     </bean>
 
+    <bean id="camelot-mongodb-direct-routes-injector"
+          class="ru.yandex.qatools.camelot.mongodb.MongodbDirectRoutesInjector"/>
     <bean id="camelot-mongodb-direct-routes-initializer"
           class="ru.yandex.qatools.camelot.mongodb.MongodbDirectRoutesInitializer">
         <constructor-arg name="pluginsService" ref="camelot-processing-engine"/>
         <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
         <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
         <constructor-arg name="maxSize" value="${camelot.mongodb.direct.queue.maxsize}"/>
-        <constructor-arg name="poolSize" value="${camelot.mongodb.direct.queue.poolsize}"/>
     </bean>
 </beans>

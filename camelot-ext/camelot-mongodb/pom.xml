@@ -28,6 +28,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>ru.yandex.qatools.camelot</groupId>
+            <artifactId>camelot-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <scope>provided</scope>

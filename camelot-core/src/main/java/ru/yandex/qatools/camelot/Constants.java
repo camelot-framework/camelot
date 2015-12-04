@@ -5,8 +5,6 @@ package ru.yandex.qatools.camelot;
  */
 public final class Constants {
 
-    public static final String INPUT_QUEUE = "ref:events.input";
-
     public static final String CLIENT_SEND_SUFFIX = "client";
     public static final String SPLIT_SUFFIX = "split";
     public static final String FILTERED_SUFFIX = "filtered";

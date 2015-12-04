@@ -7,7 +7,7 @@
         <plugin>
             <aggregator>ru.yandex.qatools.camelot.mongodb.test.SaveAggregator</aggregator>
         </plugin>
-        <plugin baseInputUri="direct://mongodb">
+        <plugin baseInputUri="mongodb://topic:">
             <processor>ru.yandex.qatools.camelot.mongodb.test.BroadcastProcessor</processor>
         </plugin>
     </source>
