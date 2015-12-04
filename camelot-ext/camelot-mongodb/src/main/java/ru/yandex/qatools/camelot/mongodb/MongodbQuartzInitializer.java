@@ -50,6 +50,7 @@ public class MongodbQuartzInitializer extends AbstractQuartzInitializer<MongoPes
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void updateHeartBeat() {
         repo.put(HEARTBEAT_LAST_TIME, currentTimeMillis());
     }

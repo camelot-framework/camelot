@@ -6,6 +6,7 @@ import org.apache.camel.spi.AggregationRepository;
 import ru.qatools.mongodb.MongoPessimisticLocking;
 import ru.qatools.mongodb.MongoPessimisticRepo;
 import ru.yandex.qatools.camelot.api.Storage;
+import ru.yandex.qatools.camelot.common.MessagesSerializer;
 import ru.yandex.qatools.camelot.common.builders.MemoryAggregationRepositoryBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
 
@@ -20,14 +21,16 @@ public class MongodbAggregationRepositoryBuilder extends MemoryAggregationReposi
     private final String dbName;
     private final long waitForLockSec;
     private final long lockPollMaxIntervalMs;
+    private final MongoSerializer serializer;
 
-    public MongodbAggregationRepositoryBuilder(MongoClient mongoClient, String dbName, CamelContext camelContext,
-                                               long waitForLockSec, long lockPollMaxIntervalMs) {
+    public MongodbAggregationRepositoryBuilder(MongoClient mongoClient, MessagesSerializer serializer, String dbName,
+                                               CamelContext camelContext, long waitForLockSec, long lockPollMaxIntervalMs) {
         super(camelContext, waitForLockSec);
         this.mongoClient = mongoClient;
         this.waitForLockSec = waitForLockSec;
         this.lockPollMaxIntervalMs = lockPollMaxIntervalMs;
         this.dbName = dbName;
+        this.serializer = new MongoSerializer(serializer);
     }
 
     /**
@@ -37,7 +40,7 @@ public class MongodbAggregationRepositoryBuilder extends MemoryAggregationReposi
     public AggregationRepository initWritable(Plugin plugin) throws Exception { //NOSONAR
         final MongoPessimisticLocking locking = initLocking(plugin.getId());
         final MongodbAggregationRepository repo = new MongodbAggregationRepository(
-                plugin.getId(), locking, waitForLockSec
+                serializer, plugin.getId(), locking, waitForLockSec
         );
         repo.doStart();
         return repo;

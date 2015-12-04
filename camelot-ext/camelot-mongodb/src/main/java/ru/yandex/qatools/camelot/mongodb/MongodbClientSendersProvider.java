@@ -65,6 +65,9 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
     public void setCamelContext(CamelContext camelContext) {
         this.camelContext = camelContext;
         this.queue = new MongoTailingQueue<>(MongoQueueMessage.class, mongoClient, dbName, colName, maxSize);
+        final MongoSerializer mongoSerializer = new MongoSerializer(this.serializer);
+        queue.setDeserializer(mongoSerializer);
+        queue.setSerializer(mongoSerializer);
         queue.init();
         initPoller(camelContext);
         initRoutes(camelContext);
