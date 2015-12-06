@@ -24,7 +24,7 @@ public class MongodbStorage<T extends Serializable> implements Storage<T> {
 
     @Override
     public T get(String key) {
-        return (T) mongoRepo.get(key);
+        return mongoRepo.get(key);
     }
 
     @Override

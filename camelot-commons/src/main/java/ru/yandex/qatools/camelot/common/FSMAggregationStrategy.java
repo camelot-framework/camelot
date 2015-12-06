@@ -82,9 +82,7 @@ public class FSMAggregationStrategy extends ClayProcessor implements Aggregation
             currentThread().setContextClassLoader(originalCL);
         }
 
-        if (result != null) {
-            message.getIn().setBody(result);
-        }
+        message.getIn().setBody(result);
         return processBeforeOut(message);
     }
 

@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import ru.yandex.qatools.camelot.common.BasicMessagesSerializer;
 import ru.yandex.qatools.camelot.common.MessagesSerializer;
-import ru.yandex.qatools.camelot.mongodb.MongodbClientSendersProvider.MongoQueueMessage;
 import ru.yandex.qatools.camelot.test.CamelotTestRunner;
 
 import static org.hamcrest.core.IsInstanceOf.instanceOf;

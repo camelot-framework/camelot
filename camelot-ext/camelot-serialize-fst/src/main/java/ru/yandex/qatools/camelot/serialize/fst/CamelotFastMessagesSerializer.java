@@ -1,8 +1,8 @@
 package ru.yandex.qatools.camelot.serialize.fst;
 
-import de.ruedigermoeller.serialization.FSTConfiguration;
-import de.ruedigermoeller.serialization.FSTObjectInput;
-import de.ruedigermoeller.serialization.FSTObjectOutput;
+import org.apache.camel.util.LRUSoftCache;
+import org.nustaq.serialization.FSTConfiguration;
+import org.nustaq.serialization.FSTObjectOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.camelot.common.BasicMessagesSerializer;
@@ -10,9 +10,8 @@ import ru.yandex.qatools.camelot.common.BasicMessagesSerializer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static de.ruedigermoeller.serialization.FSTConfiguration.createDefaultConfiguration;
+import static org.nustaq.serialization.FSTConfiguration.createDefaultConfiguration;
 import static ru.yandex.qatools.camelot.util.SerializeUtil.*;
 
 /**
@@ -20,9 +19,9 @@ import static ru.yandex.qatools.camelot.util.SerializeUtil.*;
  */
 public class CamelotFastMessagesSerializer extends BasicMessagesSerializer {
 
+    public static final int MAX_CACHE_SIZE = 1000;
+    private static final Map<ClassLoader, FSTConfiguration> configByClassLoader = new LRUSoftCache<>(MAX_CACHE_SIZE);
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
-
-    private static final Map<ClassLoader, FSTConfiguration> configByClassLoader = new ConcurrentHashMap<>();
 
     /**
      * Serialize the object to bytes
@@ -44,7 +43,7 @@ public class CamelotFastMessagesSerializer extends BasicMessagesSerializer {
             out.flush();
             return outStream.toByteArray();
         } catch (Exception e) {
-            LOGGER.error("Failed to serialize object to bytes", e);
+            LOGGER.warn("Failed to serialize object to bytes", e);
             return null; //NOSONAR
         }
 
@@ -61,10 +60,8 @@ public class CamelotFastMessagesSerializer extends BasicMessagesSerializer {
             configByClassLoader.put(classLoader, config);
             config.setClassLoader(classLoader);
         }
-        FSTObjectInput in = config.getObjectInput(bis);
-        return in.readObject(expectedClass);
+        return config.getObjectInput(bis).readObject(expectedClass);
     }
-
 
     @Override
     public Object deserialize(Object body, ClassLoader classLoader) {
@@ -74,7 +71,7 @@ public class CamelotFastMessagesSerializer extends BasicMessagesSerializer {
                 return deserializeFromBytes(unwrapBytesWithMeta((byte[]) body), classLoader, bodyClass);
             }
         } catch (Exception e) {
-            LOGGER.debug("Failed to deserialize message from bytes: " + e.getMessage(), e);
+            LOGGER.warn("Failed to deserialize message from bytes: " + e.getMessage(), e);
         }
         return body;
     }
@@ -82,7 +79,8 @@ public class CamelotFastMessagesSerializer extends BasicMessagesSerializer {
     @Override
     public Object serialize(Object body, ClassLoader classLoader) {
         if (body != null) {
-            return wrapBytesWithMeta(serializeToBytes(body, classLoader), body.getClass().getName());
+            final byte[] bytes = serializeToBytes(body, classLoader);
+            return (bytes != null) ? wrapBytesWithMeta(bytes, body.getClass().getName()) : null;
         }
         return null;
     }
