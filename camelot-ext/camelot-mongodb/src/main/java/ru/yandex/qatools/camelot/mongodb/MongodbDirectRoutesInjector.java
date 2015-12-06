@@ -1,6 +1,5 @@
 package ru.yandex.qatools.camelot.mongodb;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
@@ -21,7 +20,7 @@ public class MongodbDirectRoutesInjector implements BeanPostProcessor, PriorityO
         pluginsService.setUriBuilder(
                 (PluginUriBuilder) newProxyInstance(pluginsService.getClass().getClassLoader(),
                         new Class[]{PluginUriBuilder.class}, (proxy, method, args) -> {
-                            if (method.getName().equals("pluginUri")) {
+                            if ("pluginUri".equals(method.getName())) {
                                 final Plugin plugin = (Plugin) args[0];
                                 if (plugin.getBaseInputUri().equals(URI_PREFIX)) {
                                     return overridenUri(plugin, (String) args[1]);
@@ -33,7 +32,7 @@ public class MongodbDirectRoutesInjector implements BeanPostProcessor, PriorityO
 
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(Object bean, String beanName) {
         if (bean instanceof PluginsService) {
             overrideUriBuilder((PluginsService) bean);
         }
@@ -41,7 +40,7 @@ public class MongodbDirectRoutesInjector implements BeanPostProcessor, PriorityO
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(Object bean, String beanName) {
         return bean;
     }
 
