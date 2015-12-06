@@ -20,8 +20,9 @@ import javax.annotation.PostConstruct;
 import java.io.Serializable;
 
 import static java.text.MessageFormat.format;
-import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.apache.camel.LoggingLevel.DEBUG;
+import static ru.yandex.qatools.camelot.Constants.INPUT_SUFFIX;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.BODY_CLASS;
 import static ru.yandex.qatools.camelot.api.Constants.Headers.PLUGIN_ID;
 import static ru.yandex.qatools.camelot.util.MapUtil.map;
@@ -31,23 +32,23 @@ import static ru.yandex.qatools.camelot.util.ServiceUtil.initEventProducer;
  * @author Ilya Sadykov
  */
 public class MongodbDirectRoutesInitializer implements CamelContextAware {
-    public static final String URI_PREFIX = "direct://mongodb";
+    public static final String URI_PREFIX = "mongodb://topic";
+    public static final String NEW_INPUT_URI_PREFIX = "direct://mongodb.topic.";
+    public static final String COL_SUFFIX = "_direct_queue";
     private static final Logger LOGGER = LoggerFactory.getLogger(MongodbDirectRoutesInitializer.class);
     private final PluginsService pluginsService;
     private final MongoClient mongoClient;
     private final String dbName;
-    private final int poolSize;
     private final long maxSize;
     private final MongoSerializer serializer;
     private CamelContext camelContext;
 
     public MongodbDirectRoutesInitializer(PluginsService pluginsService, MongoClient mongoClient,
-                                          String dbName, int poolSize, long maxSize) {
+                                          String dbName, long maxSize) {
         this.pluginsService = pluginsService;
         this.mongoClient = mongoClient;
         this.dbName = dbName;
         this.maxSize = maxSize;
-        this.poolSize = poolSize;
         this.serializer = new MongoSerializer(pluginsService.getMessagesSerializer());
     }
 
@@ -55,17 +56,21 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
         return new MongoQueueMessage(plugin.getId(), event);
     }
 
-    private static String calcColName(String inputUri) {
-        return inputUri.replace(".", "_");
+    private static String calcColName(Plugin plugin) {
+        return plugin.getId() + COL_SUFFIX;
     }
 
     private static String calcFromUri(String inputUri) {
         return inputUri.replace(URI_PREFIX, "").split("\\?")[0];
     }
 
+    public static String overridenUri(Plugin plugin, String suffix) {
+        return NEW_INPUT_URI_PREFIX + plugin.getId() + "." + suffix;
+    }
+
     @Override
     public CamelContext getCamelContext() {
-        return null;
+        return camelContext;
     }
 
     @Override
@@ -83,14 +88,14 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
         pluginsService.getPluginsMap().values().forEach(plugin -> {
             final PluginEndpoints endpoints = plugin.getContext().getEndpoints();
             final String inputUri = endpoints.getInputUri();
-            if (inputUri.startsWith(URI_PREFIX)) {
+            if (inputUri.startsWith(NEW_INPUT_URI_PREFIX)) {
                 LOGGER.info("Initializing MongoDB direct route for {}", plugin.getId());
-                final String colName = calcColName(inputUri);
+                final String colName = calcColName(plugin);
                 final MongoTailingQueue<MongoQueueMessage> queue = initQueue(colName);
                 queue.init();
                 try {
                     addSaverRoute(camelContext, plugin, endpoints, colName, queue);
-                    initPoller(camelContext, plugin, inputUri, queue);
+                    initPoller(camelContext, plugin, queue);
                 } catch (Exception e) {
                     throw new RuntimeException(format("Failed to initialize MongoDB direct route for %s!",//NOSONAR
                             plugin.getId()), e);
@@ -109,12 +114,12 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
         return queue;
     }
 
-    private void initPoller(CamelContext camelContext, Plugin plugin, String inputUri, MongoTailingQueue<MongoQueueMessage> queue) {
+    private void initPoller(CamelContext camelContext, Plugin plugin, MongoTailingQueue<MongoQueueMessage> queue) {
         LOGGER.info("Initializing MongoDB queue poller for {}", plugin.getId());
         try {
-            final EventProducer producer = initEventProducer(camelContext, inputUri,
+            final EventProducer producer = initEventProducer(camelContext, overridenUri(plugin, INPUT_SUFFIX),
                     pluginsService.getMessagesSerializer());
-            newFixedThreadPool(poolSize).submit(() ->
+            newSingleThreadExecutor().submit(() ->
                     queue.poll(m -> producer.produce(m.object, map(
                             BODY_CLASS, m.object.getClass().getName(),
                             PLUGIN_ID, m.pluginId
