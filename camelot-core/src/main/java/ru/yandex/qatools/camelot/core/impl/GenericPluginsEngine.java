@@ -85,7 +85,6 @@ public abstract class GenericPluginsEngine implements PluginsService, RoutingSer
                 this.clientSendersProvider = new BasicClientSendersProvider(camelContext, messagesSerializer);
             }
             initializePlugins();
-            initWebResources();
         } catch (Exception e) {
             logger.error("Could not initialize plugins configurations: {}", formatStackTrace(e), e);
         }
