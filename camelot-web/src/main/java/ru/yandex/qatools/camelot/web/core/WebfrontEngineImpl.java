@@ -43,6 +43,7 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
         } catch (Exception e) {
             logger.error("Could not intialize web context", e);
         }
+        initialized = true;
     }
 
     @Override

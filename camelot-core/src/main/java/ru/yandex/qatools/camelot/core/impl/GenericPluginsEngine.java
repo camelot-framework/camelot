@@ -44,6 +44,7 @@ public abstract class GenericPluginsEngine implements PluginsService, RoutingSer
     protected PluginTree pluginTree;
     protected Map<String, Plugin> pluginsMap;
     protected Map<String, Plugin> pluginsByClassMap;
+    protected volatile boolean initialized = false;
     private PluginContextInjector contextInjector;
     private BuildersFactory buildersFactory;
     private ResourceBuilder resourceBuilder;
@@ -324,6 +325,12 @@ public abstract class GenericPluginsEngine implements PluginsService, RoutingSer
     public boolean pluginCanConsume(Plugin plugin) {
         return !isEmpty(plugin.getAggregator()) || !isEmpty(plugin.getProcessor());
     }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
+    }
+
 
     /** ------------------------------------------------------------- **/
 

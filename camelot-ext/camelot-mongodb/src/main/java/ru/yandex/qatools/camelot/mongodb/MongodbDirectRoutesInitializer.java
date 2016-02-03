@@ -120,10 +120,14 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
             final EventProducer producer = initEventProducer(camelContext, overridenUri(plugin, INPUT_SUFFIX),
                     pluginsService.getMessagesSerializer());
             newSingleThreadExecutor().submit(() ->
-                    queue.poll(m -> producer.produce(m.object, map(
-                            BODY_CLASS, m.object.getClass().getName(),
-                            PLUGIN_ID, m.pluginId
-                    ))));
+                    queue.poll(m -> {
+                        if (pluginsService.isInitialized()) {
+                            producer.produce(m.object, map(
+                                    BODY_CLASS, m.object.getClass().getName(),
+                                    PLUGIN_ID, m.pluginId
+                            ));
+                        }
+                    }));
         } catch (Exception e) {
             throw new RuntimeException(format("Failed to initialize MongoDB poller for %s!",//NOSONAR
                     plugin.getId()), e);
