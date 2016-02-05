@@ -3,7 +3,7 @@ package ru.yandex.qatools.camelot.test.core;
 import org.apache.camel.CamelContext;
 import ru.yandex.qatools.camelot.api.annotations.OnTimer;
 import ru.yandex.qatools.camelot.common.AggregatorPluginAnnotatedMethodInvoker;
-import ru.yandex.qatools.camelot.common.AnnotatedMethodListener;
+import ru.yandex.qatools.camelot.common.PluginAnnotatedMethodInvoker;
 import ru.yandex.qatools.camelot.common.builders.SchedulerBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
 
@@ -42,12 +42,7 @@ class TestSchedulerBuilder implements SchedulerBuilder {
     @Override
     public void invokeJobs() throws Exception { //NOSONAR
         Class pluginClass = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass());
-        forEachAnnotatedMethod(pluginClass, OnTimer.class, new AnnotatedMethodListener<Object, OnTimer>() {
-            @Override
-            public Object found(Method method, OnTimer annotation) throws Exception {
-                return invokeJob(method.getName());
-            }
-        });
+        forEachAnnotatedMethod(pluginClass, OnTimer.class, (method, annotation) -> invokeJob(method.getName()));
     }
 
     @Override
@@ -56,8 +51,12 @@ class TestSchedulerBuilder implements SchedulerBuilder {
             Class pluginClass = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass());
             final Method m = getMethodFromClassHierarchy(pluginClass, method);
             final OnTimer onTimer = m.getAnnotation(OnTimer.class);
-            AggregatorPluginAnnotatedMethodInvoker invoker =
-                    new AggregatorPluginAnnotatedMethodInvoker(camelContext, plugin, OnTimer.class, onTimer.readOnly());
+            PluginAnnotatedMethodInvoker invoker;
+            if (onTimer.perState()) {
+                invoker = new AggregatorPluginAnnotatedMethodInvoker(camelContext, plugin, OnTimer.class, onTimer.readOnly());
+            } else {
+                invoker = new PluginAnnotatedMethodInvoker(plugin, OnTimer.class);
+            }
             invoker.process();
             invoker.setPluginInstance(pluginMock);
             invoker.invoke(m);
