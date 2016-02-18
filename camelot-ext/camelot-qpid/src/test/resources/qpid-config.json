@@ -1,0 +1,114 @@
+{
+  "name": "${broker.name}",
+  "modelVersion": "6.0",
+  "authenticationproviders": [
+    {
+      "name": "passwordFile",
+      "type": "PlainPasswordFile",
+      "path": "${qpid.password_file}",
+      "preferencesproviders": [
+        {
+          "name": "fileSystemPreferences",
+          "type": "FileSystemPreferences",
+          "path": "${qpid.work_dir}${file.separator}user.preferences.json"
+        }
+      ]
+    }
+  ],
+  "brokerloggers": [
+    {
+      "name": "logfile",
+      "type": "File",
+      "fileName": "${qpid.work_dir}${file.separator}log${file.separator}qpid.log",
+      "brokerloginclusionrules": [
+        {
+          "name": "Root",
+          "type": "NameAndLevel",
+          "level": "WARN",
+          "loggerName": "ROOT"
+        },
+        {
+          "name": "Qpid",
+          "type": "NameAndLevel",
+          "level": "INFO",
+          "loggerName": "org.apache.qpid.*"
+        },
+        {
+          "name": "Operational",
+          "type": "NameAndLevel",
+          "level": "INFO",
+          "loggerName": "qpid.message.*"
+        }
+      ]
+    },
+    {
+      "name": "memory",
+      "type": "Memory",
+      "brokerloginclusionrules": [
+        {
+          "name": "Root",
+          "type": "NameAndLevel",
+          "level": "WARN",
+          "loggerName": "ROOT"
+        },
+        {
+          "name": "Qpid",
+          "type": "NameAndLevel",
+          "level": "INFO",
+          "loggerName": "org.apache.qpid.*"
+        },
+        {
+          "name": "Operational",
+          "type": "NameAndLevel",
+          "level": "INFO",
+          "loggerName": "qpid.message.*"
+        }
+      ]
+    }
+  ],
+  "ports": [
+    {
+      "name": "AMQP",
+      "port": "${qpid.amqp_port}",
+      "authenticationProvider": "passwordFile",
+      "virtualhostaliases": [
+        {
+          "name": "nameAlias",
+          "type": "nameAlias"
+        },
+        {
+          "name": "defaultAlias",
+          "type": "defaultAlias"
+        },
+        {
+          "name": "hostnameAlias",
+          "type": "hostnameAlias"
+        }
+      ]
+    },
+    {
+      "name": "RMI_REGISTRY",
+      "port": "${qpid.rmi_port}",
+      "protocols": [
+        "RMI"
+      ]
+    },
+    {
+      "name": "JMX_CONNECTOR",
+      "port": "${qpid.jmx_port}",
+      "authenticationProvider": "passwordFile",
+      "protocols": [
+        "JMX_RMI"
+      ]
+    }
+  ],
+  "virtualhostnodes": [
+    {
+      "name": "default",
+      "type": "JSON",
+      "defaultVirtualHostNode": "true",
+      "virtualHostInitialConfiguration": "${qpid.initial_config_virtualhost_config}"
+    }
+  ],
+  "plugins": []
+}
