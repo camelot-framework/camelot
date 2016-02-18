@@ -10,6 +10,8 @@ import ru.yandex.qatools.camelot.common.MessagesSerializer;
 import ru.yandex.qatools.camelot.common.builders.MemoryAggregationRepositoryBuilder;
 import ru.yandex.qatools.camelot.config.Plugin;
 
+import java.io.Serializable;
+
 import static ru.yandex.qatools.camelot.util.NameUtil.pluginStorageKey;
 
 /**
@@ -21,7 +23,7 @@ public class MongodbAggregationRepositoryBuilder extends MemoryAggregationReposi
     private final String dbName;
     private final long waitForLockSec;
     private final long lockPollMaxIntervalMs;
-    private final MongoSerializer serializer;
+    private final MessagesSerializer serializer;
 
     public MongodbAggregationRepositoryBuilder(MongoClient mongoClient, MessagesSerializer serializer, String dbName,
                                                CamelContext camelContext, long waitForLockSec, long lockPollMaxIntervalMs) {
@@ -30,7 +32,7 @@ public class MongodbAggregationRepositoryBuilder extends MemoryAggregationReposi
         this.waitForLockSec = waitForLockSec;
         this.lockPollMaxIntervalMs = lockPollMaxIntervalMs;
         this.dbName = dbName;
-        this.serializer = new MongoSerializer(serializer);
+        this.serializer = serializer;
     }
 
     /**
@@ -40,7 +42,8 @@ public class MongodbAggregationRepositoryBuilder extends MemoryAggregationReposi
     public AggregationRepository initWritable(Plugin plugin) throws Exception { //NOSONAR
         final MongoPessimisticLocking locking = initLocking(plugin.getId());
         final MongodbAggregationRepository repo = new MongodbAggregationRepository(
-                serializer, plugin.getId(), locking, waitForLockSec
+                new MongoSerializer(serializer, plugin.getContext().getClassLoader()),
+                plugin.getId(), locking, waitForLockSec
         );
         repo.doStart();
         return repo;
@@ -49,7 +52,9 @@ public class MongodbAggregationRepositoryBuilder extends MemoryAggregationReposi
     @Override
     @SuppressWarnings("unchecked")
     public Storage initStorage(Plugin plugin) throws Exception { //NOSONAR
-        return new MongodbStorage<>(new MongoPessimisticRepo<>(initLocking(pluginStorageKey(plugin.getId()))));
+        return new MongodbStorage<>(
+                new MongoPessimisticRepo<>(initLocking(pluginStorageKey(plugin.getId())), Serializable.class)
+        );
     }
 
     private MongoPessimisticLocking initLocking(String id) {

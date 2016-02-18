@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import ru.yandex.qatools.camelot.api.annotations.OnTimer;
 import ru.yandex.qatools.camelot.api.error.RepositoryUnreachableException;
 import ru.yandex.qatools.camelot.common.AggregatorPluginAnnotatedMethodInvoker;
-import ru.yandex.qatools.camelot.common.AnnotatedMethodListener;
 import ru.yandex.qatools.camelot.common.PluginAnnotatedMethodInvoker;
 import ru.yandex.qatools.camelot.common.PluginMethodInvoker;
 import ru.yandex.qatools.camelot.config.Plugin;
@@ -74,33 +73,30 @@ public class QuartzAggregatorSchedulerBuilder implements SchedulerBuilder {
 
         final Class<?> aggClass = plugin.getContext().getClassLoader()
                 .loadClass(plugin.getContext().getPluginClass());
-        forEachAnnotatedMethod(aggClass, OnTimer.class, new AnnotatedMethodListener() {
-            @Override
-            public Object found(Method method, Object annotation) throws Exception { //NOSONAR
-                Object timerInfo;
-                try {
-                    timerInfo = getAnnotation(method, OnTimer.class);
-                    final PluginContext context = plugin.getContext();
-                    final PluginMethodInvoker invoker;
+        forEachAnnotatedMethod(aggClass, OnTimer.class, (method, annotation) -> { //NOSONAR
+            Object timerInfo;
+            try {
+                timerInfo = getAnnotation(method, OnTimer.class);
+                final PluginContext context = plugin.getContext();
+                final PluginMethodInvoker invoker;
 
-                    final Boolean readOnly = (Boolean) getAnnotationValue(timerInfo, READ_ONLY);
-                    final Boolean perState = (Boolean) getAnnotationValue(timerInfo, PER_STATE);
-                    if (perState) {
-                        invoker = new AggregatorPluginAnnotatedMethodInvoker(
-                                camelContext, plugin, OnTimer.class, readOnly
-                        ).process();
-                    } else {
-                        invoker = new PluginAnnotatedMethodInvoker(plugin, OnTimer.class).process();
-                    }
-                    if (timerInfo != null) {
-                        addNewJob(method, timerInfo, context, invoker);
-                    }
-                } catch (Exception e) {
-                    LOGGER.error("Failed to process scheduler method {} of class {}",
-                            method.getName(), aggClass, e);
+                final Boolean readOnly = (Boolean) getAnnotationValue(timerInfo, READ_ONLY);
+                final Boolean perState = (Boolean) getAnnotationValue(timerInfo, PER_STATE);
+                if (perState) {
+                    invoker = new AggregatorPluginAnnotatedMethodInvoker(
+                            camelContext, plugin, OnTimer.class, readOnly
+                    ).process();
+                } else {
+                    invoker = new PluginAnnotatedMethodInvoker(plugin, OnTimer.class).process();
                 }
-                return null;
+                if (timerInfo != null) {
+                    addNewJob(method, timerInfo, context, invoker);
+                }
+            } catch (Exception e) {
+                LOGGER.error("Failed to process scheduler method {} of class {}",
+                        method.getName(), aggClass, e);
             }
+            return null;
         });
     }
 

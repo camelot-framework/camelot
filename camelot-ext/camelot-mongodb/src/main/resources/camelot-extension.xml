@@ -49,6 +49,7 @@
         <constructor-arg name="colName" value="${camelot.mongodb.frontend.queue.name}"/>
         <constructor-arg name="maxSize" value="${camelot.mongodb.frontend.queue.maxsize}"/>
         <constructor-arg name="poolSize" value="${camelot.mongodb.frontend.queue.poolsize}"/>
+        <constructor-arg name="minPollIntervalMs" value="${camelot.mongodb.frontend.min.poll.inteval.ms}"/>
     </bean>
 
     <bean id="camelot-mongodb-direct-routes-injector"
@@ -59,5 +60,6 @@
         <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
         <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
         <constructor-arg name="maxSize" value="${camelot.mongodb.direct.queue.maxsize}"/>
+        <constructor-arg name="minPollIntervalMs" value="${camelot.mongodb.direct.min.poll.inteval.ms}"/>
     </bean>
 </beans>
