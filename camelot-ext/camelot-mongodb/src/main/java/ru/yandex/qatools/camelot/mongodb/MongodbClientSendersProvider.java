@@ -41,7 +41,7 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
 
     public MongodbClientSendersProvider(MessagesSerializer serializer, PluginUriBuilder uriBuilder, int poolSize,
                                         MongoClient mongoClient, String dbName, String colName, long maxSize,
-                                        int minPollIntervalMs) {
+                                        int minPollIntervalMs) { //NOSONAR
         this.serializer = serializer;
         this.feBroadcastUri = uriBuilder.frontendBroadcastUri();
         this.senderPool = newFixedThreadPool(poolSize);
@@ -98,13 +98,11 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
         try {
             final EventProducer producer = initEventProducer(camelContext, MONGODB_FRONTEND_URI, serializer);
             newSingleThreadExecutor().submit(() ->
-                    queue.poll(m -> {
-                        producer.produce(m.object, map(
-                                BODY_CLASS, m.object.getClass().getName(),
-                                TOPIC, m.topic,
-                                PLUGIN_ID, m.pluginId
-                        ));
-                    })
+                    queue.poll(m -> producer.produce(m.object, map(
+                            BODY_CLASS, m.object.getClass().getName(),
+                            TOPIC, m.topic,
+                            PLUGIN_ID, m.pluginId
+                    )))
             );
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize MongoDB poller for client notify support!", e);//NOSONAR
