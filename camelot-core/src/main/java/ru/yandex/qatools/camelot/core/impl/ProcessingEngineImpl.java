@@ -83,6 +83,7 @@ public class ProcessingEngineImpl extends GenericPluginsEngine implements Proces
         } catch (Exception e) {
             logger.error("Failed to add camel context listener", e);
         }
+        initialized = true;
     }
 
     @Override

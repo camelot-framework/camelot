@@ -23,7 +23,6 @@ import static org.apache.commons.lang3.ArrayUtils.addAll;
 public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMethodInvoker {
     final CamelContext camelContext;
     final boolean readOnly;
-    private Object pluginInstance;
 
     public AggregatorPluginAnnotatedMethodInvoker(CamelContext camelContext, Plugin plugin,
                                                   Class<? extends Annotation> anClass, boolean readOnly)
@@ -31,10 +30,6 @@ public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMetho
         super(plugin, anClass);
         this.camelContext = camelContext;
         this.readOnly = readOnly;
-    }
-
-    public void setPluginInstance(Object pluginInstance) {
-        this.pluginInstance = pluginInstance;
     }
 
     @Override
@@ -99,12 +94,9 @@ public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMetho
     @SuppressWarnings("unchecked")
     private void invokeForExchange(String key, Exchange exchange, Method method, Object[] args) throws Exception { //NOSONAR
         final PluginContext context = plugin.getContext();
-        final ClassLoader classLoader = context.getClassLoader();
-        Object aggregator = (pluginInstance == null) ?
-                            classLoader.loadClass(plugin.getAggregator()).newInstance() :
-                            pluginInstance;
+        final Object aggregator = getPluginInstance();
+        final ClassLoader classLoader = plugin.getContext().getClassLoader();
         context.getInjector().inject(aggregator, context, exchange);
-
         context.getMessagesSerializer().preProcess(exchange, classLoader);
         Object body = exchange.getIn().getBody();
         Object[] mArgs = new Object[]{body};
@@ -119,6 +111,7 @@ public class AggregatorPluginAnnotatedMethodInvoker extends PluginAnnotatedMetho
                 method.getName(), key, plugin.getId());
         context.getMessagesSerializer().postProcess(exchange, classLoader);
     }
+
 
     private void unlockQuietly(AggregationRepository repo, String key) {
         if (!readOnly && repo instanceof AggregationRepositoryWithLocks) {

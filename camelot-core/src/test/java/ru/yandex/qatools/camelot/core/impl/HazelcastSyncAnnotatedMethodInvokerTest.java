@@ -73,18 +73,8 @@ public class HazelcastSyncAnnotatedMethodInvokerTest {
     @Test
     public void testPlugin() throws Exception {
         final PluginMethodInvoker invoker = new HazelcastSyncAnnotatedMethodInvoker<>(hazelcastInstance,
-                plugin, OnInit.class, 2, false).process(new FoundMethodProcessor() {
-            @Override
-            public boolean appliesTo(Method method, Object annotation) {
-                return method.getName().equals("testSync");
-            }
-        });
-        new Thread() {
-            @Override
-            public void run() {
-                invoker.invoke();
-            }
-        }.start();
+                plugin, OnInit.class, 2, false).process((method, annotation) -> method.getName().equals("testSync"));
+        new Thread(invoker::invoke).start();
         invoker.invoke();
         assertEquals("counter must be equal to 1", 1, count.get());
     }

@@ -11,6 +11,8 @@ import ru.yandex.qatools.camelot.common.PluginInitializer;
 import ru.yandex.qatools.camelot.config.Plugin;
 import ru.yandex.qatools.camelot.util.ReflectUtil;
 
+import java.io.Serializable;
+
 
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
@@ -22,9 +24,11 @@ public class MongodbPluginInitializer implements PluginInitializer {
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private final MongoPessimisticRepo mongoRepo;
 
+    @SuppressWarnings("unchecked")
     public MongodbPluginInitializer(MongoClient mongoClient, String dbName) {
         this.mongoRepo = new MongoPessimisticRepo(
-                new MongoPessimisticLocking(mongoClient, dbName, PLUGIN_INIT_KS, PLUGIN_INIT_MAX_INTERVAL_MS)
+                new MongoPessimisticLocking(mongoClient, dbName, PLUGIN_INIT_KS, PLUGIN_INIT_MAX_INTERVAL_MS),
+                Serializable.class
         );
     }
 

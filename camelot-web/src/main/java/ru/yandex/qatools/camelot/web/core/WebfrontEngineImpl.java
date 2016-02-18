@@ -37,12 +37,13 @@ public class WebfrontEngineImpl extends GenericPluginsEngine implements Webfront
     @Override
     public synchronized void init() {
         super.init();
-
         try {
+            initWebResources();
             initAdditionalProcessors();
         } catch (Exception e) {
-            logger.error("Could not register local client notify routes", e);
+            logger.error("Could not intialize web context", e);
         }
+        initialized = true;
     }
 
     @Override

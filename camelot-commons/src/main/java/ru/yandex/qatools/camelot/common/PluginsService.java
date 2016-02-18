@@ -162,4 +162,9 @@ public interface PluginsService {
      * Returns true if plugin has aggregator or processor
      */
     boolean pluginCanConsume(Plugin plugin);
+
+    /**
+     * Returns true when all plugins are initialized
+     */
+    boolean isInitialized();
 }

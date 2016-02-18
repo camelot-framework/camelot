@@ -8,6 +8,8 @@ import ru.qatools.mongodb.MongoPessimisticRepo;
 import ru.yandex.qatools.camelot.api.AppConfig;
 import ru.yandex.qatools.camelot.common.builders.AbstractQuartzInitializer;
 
+import java.io.Serializable;
+
 import static java.lang.System.currentTimeMillis;
 
 /**
@@ -24,12 +26,13 @@ public class MongodbQuartzInitializer extends AbstractQuartzInitializer<MongoPes
 
     private final MongoPessimisticRepo repo;
 
+    @SuppressWarnings("unchecked")
     public MongodbQuartzInitializer(MongoClient mongoClient, String dbName, Scheduler scheduler, AppConfig config) {
         super(scheduler, config);
         this.repo = new MongoPessimisticRepo(
                 new MongoPessimisticLocking(
                         mongoClient, dbName, INITIALIZER_KS, MAX_CHECK_INTERVAL_MS
-                )
+                ), Serializable.class
         );
     }
 

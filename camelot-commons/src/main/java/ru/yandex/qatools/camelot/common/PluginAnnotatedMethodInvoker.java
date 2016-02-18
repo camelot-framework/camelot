@@ -21,6 +21,7 @@ public class PluginAnnotatedMethodInvoker<A> implements PluginMethodInvoker {
     protected final Plugin plugin;
     protected final Class anClass;
     protected List<Method> methods = new ArrayList<>();
+    protected Object pluginInstance;
 
     public PluginAnnotatedMethodInvoker(Plugin plugin, Class anClass) {
         this.plugin = plugin;
@@ -53,10 +54,19 @@ public class PluginAnnotatedMethodInvoker<A> implements PluginMethodInvoker {
         }
     }
 
+    protected Object getPluginInstance() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+        return (pluginInstance == null) ? plugin.getContext().getClassLoader()
+                .loadClass(plugin.getContext().getPluginClass()).newInstance() : pluginInstance;
+    }
+
+    public void setPluginInstance(Object pluginInstance) {
+        this.pluginInstance = pluginInstance;
+    }
+
     @Override
     public void invoke(Method method, Object... args) {
         try {
-            Object instance = plugin.getContext().getClassLoader().loadClass(plugin.getContext().getPluginClass()).newInstance();
+            final Object instance = getPluginInstance();
             plugin.getContext().getInjector().inject(instance, plugin.getContext());
             method.invoke(instance, args);
         } catch (InvocationTargetException e) {//NOSONAR
