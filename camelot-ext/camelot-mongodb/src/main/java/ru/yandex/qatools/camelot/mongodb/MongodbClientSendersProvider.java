@@ -7,7 +7,7 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.qatools.mongodb.MongoTailingQueue;
+import ru.qatools.mongodb.MongoTailableQueue;
 import ru.yandex.qatools.camelot.api.ClientMessageSender;
 import ru.yandex.qatools.camelot.api.ClientSendersProvider;
 import ru.yandex.qatools.camelot.api.EventProducer;
@@ -35,11 +35,13 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
     private final long maxSize;
     private final MessagesSerializer serializer;
     private final String feBroadcastUri;
-    private MongoTailingQueue<MongoQueueMessage> queue;
+    private final int minPollIntervalMs;
+    private MongoTailableQueue<MongoQueueMessage> queue;
     private CamelContext camelContext;
 
     public MongodbClientSendersProvider(MessagesSerializer serializer, PluginUriBuilder uriBuilder, int poolSize,
-                                        MongoClient mongoClient, String dbName, String colName, long maxSize) {
+                                        MongoClient mongoClient, String dbName, String colName, long maxSize,
+                                        int minPollIntervalMs) {
         this.serializer = serializer;
         this.feBroadcastUri = uriBuilder.frontendBroadcastUri();
         this.senderPool = newFixedThreadPool(poolSize);
@@ -47,6 +49,7 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
         this.dbName = dbName;
         this.colName = colName;
         this.maxSize = maxSize;
+        this.minPollIntervalMs = minPollIntervalMs;
     }
 
     @Override
@@ -64,10 +67,11 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
     @Override
     public void setCamelContext(CamelContext camelContext) {
         this.camelContext = camelContext;
-        this.queue = new MongoTailingQueue<>(MongoQueueMessage.class, mongoClient, dbName, colName, maxSize);
-        final MongoSerializer mongoSerializer = new MongoSerializer(this.serializer);
+        this.queue = new MongoTailableQueue<>(MongoQueueMessage.class, mongoClient, dbName, colName, maxSize);
+        final MongoSerializer mongoSerializer = new MongoSerializer(this.serializer, MongoQueueMessage.class.getClassLoader());
         queue.setDeserializer(mongoSerializer);
         queue.setSerializer(mongoSerializer);
+        queue.setMinPollIntervalMs(minPollIntervalMs);
         queue.init();
         initPoller(camelContext);
         initRoutes(camelContext);
@@ -94,14 +98,16 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
         try {
             final EventProducer producer = initEventProducer(camelContext, MONGODB_FRONTEND_URI, serializer);
             newSingleThreadExecutor().submit(() ->
-                    queue.poll(m -> producer.produce(m.object, map(
-                            BODY_CLASS, m.object.getClass().getName(),
-                            TOPIC, m.topic,
-                            PLUGIN_ID, m.pluginId
-                    ))));
+                    queue.poll(m -> {
+                        producer.produce(m.object, map(
+                                BODY_CLASS, m.object.getClass().getName(),
+                                TOPIC, m.topic,
+                                PLUGIN_ID, m.pluginId
+                        ));
+                    })
+            );
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize MongoDB poller for client notify support!", e);//NOSONAR
         }
     }
-
 }

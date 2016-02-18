@@ -148,7 +148,7 @@ public class MongodbAggregationRepository extends ServiceSupport
 
     @Override
     public void doStart() throws Exception { //NOSONAR
-        mongoRepo = new MongoPessimisticRepo<>(mongoLocking);
+        mongoRepo = new MongoPessimisticRepo<>(mongoLocking, DefaultExchangeHolder.class);
         mongoRepo.setSerializer(serializer);
         mongoRepo.setDeserializer(serializer);
     }

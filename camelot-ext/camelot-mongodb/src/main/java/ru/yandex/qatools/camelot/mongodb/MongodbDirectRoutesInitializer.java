@@ -7,8 +7,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.ProcessorDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.qatools.mongodb.MongoTailingQueue;
-import ru.qatools.mongodb.TailingQueue;
+import ru.qatools.mongodb.MongoTailableQueue;
+import ru.qatools.mongodb.TailableQueue;
 import ru.yandex.qatools.camelot.api.EventProducer;
 import ru.yandex.qatools.camelot.api.PluginEndpoints;
 import ru.yandex.qatools.camelot.api.annotations.Processor;
@@ -40,16 +40,16 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
     private final MongoClient mongoClient;
     private final String dbName;
     private final long maxSize;
-    private final MongoSerializer serializer;
+    private final int minPollIntervalMs;
     private CamelContext camelContext;
 
     public MongodbDirectRoutesInitializer(PluginsService pluginsService, MongoClient mongoClient,
-                                          String dbName, long maxSize) {
+                                          String dbName, long maxSize, int minPollIntervalMs) {
         this.pluginsService = pluginsService;
         this.mongoClient = mongoClient;
         this.dbName = dbName;
         this.maxSize = maxSize;
-        this.serializer = new MongoSerializer(pluginsService.getMessagesSerializer());
+        this.minPollIntervalMs = minPollIntervalMs;
     }
 
     private static MongoQueueMessage msg(Object event, Plugin plugin) {
@@ -91,7 +91,8 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
             if (inputUri.startsWith(NEW_INPUT_URI_PREFIX)) {
                 LOGGER.info("Initializing MongoDB direct route for {}", plugin.getId());
                 final String colName = calcColName(plugin);
-                final MongoTailingQueue<MongoQueueMessage> queue = initQueue(colName);
+                final MongoTailableQueue<MongoQueueMessage> queue = initQueue(colName, plugin.getContext().getClassLoader());
+                queue.setMinPollIntervalMs(minPollIntervalMs);
                 queue.init();
                 try {
                     addSaverRoute(camelContext, plugin, endpoints, colName, queue);
@@ -105,16 +106,17 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
         });
     }
 
-    private MongoTailingQueue<MongoQueueMessage> initQueue(String colName) {
-        final MongoTailingQueue<MongoQueueMessage> queue = new MongoTailingQueue<>(
+    private MongoTailableQueue<MongoQueueMessage> initQueue(String colName, ClassLoader classLoader) {
+        final MongoTailableQueue<MongoQueueMessage> queue = new MongoTailableQueue<>(
                 MongoQueueMessage.class, mongoClient, dbName, colName, maxSize
         );
+        final MongoSerializer serializer = new MongoSerializer(pluginsService.getMessagesSerializer(), classLoader);
         queue.setDeserializer(serializer);
         queue.setSerializer(serializer);
         return queue;
     }
 
-    private void initPoller(CamelContext camelContext, Plugin plugin, MongoTailingQueue<MongoQueueMessage> queue) {
+    private void initPoller(CamelContext camelContext, Plugin plugin, MongoTailableQueue<MongoQueueMessage> queue) {
         LOGGER.info("Initializing MongoDB queue poller for {}", plugin.getId());
         try {
             final EventProducer producer = initEventProducer(camelContext, overridenUri(plugin, INPUT_SUFFIX),
@@ -135,7 +137,8 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
     }
 
     private void addSaverRoute(CamelContext camelContext, final Plugin plugin, PluginEndpoints endpoints,
-                               final String colName, final MongoTailingQueue<MongoQueueMessage> queue) throws Exception {
+                               final String colName, final MongoTailableQueue<MongoQueueMessage> queue)
+            throws Exception {//NOSONAR
         final String fromUri = calcFromUri(endpoints.getConsumerUri());
         final String consumerUri = endpoints.getConsumerUri();
         final String consumerRouteId = endpoints.getConsumerRouteId();
@@ -161,10 +164,10 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
     }
 
     public static class Saver {
-        final TailingQueue<MongoQueueMessage> queue;
+        final TailableQueue<MongoQueueMessage> queue;
         final Plugin plugin;
 
-        Saver(TailingQueue<MongoQueueMessage> queue, Plugin plugin) {
+        Saver(TailableQueue<MongoQueueMessage> queue, Plugin plugin) {
             this.queue = queue;
             this.plugin = plugin;
         }
