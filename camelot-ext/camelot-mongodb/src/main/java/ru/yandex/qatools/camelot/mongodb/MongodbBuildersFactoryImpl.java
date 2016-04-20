@@ -14,12 +14,15 @@ public class MongodbBuildersFactoryImpl extends BuildersFactoryImpl {
     protected final MongoClient mongoClient;
     protected final String dbName;
     protected final MessagesSerializer serializer;
+    protected final MongoSerializerBuilder serializerBuilder;
     protected long lockPollMaxIntervalMs = 20;
 
-    public MongodbBuildersFactoryImpl(MongoClient mongoClient, MessagesSerializer serializer, String dbName) {
+    public MongodbBuildersFactoryImpl(MongoClient mongoClient, MessagesSerializer serializer, String dbName,
+                                      MongoSerializerBuilder serializerBuilder) {
         this.mongoClient = mongoClient;
         this.dbName = dbName;
         this.serializer = serializer;
+        this.serializerBuilder = serializerBuilder;
     }
 
     public void setLockPollMaxIntervalMs(long lockPollMaxIntervalMs) {
@@ -28,7 +31,7 @@ public class MongodbBuildersFactoryImpl extends BuildersFactoryImpl {
 
     @Override
     public AggregationRepositoryBuilder newRepositoryBuilder(CamelContext camelContext) throws Exception { //NOSONAR
-        return new MongodbAggregationRepositoryBuilder(mongoClient, serializer, dbName, camelContext,
-                getWaitForLockSec(), lockPollMaxIntervalMs);
+        return new MongodbAggregationRepositoryBuilder(mongoClient, serializer, serializerBuilder,
+                dbName, camelContext, getWaitForLockSec(), lockPollMaxIntervalMs);
     }
 }

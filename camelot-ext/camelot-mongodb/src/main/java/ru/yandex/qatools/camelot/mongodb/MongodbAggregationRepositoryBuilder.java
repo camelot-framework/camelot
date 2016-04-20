@@ -24,15 +24,19 @@ public class MongodbAggregationRepositoryBuilder extends MemoryAggregationReposi
     private final long waitForLockSec;
     private final long lockPollMaxIntervalMs;
     private final MessagesSerializer serializer;
+    private final MongoSerializerBuilder serializerBuilder;
 
-    public MongodbAggregationRepositoryBuilder(MongoClient mongoClient, MessagesSerializer serializer, String dbName,
-                                               CamelContext camelContext, long waitForLockSec, long lockPollMaxIntervalMs) {
+    public MongodbAggregationRepositoryBuilder(MongoClient mongoClient, MessagesSerializer serializer,
+                                               MongoSerializerBuilder serializerBuilder,
+                                               String dbName, CamelContext camelContext,
+                                               long waitForLockSec, long lockPollMaxIntervalMs) {
         super(camelContext, waitForLockSec);
         this.mongoClient = mongoClient;
         this.waitForLockSec = waitForLockSec;
         this.lockPollMaxIntervalMs = lockPollMaxIntervalMs;
         this.dbName = dbName;
         this.serializer = serializer;
+        this.serializerBuilder = serializerBuilder;
     }
 
     /**
@@ -42,7 +46,7 @@ public class MongodbAggregationRepositoryBuilder extends MemoryAggregationReposi
     public AggregationRepository initWritable(Plugin plugin) throws Exception { //NOSONAR
         final MongoPessimisticLocking locking = initLocking(plugin.getId());
         final MongodbAggregationRepository repo = new MongodbAggregationRepository(
-                new MongoSerializer(serializer, plugin.getContext().getClassLoader()),
+                serializerBuilder.build(serializer, plugin.getContext().getClassLoader()),
                 plugin.getId(), locking, waitForLockSec
         );
         repo.doStart();

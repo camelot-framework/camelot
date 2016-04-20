@@ -39,17 +39,19 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
     private final PluginsService pluginsService;
     private final MongoClient mongoClient;
     private final String dbName;
+    private final MongoSerializerBuilder serializerBuilder;
     private final long maxSize;
     private final int minPollIntervalMs;
     private CamelContext camelContext;
 
     public MongodbDirectRoutesInitializer(PluginsService pluginsService, MongoClient mongoClient,
-                                          String dbName, long maxSize, int minPollIntervalMs) {
+                                          String dbName, MongoSerializerBuilder serializerBuilder, long maxSize, int minPollIntervalMs) {
         this.pluginsService = pluginsService;
         this.mongoClient = mongoClient;
         this.dbName = dbName;
         this.maxSize = maxSize;
         this.minPollIntervalMs = minPollIntervalMs;
+        this.serializerBuilder = serializerBuilder;
     }
 
     private static MongoQueueMessage msg(Object event, Plugin plugin) {
@@ -110,7 +112,7 @@ public class MongodbDirectRoutesInitializer implements CamelContextAware {
         final MongoTailableQueue<MongoQueueMessage> queue = new MongoTailableQueue<>(
                 MongoQueueMessage.class, mongoClient, dbName, colName, maxSize
         );
-        final MongoSerializer serializer = new MongoSerializer(pluginsService.getMessagesSerializer(), classLoader);
+        final MongoSerializer serializer = serializerBuilder.build(pluginsService.getMessagesSerializer(), classLoader);
         queue.setDeserializer(serializer);
         queue.setSerializer(serializer);
         return queue;
