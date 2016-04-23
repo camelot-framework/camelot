@@ -3,9 +3,12 @@ package ru.yandex.qatools.camelot.mongodb;
 import java.io.Serializable;
 
 public class MongoQueueMessage implements Serializable {
-    final Serializable object;
-    final String topic;
-    final String pluginId;
+    Serializable object;
+    String topic;
+    String pluginId;
+
+    public MongoQueueMessage() {
+    }
 
     public MongoQueueMessage(String pluginId, Object object) {
         this(pluginId, object, null);
