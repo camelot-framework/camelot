@@ -27,11 +27,15 @@
         <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
     </bean>
 
+    <bean id="camelot-mongodb-serializer-builder-binary"
+          class="ru.yandex.qatools.camelot.mongodb.MongoSerializerBuilder"/>
+
     <!-- Builders Factories -->
     <bean id="camelot-factory-mongodb" class="ru.yandex.qatools.camelot.mongodb.MongodbBuildersFactoryImpl">
         <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
         <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
         <constructor-arg name="serializer" ref="${camelot.serializer}"/>
+        <constructor-arg name="serializerBuilder" ref="${camelot.mongodb.serializer.builder}"/>
         <property name="waitForLockSec" value="${camelot.mongodb.waitForLockSec}"/>
         <property name="lockPollMaxIntervalMs" value="${camelot.mongodb.lockPollMaxIntervalMs}"/>
     </bean>
@@ -44,6 +48,7 @@
     <bean id="camelot-client-senders-mongodb" class="ru.yandex.qatools.camelot.mongodb.MongodbClientSendersProvider">
         <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
         <constructor-arg name="serializer" ref="${camelot.serializer}"/>
+        <constructor-arg name="serializerBuilder" ref="${camelot.mongodb.serializer.builder}"/>
         <constructor-arg name="uriBuilder" ref="${camelot.uribuilder}"/>
         <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
         <constructor-arg name="colName" value="${camelot.mongodb.frontend.queue.name}"/>
@@ -57,6 +62,7 @@
     <bean id="camelot-mongodb-direct-routes-initializer"
           class="ru.yandex.qatools.camelot.mongodb.MongodbDirectRoutesInitializer">
         <constructor-arg name="pluginsService" ref="camelot-processing-engine"/>
+        <constructor-arg name="serializerBuilder" ref="${camelot.mongodb.serializer.builder}"/>
         <constructor-arg name="mongoClient" ref="camelot-mongodb-client"/>
         <constructor-arg name="dbName" value="${camelot.mongodb.dbname}"/>
         <constructor-arg name="maxSize" value="${camelot.mongodb.direct.queue.maxsize}"/>

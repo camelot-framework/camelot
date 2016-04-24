@@ -36,13 +36,16 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
     private final MessagesSerializer serializer;
     private final String feBroadcastUri;
     private final int minPollIntervalMs;
+    private final MongoSerializerBuilder serializerBuilder;
     private MongoTailableQueue<MongoQueueMessage> queue;
     private CamelContext camelContext;
 
-    public MongodbClientSendersProvider(MessagesSerializer serializer, PluginUriBuilder uriBuilder, int poolSize,
+    public MongodbClientSendersProvider(MessagesSerializer serializer, MongoSerializerBuilder serializerBuilder,
+                                        PluginUriBuilder uriBuilder, int poolSize,
                                         MongoClient mongoClient, String dbName, String colName, long maxSize,
                                         int minPollIntervalMs) { //NOSONAR
         this.serializer = serializer;
+        this.serializerBuilder = serializerBuilder;
         this.feBroadcastUri = uriBuilder.frontendBroadcastUri();
         this.senderPool = newFixedThreadPool(poolSize);
         this.mongoClient = mongoClient;
@@ -78,7 +81,7 @@ public class MongodbClientSendersProvider implements ClientSendersProvider, Came
     public void setCamelContext(CamelContext camelContext) {
         this.camelContext = camelContext;
         this.queue = new MongoTailableQueue<>(MongoQueueMessage.class, mongoClient, dbName, colName, maxSize);
-        final MongoSerializer mongoSerializer = new MongoSerializer(this.serializer, MongoQueueMessage.class.getClassLoader());
+        final MongoSerializer mongoSerializer = serializerBuilder.build(this.serializer, MongoQueueMessage.class.getClassLoader());
         queue.setDeserializer(mongoSerializer);
         queue.setSerializer(mongoSerializer);
         queue.setMinPollIntervalMs(minPollIntervalMs);
